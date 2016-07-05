@@ -1,0 +1,4 @@
+django==1.9.7
+gunicorn
+celery
+djangorestframework
