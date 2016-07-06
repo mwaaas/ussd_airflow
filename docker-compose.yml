@@ -28,7 +28,7 @@ services:
       - POSTGRES_PASSWORD=django-ussd-airflow
       - POSTGRES_USER=django-ussd-airflow
     ports:
-      - 5440:5432
+      - 5432:5432
 
   rabbitmq:
     image: rabbitmq:3.5.7-management
