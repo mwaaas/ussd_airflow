@@ -64,3 +64,20 @@ services:
     environment:
       -  C_FORCE_ROOT=true
       -  CELERY_BROKER_URL=amqp://guest:guest@rabbitmq//
+
+  compile_documentation:
+    build: .
+    volumes:
+      - ./:/usr/src/app
+    command: make -C /usr/src/app/docs html
+
+  documentation:
+    image: python:3.3.6-alpine
+    depends_on:
+      - compile_documentation
+    working_dir: /usr/src/app/docs/_build/html
+    volumes:
+      - ./docs/_build/html:/usr/src/app/docs/_build/html
+    command: python -m http.server
+    ports:
+      - 7000:8000
