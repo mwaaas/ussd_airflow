@@ -1,6 +1,6 @@
 """
 To have the ability to change ussd text and ussd workflow ( ussd customer journey)
-without code change the best strategy would be your ussd content to be dirived from a data rather than the code
+without code change the best strategy would be your ussd content to be derived from a data rather than the code
 
 Since we need to change ussd content without changing the code, we will be storing the ussd content in database
 and then write logic to interpret the ussd content in the database
@@ -39,7 +39,7 @@ The last option is static
 
 **4. Quit Screen**
 
-Its a screen dsplaying ussd text only and no field to enter input
+Its a screen displaying ussd text only and no field to enter input
 
 Its used to terminate the ussd session
 
@@ -66,17 +66,30 @@ This is the screen responsible for that functionality.
 
 This can be any of the screens above. The first ussd request goes to this screen
 
-
-
-
 """
 
 from django.db import models
 
 
-class UssdScreens(object):
+class UssdScreens(models.Model):
     """
-    testing
+    All the types of ussd screen we have mentioned in the previous section
+    are stored in this model.
+
+    The model contains all the possible fields that any of the screen may require.
+    The logic of how to create a specific screen will be done in the core api views
+
+    *Reason of saving all the type of screens in one model rather than have each screen with its own model*
+
+    Each screen (apart from the quit screen) defines a next screen to go if a user inputs something.
+    that means if we have a separate model for each screen we will have multiple foreign key, for instance
+    input screen can
+    point to all available screens, that means we will have all the foreign fields for each screen.
+
+    Its cleaner and better to handler if all screens are saved in one model. and the logistic of creating the screens
+    tobe handlers by the core apis
+
+
     """
     pass
 # Create your models here.
