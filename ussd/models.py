@@ -71,7 +71,7 @@ This can be any of the screens above. The first ussd request goes to this screen
 from django.db import models
 
 
-class UssdScreens(models.Model):
+class UssdScreens(object):
     """
     All the types of ussd screen we have mentioned in the previous section
     are stored in this model.

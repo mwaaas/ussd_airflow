@@ -5,4 +5,6 @@ djangorestframework==3.3.3
 psycopg2==2.6.2
 sphinx==1.4.4
 sphinx-autobuild==0.6.0
-sphinx_rtd_theme
+sphinx_rtd_theme==0.1.9
+coverage==4.1
+codacy-coverage==1.2.18

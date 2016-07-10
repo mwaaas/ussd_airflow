@@ -49,6 +49,7 @@ services:
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq//
       - VIRTUAL_HOST=http://*/*
+      - CODACY_PROJECT_TOKEN=7911468d4aa94f0f941148a355a953d0
 
   worker:
     build: .
