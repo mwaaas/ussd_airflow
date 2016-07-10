@@ -13,5 +13,5 @@ test:
   override:
     - docker run -d -p 9000:80 mwaaas/ussd-airflow; sleep 10
     - curl --retry 10 --retry-delay 5 -v http://localhost:9000
-    - docker run -d mwaaas/ussd-airlow coverage run manage.py test
-    - docker run -d -e CODACY_PROJECT_TOKEN=7911468d4aa94f0f941148a355a953d0 mwaaas/ussd-airlow python-codacy-coverage -r coverage.xml
+    - docker run -d mwaaas/ussd-airflow coverage run manage.py test
+    - docker run -d -e CODACY_PROJECT_TOKEN=7911468d4aa94f0f941148a355a953d0 mwaaas/ussd-airflow python-codacy-coverage -r coverage.xml
