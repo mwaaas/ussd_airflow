@@ -6,10 +6,10 @@ machine:
 dependencies:
   override:
     - docker info
-    - docker-compose build
+    - docker build -t mwaaas/ussd-airflow .
 
 
 test:
   override:
-    - docker-compose up
+    - docker run -d -p 9000:80 mwaaas/ussd-airflow; sleep 10
     - curl --retry 10 --retry-delay 5 -v http://localhost:9000
