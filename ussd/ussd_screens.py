@@ -34,7 +34,7 @@ class InputScreen(object):
               error_message: This the message thats going to be displayed if expression returns False
 
     Example:
-        .. literalinclude:: ../../ussd/tests/tests_input_screen/valid_input_screen_conf.yml
+        .. literalinclude:: ../../ussd/tests/sample_screen_definition/valid_input_screen_conf.yml
     """
 
 
