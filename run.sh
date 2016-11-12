@@ -13,5 +13,5 @@ exec  gunicorn --bind=0.0.0.0:80 django_ussd_airflow.wsgi \
         --log-file=-\
         --access-logfile=-\
         --error-logfile=-\
-        --timeout 30\
+        --timeout 30000\
         --reload

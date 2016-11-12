@@ -1,0 +1,36 @@
+enter_height:
+  type: input_screen
+  text:
+    en: Enter your height
+    sw: Weka jina lako
+    default: en
+  input_identifier: height
+  next_screen: enter_age
+  validators:
+    - regex: ^[0-9]{1,7}$
+      error_message: Enter number between 1 and 7
+
+enter_age:
+    type: input_screen
+    text:
+      en: Enter your age
+      sw: Weka miaka yako
+      default: en
+    input_identifier: age
+    next_screen: thank_you_screen
+    validators:
+        - regex: ^[0-9]{1,7}$
+          error_message: Only nubers are allowed
+        - expression: ussd_request.input > 100
+          error_message: Number over 100 is not allowed
+
+show_infomation:
+    text:
+      en: Your age is {age} and your height is {height}.\n
+          Enter your any thing to go back to the first screen
+      sw: Miaka yako in {age} na ukubwa wako in {height}.
+          Weka kitu ingine yoyote unende kwenye screen ya kwanza
+      default: en
+    type: input
+    input_identifier: foo
+    next_screen: enter_height

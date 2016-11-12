@@ -1,25 +1,25 @@
 version: '2'
 services:
   lb:
-    image: dockercloud/haproxy:1.5.1
-    depends_on:
-      - app
-      - nginx
-    links:
-      - app
-      - nginx
+    image: traefik:latest
+    command: --web --docker --docker.domain=docker.localhost --logLevel=DEBUG
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - /dev/null:/traefik.toml
     ports:
-      - '9000:80'
+      - "9000:80"
+      - "8081:80"
+      - "9001:8080"
 
   nginx:
     image: nginx
     volumes:
       - ./:/usr/share/nginx/html/
-    environment:
-      - VIRTUAL_HOST=http://*/static/*
-      - VIRTUAL_HOST_WEIGHT=3
+    labels:
+      - "traefik.frontend.rule=PathPrefix:/static/"
+      - "traefik.backend=nginx"
+      - "traefik.port=80"
+      - "traefik.weight=5"
 
   db:
     image: postgres:9.5
@@ -29,6 +29,8 @@ services:
       - POSTGRES_USER=django-ussd-airflow
     ports:
       - 5432:5432
+    labels:
+      - "traefik.enable=false"
 
   rabbitmq:
     image: rabbitmq:3.5.7-management
@@ -48,8 +50,14 @@ services:
       - rabbitmq
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq//
-      - VIRTUAL_HOST=http://*/*
       - CODACY_PROJECT_TOKEN=7911468d4aa94f0f941148a355a953d0
+    labels:
+      - "traefik.frontend.rule=PathPrefix:/"
+      - "traefik.backend=web"
+      - "traefik.port=80"
+      - "traefik.weight=3"
+    ports:
+      - 8007:80
 
   worker:
     build: .
@@ -65,12 +73,16 @@ services:
     environment:
       -  C_FORCE_ROOT=true
       -  CELERY_BROKER_URL=amqp://guest:guest@rabbitmq//
+    labels:
+      - "traefik.enable=false"
 
   compile_documentation:
     build: .
     volumes:
       - ./:/usr/src/app
     command: make -C /usr/src/app/docs html
+    labels:
+      - "traefik.enable=false"
 
   documentation:
     image: python:3.3.6-alpine
@@ -82,3 +94,5 @@ services:
     command: python -m http.server
     ports:
       - 7000:8000
+    labels:
+      - "traefik.enable=false"

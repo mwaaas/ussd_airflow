@@ -1,11 +1,13 @@
-=======================================
-How ussd content are created internally
-=======================================
+====================================
+How is ussd customer journey created
+====================================
 
-How the ussd content  are saved in the Database
+How the ussd content is created in yaml
 -----------------------------------------------
 
-.. autoclass:: ussd.models.UssdScreens
+.. automodule:: ussd.ussd_screens
+   :members:
+   :undoc-members:
 
 
 How the type of ussd are created in the model
