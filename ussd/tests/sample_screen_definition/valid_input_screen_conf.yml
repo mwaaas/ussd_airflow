@@ -19,7 +19,7 @@ enter_age:
       sw: Weka miaka yako
       default: en
     input_identifier: age
-    next_screen: thank_you_screen
+    next_screen: show_infomation
     validators:
         - regex: ^[0-9]{1,7}$
           error_message: Only nubers are allowed
@@ -33,6 +33,6 @@ show_infomation:
       sw: Miaka yako in {age} na ukubwa wako in {height}.
           Weka kitu ingine yoyote unende kwenye screen ya kwanza
       default: en
-    type: input
+    type: input_screen
     input_identifier: foo
     next_screen: enter_height

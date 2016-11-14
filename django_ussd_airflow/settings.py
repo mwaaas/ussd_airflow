@@ -85,7 +85,7 @@ DATABASES = {
         'NAME': 'django-ussd-airflow',
         'USER': 'django-ussd-airflow',
         'PASSWORD': 'django-ussd-airflow',
-        'HOST': 'db'
+        'HOST': 'localhost'
     }
 }
 
@@ -129,3 +129,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, 'static'))
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'

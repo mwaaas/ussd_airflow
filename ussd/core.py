@@ -215,24 +215,21 @@ class UssdView(APIView):
                   if ussd_request.session['_ussd_state']['next_handler'] \
                   else staticconf.read('initial_screen', namespace=self.ussd_customer_journey_namespace)
 
-        screen_content = staticconf.read(
-            handler,
-            namespace=self.ussd_customer_journey_namespace)
 
-        ussd_response = _registered_ussd_handlers[screen_content['type']](
-            ussd_request,
-            handler,
-            screen_content
-        ).handle()
+        ussd_response = (ussd_request, handler)
 
 
         # Handle any forwarded Requests; loop until a Response is
         # eventually returned.
         while not isinstance(ussd_response, UssdResponse):
-            new_ussd_request, handler = ussd_response
+            ussd_request, handler = ussd_response
+
+            screen_content = staticconf.read(
+                handler,
+                namespace=self.ussd_customer_journey_namespace)
 
             ussd_response = _registered_ussd_handlers[screen_content['type']](
-                new_ussd_request,
+                ussd_request,
                 handler,
                 screen_content
             ).handle()
