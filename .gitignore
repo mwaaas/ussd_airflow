@@ -98,3 +98,6 @@ ENV/
 
 # django static files
 static/
+
+# virtual environtme
+.venv

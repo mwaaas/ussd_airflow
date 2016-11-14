@@ -12,8 +12,11 @@ The following are the  supported screen types:
 
 """
 
+from ussd.core import UssdHandlerAbstract, UssdResponse
+import datetime
 
-class InputScreen(object):
+
+class InputScreen(UssdHandlerAbstract):
     """
 
     **Input Screen**
@@ -37,4 +40,32 @@ class InputScreen(object):
         .. literalinclude:: ../../ussd/tests/sample_screen_definition/valid_input_screen_conf.yml
     """
 
+    screen_type = "input_screen"
+
+    @staticmethod
+    def validate_schema(ussd_content):
+        pass
+
+    def handle(self):
+        if not self.ussd_request.input:
+            response_text = self.get_text()
+            ussd_screen = dict(
+                name=self.handler,
+                start=datetime.datetime.now(),
+                screen_text=response_text
+            )
+            self.ussd_request.session['steps'].append(ussd_screen)
+
+            return UssdResponse(response_text)
+        else:
+            session_key = self.screen_content['input_identifier']
+            next_handler = self.screen_content['next_screen']
+            self.ussd_request.session[session_key] = \
+                self.ussd_request.input
+
+            self.ussd_request.session['steps'][-1].update(
+                end=datetime.datetime.now(),
+                selection=self.ussd_request.input
+            )
+            return self.ussd_request.forward(next_handler)
 

@@ -1,8 +1,10 @@
+initial_screen: enter_height
+
 enter_height:
   type: input_screen
   text:
     en: Enter your height
-    sw: Weka jina lako
+    sw: Weka ukubwa lako
     default: en
   input_identifier: height
   next_screen: enter_age
