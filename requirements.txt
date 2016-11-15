@@ -10,3 +10,4 @@ coverage==4.1
 codacy-coverage==1.2.18
 PyStaticConfiguration
 structlog
+jinja2>=2.8
