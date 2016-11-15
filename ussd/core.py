@@ -13,6 +13,7 @@ from django.conf import settings
 from importlib import import_module
 from django.contrib.sessions.backends import signed_cookies
 from django.contrib.sessions.backends.base import CreateError
+from jinja2 import Template
 
 
 _registered_ussd_handlers = {}
@@ -144,14 +145,25 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         self.handler = handler
         self.screen_content = screen_content
 
-    def get_text(self):
-        language = self.screen_content['text']['default'] \
+    def _get_session_items(self):
+        return dict(iter(self.ussd_request.session.items()))
+
+    def _render_text(self, text):
+        template = Template(text, keep_trailing_newline=True)
+        return template.render(self._get_session_items())
+
+    def get_text(self, text_context=None):
+        text_context = self.screen_content\
+                       if text_context is None \
+                       else text_context
+
+        language = text_context['text']['default'] \
                    if not self.ussd_request.language \
-                          in self.screen_content['text'] \
+                          in text_context['text'].keys() \
                    else self.ussd_request.language
-        return self.screen_content['text'][language]
-
-
+        return self._render_text(
+            self.screen_content['text'][language]
+        )
 
 
 def validate_ussd_journey(ussd_content):

@@ -13,7 +13,7 @@ class AfricasTalkingUssdGateway(UssdView):
             session_id=req.data['sessionId'],
             ussd_input=req.data['text'],
             service_code=req.data['serviceCode'],
-            language='en'
+            language=req.data.get('language', 'en')
         )
 
         return ussd_request

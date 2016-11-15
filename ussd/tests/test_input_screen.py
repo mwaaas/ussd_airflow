@@ -11,8 +11,10 @@ from ussd.tests.sample_screen_definition import path
 class TestInputHandler(LiveServerTestCase):
 
     def make_request(self, session_id, ussd_input, phone_number, language='en'):
-        url = 'http://localhost:8081' + \
+        url = self.live_server_url + \
         reverse('africastalking_url')
+
+        print(url)
         response = requests.post(
             url=url,
             data={
@@ -35,8 +37,8 @@ class TestInputHandler(LiveServerTestCase):
         )
 
         self.assertEqual(
-            "Enter your height",
-            response.content
+            "Enter your height\n",
+            response.content.decode()
         )
 
         # enter height
@@ -46,7 +48,7 @@ class TestInputHandler(LiveServerTestCase):
 
         self.assertEqual(
             "Enter your age\n",
-            response.content
+            response.content.decode()
         )
 
         # enter age
@@ -56,9 +58,9 @@ class TestInputHandler(LiveServerTestCase):
         )
 
         self.assertEqual(
-            "Your age is 24 and your height is 6. "
-            "Enter anything to go back to the first screen",
-            response.content
+            "Your age is 24 and your height is 6.\n"
+            "Enter anything to go back to the first screen\n",
+            response.content.decode()
         )
 
     def test_multilanguage_support(self):
@@ -67,23 +69,24 @@ class TestInputHandler(LiveServerTestCase):
         response = self.make_request(session_id, '1', '200', 'sw')
 
         self.assertEqual(
-            "Weka ukubwa lako",
-            response.content
+            "Weka ukubwa lako\n",
+            response.content.decode()
         )
 
         response = self.make_request(session_id, '7', '200', 'sw')
 
         self.assertEqual(
-            "Weka miaka yako",
-            response.content
+            "Weka miaka yako\n",
+            response.content.decode()
         )
 
         response = self.make_request(session_id, '23', '200', 'sw')
 
         self.assertEqual(
-            "Miaka yako in 23 na ukubwa wako in 7. "
+            "Miaka yako in 23 na ukubwa wako in 7.\n"
             "Weka kitu ingine yoyote unende "
-            "kwenye screen ya kwanza"
+            "kwenye screen ya kwanza\n",
+            response.content.decode()
         )
     def test_input_validation(self):
         session_id = str(uuid.uuid4())
@@ -100,8 +103,8 @@ class TestInputHandler(LiveServerTestCase):
 
         # should get a invalid error message
         self.assertEqual(
-            "Only numbers are allowed",
-            response.content
+            "Only numbers are allowed\n",
+            response.content.decode()
         )
 
         # enter valid height
@@ -109,24 +112,24 @@ class TestInputHandler(LiveServerTestCase):
 
         self.assertEqual(
             "Enter your age\n",
-            response.content
+            response.content.decode()
         )
 
         # enter invalid age greater thatn 100
         response = self.make_request(session_id, '150', '200')
 
         self.assertEqual(
-            "Number over 100 is not allowed",
-            response.content
+            "Number over 100 is not allowed\n",
+            response.content.decode()
         )
 
         # enter a valid age
         response = self.make_request(session_id, '23', '200')
 
         self.assertEqual(
-            "Your age is 24 and your height is 6. "
-            "Enter anything to go back to the first screen",
-            response.content
+            "Your age is 24 and your height is 6.\n"
+            "Enter anything to go back to the first screen\n",
+            response.content.decode()
         )
 
     def test_using_input_validation_yaml(self):
