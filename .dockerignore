@@ -102,3 +102,7 @@ static/
 
 # virtual environtme
 .venv
+.ven
+
+# Don't c
+.git
