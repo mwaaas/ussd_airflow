@@ -14,6 +14,16 @@ The following are the  supported screen types:
 
 from ussd.core import UssdHandlerAbstract, UssdResponse
 import datetime
+from django.core.validators import RegexValidator
+from django.utils.encoding import force_text
+import re
+
+
+def ussd_regex_validator(regex_expression, user_input):
+    regex = re.compile(regex_expression)
+    if not bool(regex.search(force_text(user_input))):
+        return False
+    return True
 
 
 class InputScreen(UssdHandlerAbstract):
@@ -46,6 +56,10 @@ class InputScreen(UssdHandlerAbstract):
     def validate_schema(ussd_content):
         pass
 
+    def validate_input(self, validate_rules):
+
+        return True
+
     def handle(self):
         if not self.ussd_request.input:
             response_text = self.get_text()
@@ -58,6 +72,33 @@ class InputScreen(UssdHandlerAbstract):
 
             return UssdResponse(response_text)
         else:
+            # validate input
+            validation_rules = self.screen_content.get("validators")
+            for validation_rule in validation_rules:
+                is_valid = True
+
+                if 'regex' in validation_rule:
+                    regex_expression = validation_rule['regex']
+                    regex = re.compile(regex_expression)
+                    is_valid = bool(
+                        regex.search(
+                            force_text(self.ussd_request.input)
+                        ))
+                else:
+                    is_valid = self.evaluate_jija_expression(
+                        validation_rule['expression']
+                    )
+
+                # show error message if validation failed
+                if not is_valid:
+                    return UssdResponse(
+                        self.get_text(
+                            validation_rule['text']
+                        )
+                    )
+
+
+
             session_key = self.screen_content['input_identifier']
             next_handler = self.screen_content['next_screen']
             self.ussd_request.session[session_key] = \
