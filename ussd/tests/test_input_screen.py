@@ -103,7 +103,7 @@ class TestInputHandler(LiveServerTestCase):
 
         # should get a invalid error message
         self.assertEqual(
-            "Only numbers are allowed\n",
+            "Enter number between 1 and 7\n",
             response.content.decode()
         )
 
@@ -127,7 +127,7 @@ class TestInputHandler(LiveServerTestCase):
         response = self.make_request(session_id, '23', '200')
 
         self.assertEqual(
-            "Your age is 24 and your height is 6.\n"
+            "Your age is 23 and your height is 6.\n"
             "Enter anything to go back to the first screen\n",
             response.content.decode()
         )
