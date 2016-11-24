@@ -153,17 +153,36 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         return template.render(self._get_session_items())
 
     def get_text(self, text_context=None):
-        text_context = self.screen_content\
+        text_context = self.screen_content.get('text')\
                        if text_context is None \
                        else text_context
 
-        language = text_context['text']['default'] \
-                   if not self.ussd_request.language \
-                          in text_context['text'].keys() \
-                   else self.ussd_request.language
+        language = self.ussd_request.language \
+                   if self.ussd_request.language \
+                          in text_context.keys() \
+                   else text_context['default']
         return self._render_text(
-            self.screen_content['text'][language]
+            text_context[language]
         )
+
+    def evaluate_jija_expression(self, expression):
+        if not expression.endswith("}}") and \
+                not expression.startswith("{{"):
+            expression = "{{ " + expression + " }}"
+
+        template = Template(expression)
+
+        results = template.render(
+            ussd_request=self.ussd_request,
+            **self._get_session_items()
+        )
+
+        if results == 'False':
+            return False
+        return True
+
+
+
 
 
 def validate_ussd_journey(ussd_content):
