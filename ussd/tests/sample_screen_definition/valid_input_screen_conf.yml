@@ -17,6 +17,7 @@ enter_height:
           Enter number between 1 and 7
         sw: |
           Weka namba kutoka 1 hadi 7
+        default: en
 
 enter_age:
     type: input_screen
@@ -35,12 +36,14 @@ enter_age:
               Only nubers are allowed
             sw: |
               Nambari pekee ndio zimekubalishwa
-        - expression: ussd_request.input > 100
+            default: en
+        - expression: ussd_request.input|int < 100
           text:
             en: |
               Number over 100 is not allowed
             sw: |
               Nambari juu ya 100 haikubalishwi
+            default: en
 
 show_infomation:
     text:
