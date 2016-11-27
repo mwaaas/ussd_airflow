@@ -26,7 +26,6 @@ services:
     environment:
       - POSTGRES_DB=django-ussd-airflow
       - POSTGRES_PASSWORD=django-ussd-airflow
-      - POSTGRES_USER=django-ussd-airflow
     ports:
       - 5432:5432
     labels:
@@ -51,6 +50,7 @@ services:
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq//
       - CODACY_PROJECT_TOKEN=7911468d4aa94f0f941148a355a953d0
+      - 'DATABASE_URL=postgres://postgres:django-ussd-airflow@db:5432/django-ussd-airflow'
     labels:
       - "traefik.frontend.rule=PathPrefix:/"
       - "traefik.backend=web"

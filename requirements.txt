@@ -11,3 +11,4 @@ codacy-coverage==1.2.18
 PyStaticConfiguration
 structlog
 jinja2>=2.8
+dj-database-url==0.4.1

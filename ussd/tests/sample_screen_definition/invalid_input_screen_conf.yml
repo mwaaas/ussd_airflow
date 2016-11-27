@@ -2,11 +2,10 @@
 enter_height:
   type: input_screen
   text:
-    en: Enter your height
     sw: Weka jina lako
     default: en
   input_identifier: height
-  # invalid validator, missing error_message
+  # invalid validator, missing text
   validators:
     - regex: ^[0-9]{1,7}$
 
@@ -17,12 +16,12 @@ enter_age:
     next_screen: thank_you_screen
     validators:
         - regex: ^[0-9]{1,7}$
-          error_message: Only numbers are allowed
+          text: Only numbers are allowed
         - expression: ussd_request.input > 100
-          error_message: Number over 100 is not allowed
+          text: Number over 100 is not allowed
 
 # missing next_screen
-show_infomation:
+show_information:
     text:
       en: Your age is {age} and your height is {height}.\n
           Enter your any thing to go back to the first screen

@@ -14,6 +14,7 @@ from importlib import import_module
 from django.contrib.sessions.backends import signed_cookies
 from django.contrib.sessions.backends.base import CreateError
 from jinja2 import Template
+from rest_framework import serializers
 
 
 _registered_ussd_handlers = {}
@@ -181,13 +182,21 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             return False
         return True
 
+    @staticmethod
+    def validate_ussd_screen_conf(ussd_content: dict) -> (bool, list):
 
-
-
+        pass
 
 def validate_ussd_journey(ussd_content):
     pass
 
+class UssdBaseSerializer(serializers.Serializer):
+    type = serializers.CharField(max_length=50)
+
+    def validate_type(self, value):
+        if value not in _registered_ussd_handlers.keys():
+            raise serializers.ValidationError("Invalid screen type not supported")
+        return value in _registered_ussd_handlers.keys()
 
 class UssdView(APIView):
     ussd_customer_journey_file = None
@@ -273,3 +282,61 @@ class UssdView(APIView):
 
         return ussd_response
 
+    @staticmethod
+    def validate_ussd_journey(ussd_content: dict) -> (bool, dict):
+        errors = {}
+        is_valid = True
+
+        # should define initial screen
+        if not 'initial_screen' in ussd_content.keys():
+            is_valid = False
+            errors.update(
+                {'hidden_fields': {
+                    "initial_screen": ["This field is required."]
+                }}
+            )
+        for screen_name, screen_content in ussd_content.items():
+            # all screens should have type attribute
+            if screen_name == "initial_screen":
+                # confirm the next screen is in the screen content
+                if not screen_content in ussd_content.keys():
+                    is_valid = False
+                    errors.update(
+                        dict(
+                            screen_name="Screen not available"
+                        )
+                    )
+                continue
+
+            screen_type = screen_content.get('type')
+
+            # all screen should have type field.
+            serialize = UssdBaseSerializer(data=screen_content,
+                                           context=ussd_content)
+            base_validation = serialize.is_valid()
+
+            if serialize.errors:
+                errors.update(
+                    {screen_name: serialize.errors}
+                )
+
+            if not base_validation:
+                is_valid = False
+                continue
+
+            # all screen type have their handlers
+            handlers = _registered_ussd_handlers[screen_type]
+
+            screen_validation, screen_errors = handlers.validate(
+                screen_name,
+                ussd_content
+            )
+            if screen_errors:
+                errors.update(
+                    {screen_name: screen_errors}
+                )
+
+            if not screen_validation:
+                is_valid = screen_validation
+
+        return is_valid, errors

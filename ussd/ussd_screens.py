@@ -12,11 +12,12 @@ The following are the  supported screen types:
 
 """
 
-from ussd.core import UssdHandlerAbstract, UssdResponse
+from ussd.core import UssdHandlerAbstract, UssdResponse, UssdBaseSerializer
 import datetime
 from django.core.validators import RegexValidator
 from django.utils.encoding import force_text
 import re
+from rest_framework import serializers
 
 
 def ussd_regex_validator(regex_expression, user_input):
@@ -24,6 +25,43 @@ def ussd_regex_validator(regex_expression, user_input):
     if not bool(regex.search(force_text(user_input))):
         return False
     return True
+
+class UssdTextSerializer(serializers.Serializer):
+
+    text = serializers.DictField(child=serializers.CharField(max_length=250))
+
+    def validate_text(self, value):
+        if not value['default'] in value.keys():
+            raise serializers.ValidationError(
+                "Text for language {} is missing".format(value['default'])
+            )
+        return value
+
+
+class UssdContentBaseSerializer(UssdBaseSerializer, UssdTextSerializer):
+    pass
+
+class NextUssdScreenSerializer(serializers.Serializer):
+    next_screen = serializers.CharField(max_length=50)
+
+    def validate_next_screen(self, value):
+        return value in self.context.keys()
+
+
+class InputValidatorSerializer(UssdTextSerializer):
+    regex = serializers.CharField(max_length=255, required=False)
+    expression = serializers.CharField(max_length=255, required=False)
+
+    def validate(self, data):
+        return super(InputValidatorSerializer, self).validate(data)
+
+
+class InputSerializer(UssdContentBaseSerializer, NextUssdScreenSerializer):
+    input_identifier = serializers.CharField(max_length=100)
+    validators = serializers.ListField(
+        child=InputValidatorSerializer(),
+        required=False
+    )
 
 
 class InputScreen(UssdHandlerAbstract):
@@ -53,7 +91,8 @@ class InputScreen(UssdHandlerAbstract):
     screen_type = "input_screen"
 
     @staticmethod
-    def validate_schema(ussd_content):
+    def validate_schema(screen_name: str,
+                        ussd_content: dict) -> (bool, dict):
         pass
 
     def validate_input(self, validate_rules):
@@ -110,3 +149,13 @@ class InputScreen(UssdHandlerAbstract):
             )
             return self.ussd_request.forward(next_handler)
 
+    @staticmethod
+    def validate(screen_name: str, ussd_content: dict) -> (bool, dict):
+        screen_content = ussd_content[screen_name]
+
+        validation = InputSerializer(data=screen_content,
+                                     context=ussd_content)
+
+        if validation.is_valid():
+            return True, {}
+        return False, validation.errors

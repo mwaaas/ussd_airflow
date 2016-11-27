@@ -28,7 +28,7 @@ enter_age:
         Weka miaka yako
       default: en
     input_identifier: age
-    next_screen: show_infomation
+    next_screen: show_information
     validators:
         - regex: ^[0-9]{1,7}$
           text:
@@ -45,7 +45,7 @@ enter_age:
               Nambari juu ya 100 haikubalishwi
             default: en
 
-show_infomation:
+show_information:
     text:
       en: |
         Your age is {{ age }} and your height is {{ height }}.

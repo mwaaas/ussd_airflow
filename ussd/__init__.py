@@ -1,2 +1,2 @@
 # Register all the ussd handlers
-from ussd.ussd_screens import *
+# from ussd.ussd_screens import *

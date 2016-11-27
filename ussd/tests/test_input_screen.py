@@ -2,7 +2,7 @@ from django.test import LiveServerTestCase
 import staticconf
 from django.urls import reverse
 
-from ussd.core import validate_ussd_journey
+from ussd.core import UssdView
 import requests
 import uuid
 from ussd.tests.sample_screen_definition import path
@@ -140,46 +140,53 @@ class TestInputHandler(LiveServerTestCase):
             flatten=False)
 
         ussd_screens = staticconf.config.\
-            get_namespace('ussd_content').\
+            get_namespace('TestInputHappyCase').\
             get_config_values()
 
-        self.assertTrue(
-            validate_ussd_journey(ussd_screens)
-        )
+        is_valid, error_message = UssdView.validate_ussd_journey(ussd_screens)
+        self.assertTrue(is_valid, error_message)
 
     def test_validating_invalid_yaml(self):
         staticconf.YamlConfiguration(
-            path + '/valid_input_screen_conf.yml',
-            namespace='TestInputHappyCase',
+            path + '/invalid_input_screen_conf.yml',
+            namespace='TestInputInValidConf',
             flatten=False)
 
         ussd_screens = staticconf.config.\
-            get_namespace('ussd_content_1').\
+            get_namespace('TestInputInValidConf').\
             get_config_values()
 
-        validation_results = validate_ussd_journey(ussd_screens)
+        is_valid, error_message = UssdView.validate_ussd_journey(
+            ussd_screens)
 
         self.assertFalse(
-            validation_results
+            is_valid
         )
 
-        self.assertEqual(3, len(validation_results))
+        # self.assertEqual(4, len(error_message))
 
-        expected_results = dict(
+        expected_error_message = dict(
             enter_height={
-                "validators": "Invalid validation, "
-                              "error message required"
+                "validators": {
+                    'text': ['This field is required.']
+                },
+                "next_screen": ["This field is required."],
+                "text": ['Text for language en is missing']
             },
             enter_age={
-                "input_identifier": "required field missing",
-                "text": "Invalid text, should be a dictionary with"
-                        " languages and a default language"
+                "input_identifier": ['This field is required.'],
+                "text": ['Expected a dictionary of items but got type "str".'],
+                'validators':
+                    {'text': ['Expected a dictionary of items but got type '
+                              '"str".']}
             },
-            show_infomation={
-                "next_screen": "required field missing"
+            show_information={
+                "type": ['Invalid screen type not supported']
             },
-            initial_screen="required field missing"
+            hidden_fields={
+                "initial_screen": ["This field is required."]
+            }
         )
 
-        self.assertDictEqual(validation_results, expected_results)
+        self.assertDictEqual(error_message, expected_error_message)
 
