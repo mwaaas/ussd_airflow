@@ -1,7 +1,3 @@
-general:
-  artifacts:
-    - "htmlcov"
-
 machine:
   services:
     - docker
