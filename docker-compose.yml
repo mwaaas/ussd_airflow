@@ -27,7 +27,7 @@ services:
       - POSTGRES_DB=django-ussd-airflow
       - POSTGRES_PASSWORD=django-ussd-airflow
     ports:
-      - 5432:5432
+      - 5444:5432
     labels:
       - "traefik.enable=false"
 
