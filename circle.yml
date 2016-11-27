@@ -15,5 +15,5 @@ dependencies:
 test:
   override:
     - curl --retry 10 --retry-delay 5 -v http://localhost:9000
-    - docker-compose run app coverage run --omit=*test*,*ven* manage.py test && curl -s https://codecov.io/bash && coverage report --fail-under=100 && coverage html
+    - docker-compose run app coverage run --omit=*test*,*ven* manage.py test && bash <(curl -s https://codecov.io/bash)
     - docker run -d -e CODACY_PROJECT_TOKEN=7911468d4aa94f0f941148a355a953d0 mwaaas/ussd-airflow python-codacy-coverage -r coverage.xml
