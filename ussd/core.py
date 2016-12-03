@@ -4,7 +4,6 @@
 from urllib.parse import unquote
 from copy import copy, deepcopy
 from rest_framework.views import APIView
-import inspect
 from copy import deepcopy
 from django.http import HttpResponse
 from structlog import get_logger
@@ -14,7 +13,7 @@ from importlib import import_module
 from django.contrib.sessions.backends import signed_cookies
 from django.contrib.sessions.backends.base import CreateError
 from jinja2 import Template
-from rest_framework import serializers
+from .screens.serializers import UssdBaseSerializer
 
 
 _registered_ussd_handlers = {}
@@ -189,14 +188,6 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
 def validate_ussd_journey(ussd_content):
     pass
-
-class UssdBaseSerializer(serializers.Serializer):
-    type = serializers.CharField(max_length=50)
-
-    def validate_type(self, value):
-        if value not in _registered_ussd_handlers.keys():
-            raise serializers.ValidationError("Invalid screen type not supported")
-        return value in _registered_ussd_handlers.keys()
 
 class UssdView(APIView):
     ussd_customer_journey_file = None

@@ -12,9 +12,10 @@ The following are the  supported screen types:
 
 """
 
-from ussd.core import UssdHandlerAbstract, UssdResponse, UssdBaseSerializer
+from ussd.core import UssdHandlerAbstract, UssdResponse
 import datetime
-from django.core.validators import RegexValidator
+from ussd.screens.serializers import UssdContentBaseSerializer, \
+    UssdTextSerializer, NextUssdScreenSerializer
 from django.utils.encoding import force_text
 import re
 from rest_framework import serializers
@@ -25,27 +26,6 @@ def ussd_regex_validator(regex_expression, user_input):
     if not bool(regex.search(force_text(user_input))):
         return False
     return True
-
-class UssdTextSerializer(serializers.Serializer):
-
-    text = serializers.DictField(child=serializers.CharField(max_length=250))
-
-    def validate_text(self, value):
-        if not value['default'] in value.keys():
-            raise serializers.ValidationError(
-                "Text for language {} is missing".format(value['default'])
-            )
-        return value
-
-
-class UssdContentBaseSerializer(UssdBaseSerializer, UssdTextSerializer):
-    pass
-
-class NextUssdScreenSerializer(serializers.Serializer):
-    next_screen = serializers.CharField(max_length=50)
-
-    def validate_next_screen(self, value):
-        return value in self.context.keys()
 
 
 class InputValidatorSerializer(UssdTextSerializer):
