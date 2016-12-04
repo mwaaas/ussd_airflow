@@ -1,0 +1,53 @@
+initial_screen: choose_meal
+
+
+choose_meal:
+  type: menu_screen
+  text: Choose your favourite meal
+  error_message: |
+    You have selected invalid option try again
+  options:
+      - text: food
+        next_screen: types_of_food
+      - text: fruits
+        next_screen: types_of_fruit
+      - text: drinks
+        next_screen: types_of_drinks
+
+
+types_of_food:
+  type: menu_screen
+  text: Choose your favourite food
+  options:
+    - text: rice
+      next_screen: rice_chosen
+    - text: back
+      next_screen: choose_meal
+
+types_of_fruit:
+  type: menu_screen
+  text: No fruits available choose * to go back
+  options:
+    - text: back
+      next_screen: choose_meal
+      input_value: '*'
+
+types_of_drinks:
+  type: menu_screen
+  text: No drinks available choose 0 to go back
+  options:
+    - text: back
+      next_screen: choose_meal
+      input_display: "0 "
+      input_value: '0'
+
+rice_chosen:
+  type: menu_screen
+  text: Your rice will be delivered shortly. Choose 1 to go back
+  options:
+    - text: back
+      next_screen: choose_meal
+
+
+
+

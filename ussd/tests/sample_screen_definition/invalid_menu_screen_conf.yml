@@ -1,0 +1,44 @@
+initial_screen: choose_meal
+
+# missing options
+choose_meal:
+  type: menu_screen
+  text: Choose your fovourite meal
+  error_message: You have selected invalid option try again
+
+# missing text
+types_of_food:
+  type: menu_screen
+  options:
+    - text: rice
+      next_screen: rice_chosen
+    - text: back
+      next_screen: choose_meal
+
+# invalid option with the wrong next screen
+types_of_fruit:
+  type: menu_screen
+  text: No fruits available choose * to go back
+  options:
+    - text: back
+      next_screen: invalid_screen
+    - text: choose food
+      next_screen: types_of_food
+
+# invalid options without a next screen field
+types_of_drinks:
+  type: menu_screen
+  text: No drinks available choose 0 to go back
+  options:
+    - text: back
+
+rice_chosen:
+  type: menu_screen
+  text: Your rice will be delivered shortly. Choose 1 to go back
+  options:
+    - text: back
+    - next_screen: choose_meal
+
+
+
+

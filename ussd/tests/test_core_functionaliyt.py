@@ -1,6 +1,11 @@
 from django.test import TestCase
 from ussd.core import _registered_ussd_handlers, \
     UssdHandlerAbstract, MissingAttribute, InvalidAttribute
+from rest_framework import serializers
+
+
+class SampleSerializer(serializers.Serializer):
+    text = serializers.CharField()
 
 
 class TestHandlerRegistration(TestCase):
@@ -9,10 +14,7 @@ class TestHandlerRegistration(TestCase):
 
         class TestOne(UssdHandlerAbstract):
             screen_type = "test_one"
-
-            @staticmethod
-            def validate_schema(file_name):
-                pass
+            serializer = SampleSerializer
 
             def handle(self, req):
                 pass
@@ -23,16 +25,13 @@ class TestHandlerRegistration(TestCase):
             _registered_ussd_handlers['test_one'] == TestOne
         )
 
-    def test_missing_screen_type_attribute(self):
+    @staticmethod
+    def test_missing_screen_type_attribute():
 
         try:
             # missing screen_type
             class TestTwo(UssdHandlerAbstract):
-
-                @staticmethod
-                def validate_schema(file_name):
-                    pass
-
+                serializer = SampleSerializer
                 def handle(self, req):
                     pass
 
@@ -40,32 +39,46 @@ class TestHandlerRegistration(TestCase):
         except MissingAttribute:
             pass
 
-    def test_missing_handle_attribute(self):
+    @staticmethod
+    def test_missing_handle_attribute():
 
         try:
             # missing handle
             class Testthree(UssdHandlerAbstract):
 
                 screen_type = "test_three"
-
-                @staticmethod
-                def validate_schema(file_name):
-                    pass
+                serializer = SampleSerializer
 
             assert False, "should raise missing attriute name"
         except MissingAttribute:
             pass
 
-    def test_missing_validate_attribute(self):
+    @staticmethod
+    def test_missing_serializer_attribute():
 
         try:
             # missing validate schema
             class TestFour(UssdHandlerAbstract):
                 screen_type = 'test_four'
-                @staticmethod
-                def handle(file_name):
-                    pass
+
 
             assert False, "should raise missing attriute name"
         except MissingAttribute:
+            pass
+
+    @staticmethod
+    def test_invalid_serializer():
+
+        try:
+            # invalid serializer
+            class TestFive(UssdHandlerAbstract):
+                screen_type = 'test_five'
+                serializer = "Sample serializer"
+
+                def handle(self, req):
+                    pass
+
+
+            assert False, "should raise invalid serializer"
+        except InvalidAttribute:
             pass

@@ -59,21 +59,17 @@ class InputScreen(UssdHandlerAbstract):
         - next_handler: The next screen to go after the user enters
                         input
         - validators:
-            - error_message: This is the message to display when the validation fails
+            - text: This is the message to display when the validation fails
               regex: regex used to validate ussd input. Its mutually exclusive with expression
             - expression: if regex is not enough you can use a jinja expression will be called ussd request object
-              error_message: This the message thats going to be displayed if expression returns False
+              text: This the message thats going to be displayed if expression returns False
 
     Example:
         .. literalinclude:: ../../ussd/tests/sample_screen_definition/valid_input_screen_conf.yml
     """
 
     screen_type = "input_screen"
-
-    @staticmethod
-    def validate_schema(screen_name: str,
-                        ussd_content: dict) -> (bool, dict):
-        pass
+    serializer = InputSerializer
 
     def validate_input(self, validate_rules):
 
@@ -128,14 +124,3 @@ class InputScreen(UssdHandlerAbstract):
                 selection=self.ussd_request.input
             )
             return self.ussd_request.forward(next_handler)
-
-    @staticmethod
-    def validate(screen_name: str, ussd_content: dict) -> (bool, dict):
-        screen_content = ussd_content[screen_name]
-
-        validation = InputSerializer(data=screen_content,
-                                     context=ussd_content)
-
-        if validation.is_valid():
-            return True, {}
-        return False, validation.errors
