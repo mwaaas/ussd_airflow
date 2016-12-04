@@ -13,7 +13,8 @@ from importlib import import_module
 from django.contrib.sessions.backends import signed_cookies
 from django.contrib.sessions.backends.base import CreateError
 from jinja2 import Template
-from .screens.serializers import UssdBaseSerializer
+from .screens.serializers import UssdBaseSerializer, UssdTextSerializer
+from rest_framework.serializers import Serializer
 
 
 _registered_ussd_handlers = {}
@@ -114,7 +115,7 @@ class UssdHandlerMetaClass(type):
         abstract = attr.get('abstract', False)
 
         if not abstract:
-            required_attributes = ('screen_type', 'validate_schema', 'handle')
+            required_attributes = ('screen_type', 'serializer', 'handle')
 
             # check all attributes have been defined
             for attribute in required_attributes:
@@ -124,16 +125,12 @@ class UssdHandlerMetaClass(type):
                             attribute, name)
                     )
 
-            # # both validate_schema function
-            # if not isinstance(attr['validate_schema'], staticmethod):
-            #     raise InvalidAttribute('validate_schema should be '
-            #                            'a static method')
-            #
-            # # handle is a class method
-            # inspect.isfunction()
-            # if not inspect.ismethod(attr['handle']):
-            #     raise InvalidAttribute("handle should be a class method")
-
+            if not type(attr['serializer']) == type(Serializer):
+                raise InvalidAttribute(
+                    "serializer should be a "
+                    "instance of {serializer}".format(
+                        serializer=Serializer)
+                )
             _registered_ussd_handlers[attr['screen_type']] = cls
 
 
@@ -157,12 +154,16 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                        if text_context is None \
                        else text_context
 
-        language = self.ussd_request.language \
+        if isinstance(text_context, dict):
+            language = self.ussd_request.language \
                    if self.ussd_request.language \
                           in text_context.keys() \
                    else text_context['default']
+
+            text_context = text_context[language]
+
         return self._render_text(
-            text_context[language]
+            text_context
         )
 
     def evaluate_jija_expression(self, expression):
@@ -181,36 +182,61 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             return False
         return True
 
-    @staticmethod
-    def validate_ussd_screen_conf(ussd_content: dict) -> (bool, list):
+    @classmethod
+    def validate(cls, screen_name: str, ussd_content: dict) -> (bool, dict):
+        screen_content = ussd_content[screen_name]
 
-        pass
+        validation = cls.serializer(data=screen_content,
+                                     context=ussd_content)
+
+        if validation.is_valid():
+            return True, {}
+        return False, validation.errors
+
 
 def validate_ussd_journey(ussd_content):
     pass
 
+
 class UssdView(APIView):
-    ussd_customer_journey_file = None
-    ussd_customer_journey_namespace = None
+    customer_journey_conf = None
+    customer_journey_namespace = None
+
+    def initial(self, request, *args, **kwargs):
+        # initialize restframework
+        super(UssdView, self).initial(request, args, kwargs)
+
+        # initialize ussd
+        self.ussd_initial(request)
+
+    def ussd_initial(self, request, *args, **kwargs):
+        if hasattr(self, 'get_customer_journey_conf'):
+            self.customer_journey_conf = self.get_customer_journey_conf(
+                request
+            )
+        if hasattr(self, 'get_customer_journey_namespace'):
+            self.customer_journey_namespace = \
+                self.get_customer_journey_namespace(request)
+
+        if self.customer_journey_conf is None \
+                or self.customer_journey_namespace is None:
+            raise MissingAttribute("attribute customer_journey_conf and "
+                                   "customer_journey_namespace are required")
+
+        if not self.customer_journey_namespace in \
+                staticconf.config.configuration_namespaces:
+            staticconf.YamlConfiguration(self.customer_journey_conf,
+                                         namespace=
+                                         self.customer_journey_namespace,
+                                         flatten=False)
 
     def finalize_response(self, request, response, *args, **kwargs):
 
         if isinstance(response, UssdRequest):
-            response = self.finalize_ussd_response(response)
-        return super(UssdView, self).finalize_response(request, response, args, kwargs)
-
-    def finalize_ussd_response(self, ussd_request):
-
-        if self.ussd_customer_journey_file is None or self.ussd_customer_journey_namespace is None:
-            raise MissingAttribute("attribute ussd_customer_journey_file and "
-                                   "ussd_customer_journey_namespace are required")
-
-        if not self.ussd_customer_journey_namespace in staticconf.config.configuration_namespaces:
-            staticconf.YamlConfiguration(self.ussd_customer_journey_file,
-                                         namespace=self.ussd_customer_journey_namespace,
-                                         flatten=False)
-        ussd_response = self.ussd_dispatcher(ussd_request)
-        return self.ussd_response_handler(ussd_response)
+            ussd_response = self.ussd_dispatcher(response)
+            return self.ussd_response_handler(ussd_response)
+        return super(UssdView, self).finalize_response(
+            request, response, args, kwargs)
 
     def ussd_response_handler(self, ussd_response):
         return HttpResponse(str(ussd_response))
@@ -237,14 +263,16 @@ class UssdView(APIView):
         ussd_response = self.run_handlers(ussd_request)
         # Save session
         ussd_request.session.save()
-        logger.debug('gateway_response', text=ussd_response.dumps(), input="{redacted}")
+        logger.debug('gateway_response', text=ussd_response.dumps(),
+                     input="{redacted}")
 
         return ussd_response
 
     def run_handlers(self, ussd_request):
         handler = ussd_request.session['_ussd_state']['next_handler'] \
                   if ussd_request.session['_ussd_state']['next_handler'] \
-                  else staticconf.read('initial_screen', namespace=self.ussd_customer_journey_namespace)
+                  else staticconf.read(
+            'initial_screen', namespace=self.customer_journey_namespace)
 
 
         ussd_response = (ussd_request, handler)
@@ -257,7 +285,7 @@ class UssdView(APIView):
 
             screen_content = staticconf.read(
                 handler,
-                namespace=self.ussd_customer_journey_namespace)
+                namespace=self.customer_journey_namespace)
 
             ussd_response = _registered_ussd_handlers[screen_content['type']](
                 ussd_request,

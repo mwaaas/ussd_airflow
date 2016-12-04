@@ -69,11 +69,7 @@ class InputScreen(UssdHandlerAbstract):
     """
 
     screen_type = "input_screen"
-
-    @staticmethod
-    def validate_schema(screen_name: str,
-                        ussd_content: dict) -> (bool, dict):
-        pass
+    serializer = InputSerializer
 
     def validate_input(self, validate_rules):
 
@@ -128,14 +124,3 @@ class InputScreen(UssdHandlerAbstract):
                 selection=self.ussd_request.input
             )
             return self.ussd_request.forward(next_handler)
-
-    @staticmethod
-    def validate(screen_name: str, ussd_content: dict) -> (bool, dict):
-        screen_content = ussd_content[screen_name]
-
-        validation = InputSerializer(data=screen_content,
-                                     context=ussd_content)
-
-        if validation.is_valid():
-            return True, {}
-        return False, validation.errors

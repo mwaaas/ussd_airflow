@@ -17,3 +17,5 @@ The following are the  supported screen types:
 
 .. automodule:: ussd.screens.input_screen
    :members:
+
+.. automodule:: ussd.screens.menu_screen

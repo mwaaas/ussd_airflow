@@ -4,8 +4,6 @@ from ussd.tests.sample_screen_definition import path
 
 
 class AfricasTalkingUssdGateway(UssdView):
-    ussd_customer_journey_file = path + "/valid_input_screen_conf.yml"
-    ussd_customer_journey_namespace = "AfricasTalkingUssdGateway"
 
     def post(self, req):
         ussd_request = UssdRequest(
@@ -17,3 +15,15 @@ class AfricasTalkingUssdGateway(UssdView):
         )
 
         return ussd_request
+
+    def get_customer_journey_conf(self, request):
+        if request.data.get('customer_journey_conf'):
+            return path + '/' + request.data.get('customer_journey_conf')
+        return path + "/valid_input_screen_conf.yml"
+
+    def get_customer_journey_namespace(self, request):
+        if request.data.get('customer_journey_conf'):
+            return request.data['customer_journey_conf'].replace(
+                '.yml', ''
+            )
+        return "AfricasTalkingUssdGateway"
