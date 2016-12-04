@@ -59,10 +59,10 @@ class InputScreen(UssdHandlerAbstract):
         - next_handler: The next screen to go after the user enters
                         input
         - validators:
-            - error_message: This is the message to display when the validation fails
+            - text: This is the message to display when the validation fails
               regex: regex used to validate ussd input. Its mutually exclusive with expression
             - expression: if regex is not enough you can use a jinja expression will be called ussd request object
-              error_message: This the message thats going to be displayed if expression returns False
+              text: This the message thats going to be displayed if expression returns False
 
     Example:
         .. literalinclude:: ../../ussd/tests/sample_screen_definition/valid_input_screen_conf.yml

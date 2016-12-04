@@ -4,15 +4,16 @@ How is ussd customer journey created
 
 How the ussd content is created in yaml
 -----------------------------------------------
+In ussd airflow ussd customer journey is created and defined by
+yaml
 
-.. automodule:: ussd.ussd_screens
+Each section in yaml is a ussd screen. Each section must have an
+key of value pair of screen_type: screen_type
+
+The screen type defines the logic and how the screen is going to be
+rendered.
+
+The following are the  supported screen types:
+
+.. automodule:: ussd.screens.input_screen
    :members:
-   :undoc-members:
-
-
-How the type of ussd are created in the model
----------------------------------------------
-
-.. automodule:: ussd.apis
-    :members:
-    :undoc-members:
