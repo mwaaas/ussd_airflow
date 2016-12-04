@@ -14,7 +14,7 @@ from django.contrib.sessions.backends import signed_cookies
 from django.contrib.sessions.backends.base import CreateError
 from jinja2 import Template
 from .screens.serializers import UssdBaseSerializer
-from rest_framework.serializers import Serializer
+from rest_framework.serializers import SerializerMetaclass
 
 
 _registered_ussd_handlers = {}
@@ -125,11 +125,11 @@ class UssdHandlerMetaClass(type):
                             attribute, name)
                     )
 
-            if not type(attr['serializer']) == type(Serializer):
+            if not isinstance(attr['serializer'], SerializerMetaclass):
                 raise InvalidAttribute(
                     "serializer should be a "
                     "instance of {serializer}".format(
-                        serializer=Serializer)
+                        serializer=SerializerMetaclass)
                 )
             _registered_ussd_handlers[attr['screen_type']] = cls
 
