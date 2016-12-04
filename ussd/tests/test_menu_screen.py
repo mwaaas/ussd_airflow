@@ -1,7 +1,7 @@
 """
 This module is involved in testing Menu screen only
 """
-from ussd.tests import UssdTestClient, UssdTestCase
+from ussd.tests import UssdTestCase
 
 
 class TestMenuHandler(UssdTestCase.BaseUssdTestCase):

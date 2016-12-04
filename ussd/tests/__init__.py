@@ -52,47 +52,40 @@ class UssdTestCase(object):
             self.namespace = self.__module__.split('.')[-1]
             self.maxDiff = None
 
-        def testing_valid_customer_journey(self):
-            # load yaml file
-            namespace = 'valid' + self.namespace
+        def _test_ussd_validation(self, yaml_to_validate, expected_validation,
+                                  expected_errors):
+
             staticconf.YamlConfiguration(
-                path + '/' + self.valid_yml,
-                namespace=namespace,
+                path + '/' + yaml_to_validate,
+                namespace=self.namespace,
                 flatten=False)
 
             ussd_screens = staticconf.config.\
-                get_namespace(namespace).\
-                get_config_values()
-
-            is_valid, error_message = UssdView.validate_ussd_journey(
-                ussd_screens)
-            self.assertTrue(is_valid, error_message)
-
-        def testing_invalid_customer_journey(self):
-            namespace = 'invalid' + self.namespace
-            staticconf.YamlConfiguration(
-                path + '/' + self.invalid_yml,
-                namespace=namespace,
-                flatten=False)
-
-            ussd_screens = staticconf.config.\
-                get_namespace(namespace).\
+                get_namespace(self.namespace).\
                 get_config_values()
 
             is_valid, error_message = UssdView.validate_ussd_journey(
                 ussd_screens)
 
-            self.assertFalse(
-                is_valid
-            )
+            self.assertEqual(is_valid, expected_validation)
 
             self.assertDictEqual(error_message,
-                                 self.validation_error_message)
+                                 expected_errors)
+
+        def testing_valid_customer_journey(self):
+            self._test_ussd_validation(self.valid_yml, True, {})
+
+        def testing_invalid_customer_journey(self):
+
+            self._test_ussd_validation(self.invalid_yml, False,
+                                       self.validation_error_message)
 
         def ussd_client(self, **kwargs):
             class UssdTestClient(object):
                 def __init__(self, host, session_id=None, phone_number=200,
-                             language='en', extra_payload={}):
+                             language='en', extra_payload=None):
+                    if extra_payload is None:
+                        extra_payload = {}
                     self.phone_number = phone_number
                     self.language = language
                     self.session_id = session_id \

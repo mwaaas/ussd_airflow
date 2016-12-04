@@ -25,7 +25,8 @@ class TestHandlerRegistration(TestCase):
             _registered_ussd_handlers['test_one'] == TestOne
         )
 
-    def test_missing_screen_type_attribute(self):
+    @staticmethod
+    def test_missing_screen_type_attribute():
 
         try:
             # missing screen_type
@@ -38,7 +39,8 @@ class TestHandlerRegistration(TestCase):
         except MissingAttribute:
             pass
 
-    def test_missing_handle_attribute(self):
+    @staticmethod
+    def test_missing_handle_attribute():
 
         try:
             # missing handle
@@ -51,7 +53,8 @@ class TestHandlerRegistration(TestCase):
         except MissingAttribute:
             pass
 
-    def test_missing_serializer_attribute(self):
+    @staticmethod
+    def test_missing_serializer_attribute():
 
         try:
             # missing validate schema
@@ -63,7 +66,8 @@ class TestHandlerRegistration(TestCase):
         except MissingAttribute:
             pass
 
-    def test_invalid_serializer(self):
+    @staticmethod
+    def test_invalid_serializer():
 
         try:
             # invalid serializer

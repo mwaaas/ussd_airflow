@@ -13,7 +13,7 @@ from importlib import import_module
 from django.contrib.sessions.backends import signed_cookies
 from django.contrib.sessions.backends.base import CreateError
 from jinja2 import Template
-from .screens.serializers import UssdBaseSerializer, UssdTextSerializer
+from .screens.serializers import UssdBaseSerializer
 from rest_framework.serializers import Serializer
 
 
