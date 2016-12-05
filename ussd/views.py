@@ -1,6 +1,6 @@
-from ussd.core import UssdView, UssdRequest, APIView
-from rest_framework.response import Response
+from ussd.core import UssdView, UssdRequest
 from ussd.tests.sample_screen_definition import path
+from django.http import HttpResponse
 
 
 class AfricasTalkingUssdGateway(UssdView):
@@ -27,3 +27,12 @@ class AfricasTalkingUssdGateway(UssdView):
                 '.yml', ''
             )
         return "AfricasTalkingUssdGateway"
+
+    def ussd_response_handler(self, ussd_response):
+        if ussd_response.status:
+            res = 'CON' + ' ' + str(ussd_response)
+            response = HttpResponse(res)
+        else:
+            res = 'END' + ' ' + str(ussd_response)
+            response = HttpResponse(res)
+        return response
