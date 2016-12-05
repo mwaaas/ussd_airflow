@@ -4,7 +4,6 @@
 from urllib.parse import unquote
 from copy import copy, deepcopy
 from rest_framework.views import APIView
-from copy import deepcopy
 from django.http import HttpResponse
 from structlog import get_logger
 import staticconf
