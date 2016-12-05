@@ -29,6 +29,9 @@ class AfricasTalkingUssdGateway(UssdView):
         return "AfricasTalkingUssdGateway"
 
     def ussd_response_handler(self, ussd_response):
+        if self.request.data.get('serviceCode') == 'test':
+            return super(AfricasTalkingUssdGateway, self).\
+                ussd_response_handler(ussd_response)
         if ussd_response.status:
             res = 'CON' + ' ' + str(ussd_response)
             response = HttpResponse(res)
