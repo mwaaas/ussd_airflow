@@ -10,7 +10,7 @@ https://docs.djangoproject.com/en/1.9/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
-from django_ussd_airflow import settings
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_ussd_airflow.settings")
 
 application = get_wsgi_application()
