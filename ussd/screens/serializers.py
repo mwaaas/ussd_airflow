@@ -45,7 +45,8 @@ class UssdTextField(serializers.DictField):
 
 class UssdTextSerializer(serializers.Serializer):
 
-    text = UssdTextField(child=serializers.CharField(max_length=250))
+    text = UssdTextField(child=serializers.CharField(max_length=250,
+                                                     allow_blank=True))
 
     def validate_text(self, value):
         if not value['default'] in value.keys():

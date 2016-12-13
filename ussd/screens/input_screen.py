@@ -56,7 +56,7 @@ class InputScreen(UssdHandlerAbstract):
         - input_identifier: input amount entered by users will be saved
                             with this key. To access this in the input
                             anywhere {{ input_identifier }}
-        - next_handler: The next screen to go after the user enters
+        - next_screen: The next screen to go after the user enters
                         input
         - validators:
             - text: This is the message to display when the validation fails

@@ -39,6 +39,11 @@ rice_chosen:
     - text: back
     - next_screen: choose_meal
 
-
+# invalid list screen
+types_of_vegetables:
+  type: menu_screen
+  text: Choose one of the following vegetables
+  items:
+    text: Vege "{{ item }}"
 
 

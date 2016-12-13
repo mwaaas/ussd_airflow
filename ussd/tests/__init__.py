@@ -1,15 +1,13 @@
-from django.urls import reverse
-import requests
 import uuid
-from django.test import LiveServerTestCase
+import requests
 import staticconf
-from ussd.tests.sample_screen_definition import path
+from django.test import LiveServerTestCase
+from django.urls import reverse
 from ussd.core import UssdView
-from unittest import  skip
+from ussd.tests.sample_screen_definition import path
 
 
 class UssdTestClient(object):
-
     def __init__(self, host, session_id=None, phone_number=200,
                  language='en'):
         self.phone_number = phone_number
@@ -21,7 +19,6 @@ class UssdTestClient(object):
         self.url = host + reverse('africastalking_url')
 
     def send_(self, ussd_input):
-
         response = requests.post(
             url=self.url,
             data={
@@ -42,10 +39,11 @@ class UssdTestCase(object):
     """
     this contains two test that are required in each screen test case
     """
+
     class BaseUssdTestCase(LiveServerTestCase):
 
         def setUp(self):
-            file_yml = self.__module__.split('.')[-1].\
+            file_yml = self.__module__.split('.')[-1]. \
                            replace('test_', '') + '_conf.yml'
             self.valid_yml = 'valid_' + file_yml
             self.invalid_yml = 'invalid_' + file_yml
@@ -60,14 +58,14 @@ class UssdTestCase(object):
                 namespace=self.namespace,
                 flatten=False)
 
-            ussd_screens = staticconf.config.\
-                get_namespace(self.namespace).\
+            ussd_screens = staticconf.config. \
+                get_namespace(self.namespace). \
                 get_config_values()
 
             is_valid, error_message = UssdView.validate_ussd_journey(
                 ussd_screens)
 
-            self.assertEqual(is_valid, expected_validation)
+            self.assertEqual(is_valid, expected_validation, error_message)
 
             self.assertDictEqual(error_message,
                                  expected_errors)
@@ -96,12 +94,12 @@ class UssdTestCase(object):
 
                 def send_(self, ussd_input):
                     payload = {
-                            "sessionId": self.session_id,
-                            "text": ussd_input,
-                            "phoneNumber": self.phone_number,
-                            "serviceCode": "test",
-                            "language": self.language
-                        }
+                        "sessionId": self.session_id,
+                        "text": ussd_input,
+                        "phoneNumber": self.phone_number,
+                        "serviceCode": "test",
+                        "language": self.language
+                    }
                     payload.update(self.extra_payload)
                     response = requests.post(
                         url=self.url,

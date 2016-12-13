@@ -13,6 +13,8 @@ choose_meal:
         next_screen: types_of_fruit
       - text: drinks
         next_screen: types_of_drinks
+      - text: vegetables
+        next_screen: types_of_vegetables
 
 
 types_of_food:
@@ -48,6 +50,75 @@ rice_chosen:
     - text: back
       next_screen: choose_meal
 
+types_of_vegetables:
+  type: menu_screen
+  text: Choose one of the following vegetables
+  items:
+    text: Vege {{ item }}
+    value: "{{ item }}"
+    with_items: "{{vegetables_list}}"
+    session_key: selected_vegetable
+    next_screen: choose_quantity
 
+choose_quantity:
+  type: menu_screen
+  text: Choose vegetable quantity
+  items:
+    text: "{{ key }} at Ksh {{ value }}"
+    value:  "{{ key }}"
+    with_dict: "{{ vegetable_quantity }}"
+    session_key: selected_quantity
+    next_screen: selected_vegetable
+  options:
+    - text: back
+      next_screen: choose_meal
 
+selected_vegetable:
+  type: menu_screen
+  text: >
+   You have selected this {{selected_vegetable}}
+   and this quantity {{selected_quantity}} at
+   {{vegetable_quantity[selected_quantity]}}
+  options:
+    - text: test_list
+      next_screen: test_list_with_native_loop
+
+test_list_with_native_loop:
+  type: menu_screen
+  text: ""
+  items:
+    text: "{{item}}"
+    value: "{{item}}"
+    next_screen: test_explicit_dict_loop
+    session_key: alphabet
+    with_items:
+      - a
+      - b
+      - c
+      - d
+
+test_explicit_dict_loop:
+  type: menu_screen
+  text: ""
+  items:
+    text: "{{key}} for {{value}}"
+    value: "{{item}}"
+    next_screen: test_invalid_jija_variable
+    session_key: testing
+    with_dict:
+      a: apple
+      b: boy
+      c: cat
+
+# we only support {{ }} jinja variables the otheres will be ingnored
+# for now
+test_invalid_jija_variable:
+  type: menu_screen
+  text: Choose one of the following vegetables
+  items:
+    text: Vege {{ item }}
+    value: "{{ item }}"
+    with_items: "{%vegetables_list%}"
+    session_key: selected_vegetable
+    next_screen: choose_quantity
 

@@ -14,7 +14,8 @@ from django.contrib.sessions.backends.base import CreateError
 from jinja2 import Template
 from .screens.serializers import UssdBaseSerializer
 from rest_framework.serializers import SerializerMetaclass
-
+import re
+import json
 
 _registered_ussd_handlers = {}
 
@@ -30,6 +31,27 @@ class DuplicateSessionId(Exception):
     pass
 
 
+def ussd_session(session_id):
+    # Make a session storage
+    session_engine = import_module(getattr(settings, "USSD_SESSION_ENGINE", settings.SESSION_ENGINE))
+    if session_engine is signed_cookies:
+        raise ValueError("You cannot use channels session functionality with signed cookie sessions!")
+    # Force the instance to load in case it resets the session when it does
+    session = session_engine.SessionStore(session_key=session_id)
+    session._session.keys()
+    session._session_key = session_id
+
+    # If the session does not already exist, save to force our
+    # session key to be valid.
+    if not session.exists(session.session_key):
+        try:
+            session.save(must_create=True)
+        except CreateError:
+            # Session wasn't unique, so another consumer is doing the same thing
+            raise DuplicateSessionId("another sever is working"
+                                     "on this session id")
+    return session
+
 class UssdRequest(object):
 
     def __init__(self, session_id, phone_number,
@@ -44,31 +66,10 @@ class UssdRequest(object):
         if len(str(session_id)) < 8:
             session_id = 's' * (8 - len(str(session_id))) + session_id
         self.session_id = session_id
-        self.session = self.create_ussd_session()
+        self.session = ussd_session(self.session_id)
 
         for key, value in kwargs.items():
             setattr(self, key, value)
-
-    def create_ussd_session(self):
-        # Make a session storage
-        session_engine = import_module(getattr(settings, "USSD_SESSION_ENGINE", settings.SESSION_ENGINE))
-        if session_engine is signed_cookies:
-            raise ValueError("You cannot use channels session functionality with signed cookie sessions!")
-        # Force the instance to load in case it resets the session when it does
-        session = session_engine.SessionStore(session_key=self.session_id)
-        session._session.keys()
-        session._session_key = self.session_id
-
-        # If the session does not already exist, save to force our
-        # session key to be valid.
-        if not session.exists(session.session_key):
-            try:
-                session.save(must_create=True)
-            except CreateError:
-                # Session wasn't unique, so another consumer is doing the same thing
-                raise DuplicateSessionId("another sever is working"
-                                         "on this session id")
-        return session
 
 
     def forward(self, handler_name):
@@ -136,17 +137,27 @@ class UssdHandlerMetaClass(type):
 class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     abstract = True
 
-    def __init__(self, ussd_request, handler, screen_content):
+    def __init__(self, ussd_request: UssdRequest,
+                 handler: str, screen_content: dict):
         self.ussd_request = ussd_request
         self.handler = handler
         self.screen_content = screen_content
 
-    def _get_session_items(self):
+        self.SINGLE_VAR = re.compile(r"^%s\s*(\w*)\s*%s$" % (
+            '{{', '}}'))
+
+    def _get_session_items(self) -> dict:
         return dict(iter(self.ussd_request.session.items()))
 
-    def _render_text(self, text):
-        template = Template(text, keep_trailing_newline=True)
-        return template.render(self._get_session_items())
+    def _render_text(self, text, session_items=None, extra=None, encode=None):
+        if session_items is None:
+            session_items = self._get_session_items()
+        if extra:
+            session_items.update(extra)
+
+        template = Template(text or '', keep_trailing_newline=True)
+        text = template.render(session_items)
+        return json.dumps(text) if encode is 'json' else text
 
     def get_text(self, text_context=None):
         text_context = self.screen_content.get('text')\
@@ -192,6 +203,16 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             return True, {}
         return False, validation.errors
 
+    @staticmethod
+    def _contains_vars(data):
+        '''
+        returns True if the data contains a variable pattern
+        '''
+        if isinstance(data, str):
+            for marker in ('{%', '{{', '{#'):
+                if marker in data:
+                    return True
+        return False
 
 def validate_ussd_journey(ussd_content):
     pass
@@ -247,7 +268,7 @@ class UssdView(APIView):
         # Clear input and initialize session if we are starting up
         if '_ussd_state' not in ussd_request.session:
             ussd_request.input = ''
-            ussd_request.session['_ussd_state'] = {'next_handler': ''}
+            ussd_request.session['_ussd_state'] = {'next_screen': ''}
             ussd_request.session['steps'] = []
             ussd_request.session['posted'] = False
             ussd_request.session['submit_data'] = {}
@@ -268,14 +289,12 @@ class UssdView(APIView):
         return ussd_response
 
     def run_handlers(self, ussd_request):
-        handler = ussd_request.session['_ussd_state']['next_handler'] \
-                  if ussd_request.session['_ussd_state']['next_handler'] \
+        handler = ussd_request.session['_ussd_state']['next_screen'] \
+                  if ussd_request.session['_ussd_state']['next_screen'] \
                   else staticconf.read(
             'initial_screen', namespace=self.customer_journey_namespace)
 
-
         ussd_response = (ussd_request, handler)
-
 
         # Handle any forwarded Requests; loop until a Response is
         # eventually returned.
@@ -292,7 +311,7 @@ class UssdView(APIView):
                 screen_content
             ).handle()
 
-        ussd_request.session['_ussd_state']['next_handler'] = handler
+        ussd_request.session['_ussd_state']['next_screen'] = handler
 
 
         # Attach session to outgoing response
