@@ -1,0 +1,6 @@
+initial_screen: example_of_quit_screen
+
+# missing text field
+example_of_quit_screen:
+  type: quit_screen
+

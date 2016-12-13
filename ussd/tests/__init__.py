@@ -81,7 +81,8 @@ class UssdTestCase(object):
         def ussd_client(self, **kwargs):
             class UssdTestClient(object):
                 def __init__(self, host, session_id=None, phone_number=200,
-                             language='en', extra_payload=None):
+                             language='en', extra_payload=None,
+                             service_code="test"):
                     if extra_payload is None:
                         extra_payload = {}
                     self.phone_number = phone_number
@@ -91,13 +92,14 @@ class UssdTestCase(object):
                         else str(uuid.uuid4())
                     self.url = host + reverse('africastalking_url')
                     self.extra_payload = extra_payload
+                    self.service_code = service_code
 
                 def send_(self, ussd_input):
                     payload = {
                         "sessionId": self.session_id,
                         "text": ussd_input,
                         "phoneNumber": self.phone_number,
-                        "serviceCode": "test",
+                        "serviceCode": self.service_code,
                         "language": self.language
                     }
                     payload.update(self.extra_payload)

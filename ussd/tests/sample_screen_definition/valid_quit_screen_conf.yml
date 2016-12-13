@@ -1,0 +1,5 @@
+initial_screen: example_of_quit_screen
+
+example_of_quit_screen:
+  type: quit_screen
+  text: End of this session
