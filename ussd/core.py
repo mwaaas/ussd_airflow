@@ -52,6 +52,7 @@ def ussd_session(session_id):
                                      "on this session id")
     return session
 
+
 class UssdRequest(object):
 
     def __init__(self, session_id, phone_number,
@@ -183,9 +184,11 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
         template = Template(expression)
 
+        context = self._get_session_items()
+        context.update(self.ussd_request.all_variables())
         results = template.render(
             ussd_request=self.ussd_request,
-            **self._get_session_items()
+            **context
         )
 
         if results == 'False':

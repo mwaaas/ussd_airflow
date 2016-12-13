@@ -1,0 +1,14 @@
+initial_screen: invalid_router_1
+
+invalid_router_1:
+  type: router_screen
+
+invalid_router_2:
+  type: router_screen
+  router_options:
+    - expression: "{{ phone_number == 200 }}"
+    - next_screen: 202_phone_number
+
+202_phone_number:
+  type: quit_screen
+  text: done

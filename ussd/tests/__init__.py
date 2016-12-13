@@ -53,13 +53,14 @@ class UssdTestCase(object):
         def _test_ussd_validation(self, yaml_to_validate, expected_validation,
                                   expected_errors):
 
+            namespace = self.namespace + str(expected_validation)
             staticconf.YamlConfiguration(
                 path + '/' + yaml_to_validate,
-                namespace=self.namespace,
+                namespace=namespace,
                 flatten=False)
 
             ussd_screens = staticconf.config. \
-                get_namespace(self.namespace). \
+                get_namespace(namespace). \
                 get_config_values()
 
             is_valid, error_message = UssdView.validate_ussd_journey(

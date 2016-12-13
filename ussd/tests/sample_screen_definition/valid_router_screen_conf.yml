@@ -1,0 +1,22 @@
+initial_screen: router_exa_1
+
+router_exa_1:
+  type: router_screen
+  default_next_screen: default_screen
+  router_options:
+    - expression: "{{ phone_number == 200|string }}"
+      next_screen: 200_phone_number
+    - expression: "{{ phone_number == 202| string }}"
+      next_screen: 202_phone_number
+
+200_phone_number:
+  type: quit_screen
+  text: This number is 200
+
+202_phone_number:
+  type: quit_screen
+  text: This number is 202
+
+default_screen:
+  type: quit_screen
+  text: This is the default screen
