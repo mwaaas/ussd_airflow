@@ -19,6 +19,7 @@ import json
 
 _registered_ussd_handlers = {}
 
+
 class MissingAttribute(Exception):
     pass
 
@@ -150,14 +151,16 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     def _get_session_items(self) -> dict:
         return dict(iter(self.ussd_request.session.items()))
 
-    def _render_text(self, text, session_items=None, extra=None, encode=None):
-        if session_items is None:
-            session_items = self._get_session_items()
+    def _render_text(self, text, context=None, extra=None, encode=None):
+        if context is None:
+            context = self._get_session_items()
+            context.update(self.ussd_request.all_variables())
+
         if extra:
-            session_items.update(extra)
+            context.update(extra)
 
         template = Template(text or '', keep_trailing_newline=True)
-        text = template.render(session_items)
+        text = template.render(context)
         return json.dumps(text) if encode is 'json' else text
 
     def get_text(self, text_context=None):
@@ -216,9 +219,6 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                 if marker in data:
                     return True
         return False
-
-def validate_ussd_journey(ussd_content):
-    pass
 
 
 class UssdView(APIView):

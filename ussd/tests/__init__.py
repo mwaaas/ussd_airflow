@@ -84,8 +84,6 @@ class UssdTestCase(object):
                 def __init__(self, host, session_id=None, phone_number=200,
                              language='en', extra_payload=None,
                              service_code="test"):
-                    if extra_payload is None:
-                        extra_payload = {}
                     self.phone_number = phone_number
                     self.language = language
                     self.session_id = session_id \
@@ -116,11 +114,6 @@ class UssdTestCase(object):
             customer_journey_conf = {
                 'customer_journey_conf': self.valid_yml
             }
-            if 'extra_payload' in kwargs:
-                kwargs['extra_payload'].update(
-                    customer_journey_conf
-                )
-            else:
-                kwargs['extra_payload'] = customer_journey_conf
+            kwargs['extra_payload'] = customer_journey_conf
 
             return UssdTestClient(self.live_server_url, **kwargs)

@@ -1,6 +1,6 @@
 from django.test import TestCase
 from ussd.core import _registered_ussd_handlers, \
-    UssdHandlerAbstract, MissingAttribute, InvalidAttribute
+    UssdHandlerAbstract, MissingAttribute, InvalidAttribute, UssdRequest
 from rest_framework import serializers
 
 
@@ -82,3 +82,14 @@ class TestHandlerRegistration(TestCase):
             assert False, "should raise invalid serializer"
         except InvalidAttribute:
             pass
+
+
+class TestUssdRequestCreation(TestCase):
+
+    def test(self):
+        session_id = '1234'
+        ussd_request = UssdRequest('1234', '200', '', 'en')
+
+        self.assertTrue(len(session_id) < 8)
+
+        self.assertTrue(len(ussd_request.session_id) >= 8)

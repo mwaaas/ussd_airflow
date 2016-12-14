@@ -233,8 +233,8 @@ class MenuScreen(UssdHandlerAbstract):
 
     def _with_items(self, text, value, items):
         list_items = []
-        context = self._get_session_items()
         for item in items:
+            context = {}
             extra = {
                 "item": item
             }
@@ -253,7 +253,7 @@ class MenuScreen(UssdHandlerAbstract):
                 ListItem(
                     self._render_text(
                         text,
-                        session_items=context
+                        extra=context
                     ),
                     self.get_value_from_variables(value, context)
                 )
