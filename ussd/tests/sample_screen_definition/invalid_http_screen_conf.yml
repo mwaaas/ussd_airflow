@@ -1,0 +1,32 @@
+initial_screen: http_invalid_screen
+
+# missing all madatory fields
+http_invalid_screen:
+  type: http_screen
+
+http_screen_invalid_method:
+  type: http_screen
+  next_screen: http_screen_invalid_url
+  session_key: http_post_response
+  http_request:
+    method: done
+    url: http://localhost:8000/mock/balance
+
+http_screen_invalid_url:
+  type: http_screen
+  next_screen: http_screen_invalid_synchronous
+  session_key: http_post_response
+  http_request:
+    method: get
+    url: invalid_url
+
+http_screen_invalid_synchronous:
+  type: http_screen
+  next_screen: http_screen_invalid_url
+  session_key: http_post_response
+  synchronous: not boolean
+  http_request:
+    method: post
+    url: http://localhost:8000/mock/balance
+
+

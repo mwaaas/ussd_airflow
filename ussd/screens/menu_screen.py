@@ -89,8 +89,8 @@ class MenuScreen(UssdHandlerAbstract):
     screen_type = "menu_screen"
     serializer = MenuScreenSerializer
 
-    def __init__(self, ussd_request, handler, screen_content):
-        super(MenuScreen, self).__init__(ussd_request, handler, screen_content)
+    def __init__(self, ussd_request, handler, screen_content, **kwargs):
+        super(MenuScreen, self).__init__(ussd_request, handler, screen_content, **kwargs)
         self.list_options = [] if self.screen_content.get('items') is None \
             else self.get_items()
         self.menu_options = [] if self.screen_content.get('options') is None \

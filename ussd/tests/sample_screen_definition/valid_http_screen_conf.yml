@@ -1,0 +1,59 @@
+initial_screen: http_get_example
+
+http_get_example:
+  type: http_screen
+  next_screen: http_get_url_query
+  session_key: get_response
+  http_request:
+    method: get
+    url: http://localhost:8000/mock/balance
+    params:
+      phone_number: "{{ phone_number }}"
+      session_id: "{{ session_id }}"
+    verify: false
+    headers:
+      content-type: "application/json"
+      user-agent: 'my-app/0.0.1'
+
+http_get_url_query:
+  type: http_screen
+  next_screen: http_post_example
+  session_key: get_url_query
+  http_request:
+    method: get
+    url: "http://localhost:8000/mock/balance/{{phone_number}}/"
+
+http_post_example:
+  type: http_screen
+  next_screen: http_async_example
+  session_key: http_post_response
+  http_request:
+    method: post
+    url: http://localhost:8000/mock/balance
+    params:
+      phone_numbers:
+        - 200
+        - 201
+        - 202
+      session_id: "{{ session_id }}"
+    verify: true
+    timeout: 30
+    headers:
+      content-type: "application/json"
+
+
+http_async_example:
+  type: http_screen
+  synchronous: True
+  next_screen: end_of_http_example
+  session_key: http_async_response
+  http_request:
+    method: get
+    url: https://localhost:8000/mock/submission
+    params:
+      phone_number: "{{ phone_number }}"
+      session_id: "{{ session_id }}"
+
+end_of_http_example:
+  type: quit_screen
+  text: Done

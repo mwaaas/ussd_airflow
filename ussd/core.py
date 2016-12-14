@@ -140,13 +140,14 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     abstract = True
 
     def __init__(self, ussd_request: UssdRequest,
-                 handler: str, screen_content: dict):
+                 handler: str, screen_content: dict, logger=None):
         self.ussd_request = ussd_request
         self.handler = handler
         self.screen_content = screen_content
 
         self.SINGLE_VAR = re.compile(r"^%s\s*(\w*)\s*%s$" % (
             '{{', '}}'))
+        self.logger = logger or get_logger(__name__).bind(**ussd_request.all_variables())
 
     def _get_session_items(self) -> dict:
         return dict(iter(self.ussd_request.session.items()))
@@ -256,6 +257,7 @@ class UssdView(APIView):
     def finalize_response(self, request, response, *args, **kwargs):
 
         if isinstance(response, UssdRequest):
+            self.logger = get_logger(__name__).bind(**response.all_variables())
             ussd_response = self.ussd_dispatcher(response)
             return self.ussd_response_handler(ussd_response)
         return super(UssdView, self).finalize_response(
@@ -265,8 +267,6 @@ class UssdView(APIView):
         return HttpResponse(str(ussd_response))
 
     def ussd_dispatcher(self, ussd_request):
-
-        logger = get_logger(__name__).bind(**ussd_request.all_variables())
 
         # Clear input and initialize session if we are starting up
         if '_ussd_state' not in ussd_request.session:
@@ -280,13 +280,13 @@ class UssdView(APIView):
 
         ussd_request.session.update(ussd_request.all_variables())
 
-        logger.debug('gateway_request', text=ussd_request.input)
+        self.logger.debug('gateway_request', text=ussd_request.input)
 
         # Invoke handlers
         ussd_response = self.run_handlers(ussd_request)
         # Save session
         ussd_request.session.save()
-        logger.debug('gateway_response', text=ussd_response.dumps(),
+        self.logger.debug('gateway_response', text=ussd_response.dumps(),
                      input="{redacted}")
 
         return ussd_response
@@ -311,7 +311,8 @@ class UssdView(APIView):
             ussd_response = _registered_ussd_handlers[screen_content['type']](
                 ussd_request,
                 handler,
-                screen_content
+                screen_content,
+                logger=self.logger
             ).handle()
 
         ussd_request.session['_ussd_state']['next_screen'] = handler
