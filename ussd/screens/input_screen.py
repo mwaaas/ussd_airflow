@@ -21,13 +21,6 @@ import re
 from rest_framework import serializers
 
 
-def ussd_regex_validator(regex_expression, user_input):
-    regex = re.compile(regex_expression)
-    if not bool(regex.search(force_text(user_input))):
-        return False
-    return True
-
-
 class InputValidatorSerializer(UssdTextSerializer):
     regex = serializers.CharField(max_length=255, required=False)
     expression = serializers.CharField(max_length=255, required=False)
@@ -60,20 +53,20 @@ class InputScreen(UssdHandlerAbstract):
                         input
         - validators:
             - text: This is the message to display when the validation fails
-              regex: regex used to validate ussd input. Its mutually exclusive with expression
-            - expression: if regex is not enough you can use a jinja expression will be called ussd request object
-              text: This the message thats going to be displayed if expression returns False
+              regex: regex used to validate ussd input. Its mutually exclusive
+              with expression
+            - expression: if regex is not enough you can use a jinja expression
+             will be called ussd request object
+              text: This the message thats going to be displayed if expression
+              returns False
 
     Example:
-        .. literalinclude:: ../../ussd/tests/sample_screen_definition/valid_input_screen_conf.yml
+        .. literalinclude:: ../../ussd/tests/sample_screen_definition/valid_in
+        put_screen_conf.yml
     """
 
     screen_type = "input_screen"
     serializer = InputSerializer
-
-    def validate_input(self, validate_rules):
-
-        return True
 
     def handle(self):
         if not self.ussd_request.input:
@@ -90,7 +83,6 @@ class InputScreen(UssdHandlerAbstract):
             # validate input
             validation_rules = self.screen_content.get("validators")
             for validation_rule in validation_rules:
-                is_valid = True
 
                 if 'regex' in validation_rule:
                     regex_expression = validation_rule['regex']
@@ -111,8 +103,6 @@ class InputScreen(UssdHandlerAbstract):
                             validation_rule['text']
                         )
                     )
-
-
 
             session_key = self.screen_content['input_identifier']
             next_handler = self.screen_content['next_screen']
