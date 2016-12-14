@@ -55,7 +55,7 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'django_ussd_airflow.urls'
+ROOT_URLCONF = 'ussd_airflow.urls'
 
 TEMPLATES = [
     {
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'django_ussd_airflow.wsgi.application'
+WSGI_APPLICATION = 'ussd_airflow.wsgi.application'
 
 
 # Database

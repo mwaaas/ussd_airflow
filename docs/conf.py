@@ -21,7 +21,7 @@ import os
 import sys
 import django
 sys.path.insert(0, os.path.abspath('..'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'django_ussd_airflow.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'ussd_airflow.settings'
 django.setup()
 
 # -- General configuration ------------------------------------------------
