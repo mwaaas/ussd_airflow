@@ -13,7 +13,8 @@ dependencies:
 
 test:
   override:
-    - curl --retry 10 --retry-delay 5 -v http://localhost:9000
+    # confirm app container is running
+    - curl --retry 10 --retry-delay 5 -v http://localhost:8007
     - docker-compose run app bash -c 'coverage run --omit=*test*,*ven* manage.py test && bash <(curl -s https://codecov.io/bash) && python-codacy-coverage -r coverage.xml'
 
 deployment:
