@@ -7,34 +7,6 @@ from ussd.core import UssdView
 from ussd.tests.sample_screen_definition import path
 
 
-class UssdTestClient(object):
-    def __init__(self, host, session_id=None, phone_number=200,
-                 language='en'):
-        self.phone_number = phone_number
-        self.language = language
-        self.session_id = session_id \
-            if session_id is not None \
-            else str(uuid.uuid4())
-        host = host if host is not None else self.live_server_url
-        self.url = host + reverse('africastalking_url')
-
-    def send_(self, ussd_input):
-        response = requests.post(
-            url=self.url,
-            data={
-                "sessionId": self.session_id,
-                "text": ussd_input,
-                "phoneNumber": self.phone_number,
-                "serviceCode": "test",
-                "language": self.language
-            }
-        )
-        return response
-
-    def send(self, ussd_input):
-        return self.send_(ussd_input).content.decode()
-
-
 class UssdTestCase(object):
     """
     this contains two test that are required in each screen test case

@@ -1,4 +1,4 @@
-from ussd.tests import UssdTestClient, UssdTestCase
+from ussd.tests import UssdTestCase
 
 
 class TestInputHandler(UssdTestCase.BaseUssdTestCase):
@@ -24,7 +24,7 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
         )
 
     def test_showing_screen_content(self):
-        ussd_client = UssdTestClient(host=self.live_server_url)
+        ussd_client = self.ussd_client()
 
         # dial in
         response = ussd_client.send('')
@@ -54,7 +54,8 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
 
     def test_multilanguage_support(self):
 
-        ussd_client = UssdTestClient(self.live_server_url, language='sw')
+        ussd_client = self.ussd_client(language='sw')
+
 
         # Dial in
         response = ussd_client.send('1')
@@ -82,7 +83,7 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
 
     def test_input_validation(self):
 
-        ussd_client = UssdTestClient(host=self.live_server_url)
+        ussd_client = self.ussd_client()
 
         # dial in
         ussd_client.send('')
