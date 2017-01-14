@@ -1,11 +1,11 @@
 from distutils.core import setup
 import os
 
-__version__ = os.environ.get('VERSION', 'v0.0.0').replace('v', '')
+__version__ = os.environ['VERSION'].replace('v', '')
 
 setup(
     name='ussd_airflow',
-    version=os.environ.get('version', __version__),
+    version=__version__,
     packages=['ussd'],
     url='https://github.com/mwaaas/ussd_airflow',
     license='MIT',
