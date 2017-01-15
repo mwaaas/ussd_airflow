@@ -1,12 +1,11 @@
-from distutils.core import setup
-import os
+from setuptools import setup, find_packages
 
 __version__ = '0.0.1.2'
 
 setup(
     name='ussd_airflow',
     version=__version__,
-    packages=['ussd'],
+    packages=find_packages(exclude=('ussd_airflow',)),
     url='https://github.com/mwaaas/ussd_airflow',
     license='MIT',
     author='Mwas',
