@@ -6,7 +6,7 @@ import json
 
 
 class Command(BaseCommand):
-    help = 'Closes the specified poll for voting'
+    help = 'Validate ussd customer journey'
 
     def add_arguments(self, parser):
         parser.add_argument('ussd_configs', nargs='+', type=str)
@@ -31,5 +31,7 @@ class Command(BaseCommand):
                 valid=is_valid,
                 error_message=error_ussd_config_message
             )
+            if not is_valid:
+                raise CommandError(json.dumps(error_message))
 
         self.stdout.write(json.dumps(error_message))

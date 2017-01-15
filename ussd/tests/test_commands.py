@@ -11,19 +11,20 @@ class ValidateCustomerJourneyConfig(TestCase):
 
     def test_command_output(self):
         out = StringIO()
-        file_name = "{0}/invalid_quit_screen_conf.yml".format(path)
+        file_name = "{0}/valid_quit_screen_conf.yml".format(path)
         call_command('validate_ussd_journey', file_name, stdout=out)
         expected_output = {
             file_name: dict(
-                valid=False,
-                error_message=dict(
-                    example_of_quit_screen=dict(
-                        text=['This field is required.']
-                    )
-                )
+                valid=True,
+                error_message=dict()
             )
         }
         self.assertDictEqual(expected_output, json.loads(out.getvalue()))
+
+    def testing_invalid_ussd_journey(self):
+        out = StringIO()
+        file_name = "{0}/invalid_quit_screen_conf.yml".format(path)
+        self.assertRaises(CommandError, call_command, 'validate_ussd_journey', file_name, stdout=out)
 
     def test_called_with_multiple_files(self):
         out = StringIO()

@@ -2,7 +2,7 @@ Ussd Airflow Changelog
 ================
 
 Version 0.0.1.5
-------------
+----------------
 Released on 15th Jan 2017
 
 Feature
@@ -11,3 +11,7 @@ Feature
 Enhancement
 - increased ussd maximum text to 500
 
+Version 0.0.1.6
+----------------
+Enhancement
+- validate_ussd_journey command to fail if customer journey fails validation
