@@ -1,0 +1,13 @@
+Ussd Airflow Changelog
+================
+
+Version 0.0.1.5
+------------
+Released on 15th Jan 2017
+
+Feature
+- adding django command to validate ussd customer journey
+
+Enhancement
+- increased ussd maximum text to 500
+
