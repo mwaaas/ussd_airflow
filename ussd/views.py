@@ -6,10 +6,14 @@ from django.http import HttpResponse
 class AfricasTalkingUssdGateway(UssdView):
 
     def post(self, req):
+        list_of_inputs = req.data['text'].split("*")
+        text = "*" if len(list_of_inputs) >= 2 and list_of_inputs[-1] == "" and list_of_inputs[-2] == "" else list_of_inputs[
+            -1]
+
         ussd_request = UssdRequest(
             phone_number=req.data['phoneNumber'].strip('+'),
             session_id=req.data['sessionId'],
-            ussd_input=req.data['text'],
+            ussd_input=text,
             service_code=req.data['serviceCode'],
             language=req.data.get('language', 'en')
         )
