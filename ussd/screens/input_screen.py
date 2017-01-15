@@ -81,7 +81,7 @@ class InputScreen(UssdHandlerAbstract):
             return UssdResponse(response_text)
         else:
             # validate input
-            validation_rules = self.screen_content.get("validators")
+            validation_rules = self.screen_content.get("validators", {})
             for validation_rule in validation_rules:
 
                 if 'regex' in validation_rule:

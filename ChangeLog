@@ -15,3 +15,9 @@ Version 0.0.1.6
 ----------------
 Enhancement
 - validate_ussd_journey command to fail if customer journey fails validation
+
+Version 0.0.1.7
+-----------------
+
+BugFix
+- if validation in input screen is missing proceed don't fail

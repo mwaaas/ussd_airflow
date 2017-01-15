@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-__version__ = '0.0.1.6'
+__version__ = '0.0.1.7'
 
 setup(
     name='ussd_airflow',
