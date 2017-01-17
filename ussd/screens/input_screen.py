@@ -1,17 +1,3 @@
-"""
-In ussd airflow ussd customer journey is created and defined by
-yaml
-
-Each section in yaml is a ussd screen. Each section must have an
-key of value pair of screen_type: screen_type
-
-The screen type defines the logic and how the screen is going to be
-rendered.
-
-The following are the  supported screen types:
-
-"""
-
 from ussd.core import UssdHandlerAbstract, UssdResponse
 import datetime
 from ussd.screens.serializers import UssdContentBaseSerializer, \
@@ -40,8 +26,6 @@ class InputSerializer(UssdContentBaseSerializer, NextUssdScreenSerializer):
 class InputScreen(UssdHandlerAbstract):
     """
 
-    **Input Screen**
-
     This screen prompts the user to enter an input
 
     Fields required:
@@ -61,8 +45,7 @@ class InputScreen(UssdHandlerAbstract):
               returns False
 
     Example:
-        .. literalinclude:: ../../ussd/tests/sample_screen_definition/valid_in
-        put_screen_conf.yml
+        .. literalinclude:: .././ussd/tests/sample_screen_definition/valid_input_screen_conf.yml
     """
 
     screen_type = "input_screen"

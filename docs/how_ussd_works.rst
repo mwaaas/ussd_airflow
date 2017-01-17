@@ -1,5 +1,3 @@
-
-
 ==============
 How ussd works
 ==============
@@ -10,7 +8,7 @@ USSD can be used for WAP browsing, prepaid callback service,
 mobile money services, location-based content services,
 menu-based information services, or even as part of configuring the phone on the network.
 
-.. image:: ../img/how_ussd_works.jpg
+.. image:: ./img/how_ussd_works.jpg
 
 From the diagram above, a request is sent from a mobile phone to a telecom network
 such Vodafone.
@@ -24,7 +22,7 @@ displays you content to the user
 
 Below is a another diagram to help understand the concept
 
-.. image:: ../img/another_example_how_ussd_works.gif
+.. image:: ./img/another_example_how_ussd_works.gif
 
 ================
 Why Ussd Airflow
@@ -63,7 +61,7 @@ message sequence required to realize the data transfers between
 a mobile user’s handset and the USSD application to implement the
 “Balance Enquiry and Top Up” service described above.
 
-.. image:: ../img/example_of_menu_driven_ussd_application.png
+.. image:: ./img/example_of_menu_driven_ussd_application.png
 
 
 How ussd airflow comes in

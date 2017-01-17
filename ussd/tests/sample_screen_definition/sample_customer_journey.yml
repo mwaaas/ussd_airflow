@@ -1,0 +1,17 @@
+initial_screen: enter_name
+
+enter_name:
+  type: input_screen
+  text: Enter your name
+  session_key: name
+  next_screen: enter_age
+
+enter_age:
+  type: input_screen
+  text: Enter your age
+  session_key: age
+  next_screen: show_details
+
+show_details:
+  type: quit_screen
+  text: You have entered name as {{name}} and age as {{age}}

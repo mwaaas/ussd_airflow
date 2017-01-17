@@ -1,6 +1,7 @@
 from ussd.core import UssdView, UssdRequest
 from ussd.tests.sample_screen_definition import path
 from django.http import HttpResponse
+from django.conf import settings
 
 
 class AfricasTalkingUssdGateway(UssdView):
@@ -23,7 +24,8 @@ class AfricasTalkingUssdGateway(UssdView):
     def get_customer_journey_conf(self, request):
         if request.data.get('customer_journey_conf'):
             return path + '/' + request.data.get('customer_journey_conf')
-        return path + "/valid_input_screen_conf.yml"
+        return getattr(settings, 'DEFAULT_USSD_SCREEN_JOURNEY',
+                       path + "sample_customer_journey.yml")
 
     def get_customer_journey_namespace(self, request):
         if request.data.get('customer_journey_conf'):

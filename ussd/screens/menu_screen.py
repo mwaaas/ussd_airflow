@@ -1,17 +1,3 @@
-"""
-**Menu Screen**
-
-This is the screen used to display options to select:
-
-Fields required:
-    - text: text to display for the user to choose option
-        .. automodule:: ussd.screens.serializers
-            :members: UssdBaseSerializer
-    - menu_options:
-        This is a list of the options to display to the user
-        should contain text to show to the user and screen to
-        go next if the user selects that option.
-"""
 from ussd.core import UssdHandlerAbstract, UssdResponse
 from .serializers import UssdContentBaseSerializer, \
     MenuOptionSerializer, NextUssdScreenSerializer, UssdTextSerializer
@@ -56,6 +42,29 @@ class ItemsSerializer(UssdTextSerializer, NextUssdScreenSerializer):
 
 
 class MenuScreenSerializer(UssdContentBaseSerializer):
+    """
+    - text:
+        .. autoclass:: UssdContentBaseSerializer
+
+    - options:
+        This is a list of options to display to the user
+        each option is
+            .. autoclass:: MenuOptionSerializer
+
+    - items:
+        Sometimes you what to display a list of items and not
+        menu options. Item is used for this
+            .. autoclass:: ItemsSerializer
+
+    - error_message: This is an optional message to display if the
+                     user enters invalid input
+
+    - option and items are mutual exclusive.
+
+    Examples of menu screen:
+
+        .. literalinclude:: .././ussd/tests/sample_screen_definition/valid_menu_screen_conf.yml
+    """
     options = ListField(
         child=MenuOptionSerializer(),
         required=False
@@ -86,6 +95,72 @@ class MenuOption(object):
 
 
 class MenuScreen(UssdHandlerAbstract):
+    """
+    This is the screen used to display options to select:
+
+        - text:
+            This is the text to display to the user.
+
+        - options:
+            This is a list of options to display to the user
+            each option is a key value pair of option text to display
+            and next_screen to redirect if option is selected.
+            Example of option:
+
+            .. code-block:: yaml
+
+                   options:
+                    - text: option one
+                      next_screen: screen_one
+                    - text: option two
+                      next_screen: screen_two
+
+        - items:
+            Unlike options where each option has its own screen to redirect
+            in items we have a list of items to display and regardless of
+            the input user will be redirected to one screen.
+
+                Example of items
+
+                .. code-block:: yaml
+
+                    menu_screen_with_item_example:
+                        type: menu_screen
+                        text: choose one item
+                        items:
+                            text: "{{key}} for {{value}}"
+                            value: "{{item}}"
+                            next_screen: display_option
+                            session_key: testing
+                            with_dict:
+                                a: apple
+                                b: boy
+                                c: cat
+
+            In the above example if will display the following text
+
+            .. code-block:: text
+
+                    Choose one item
+                        1. apple
+                        2. boy
+                        3. cat
+
+            If the user selects "2", that would be translated by the value
+            key, it will result to "b", then "b" will be saved with session_key
+            provided and the user will be directed to the next screen which
+            is display_option.
+
+            To reference the selected item, use {{your_session_key}}
+
+        - error_message: (optional)
+            This is message to display if the user enter the wrong value.
+
+            defaults to "Please enter a valid choice."
+
+        - option and items are mutual exclusive.
+
+    """
     screen_type = "menu_screen"
     serializer = MenuScreenSerializer
 

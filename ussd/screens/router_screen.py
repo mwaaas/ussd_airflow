@@ -15,6 +15,34 @@ class RouterSerializer(UssdBaseSerializer):
 
 
 class RouterScreen(UssdHandlerAbstract):
+    """
+    This screen is invisible to the user. Sometimes you would like to
+    direct user to different screens depending on some status.
+
+    For instance you want to show different screen to users who are not
+    registered and a different screen to users who have already registered.
+    This is the screen to create.
+
+    Fields used to create this screen:
+        1. router_options
+            This is a list of router option.
+            Each router option has the following fields
+                a. expression
+                    This is a jinja expression that's is evaluating to boolean
+                    It can reference anything in the session and parameters
+                    in ussd_request
+                b. next_screen
+                    This is the screen to direct to if the above expression
+                    is true
+        2. default_next_screen (optional)
+            This is the screen to direct to if all expression in router_options
+            failed.
+
+        Examples of router screens
+
+            .. literalinclude:: .././ussd/tests/sample_screen_definition/valid_router_screen_conf.yml
+    """
+
     screen_type = "router_screen"
     serializer = RouterSerializer
 

@@ -1,5 +1,5 @@
 """
-
+Comming soon
 """
 from urllib.parse import unquote
 from copy import copy, deepcopy
@@ -55,7 +55,41 @@ def ussd_session(session_id):
 
 
 class UssdRequest(object):
+    """
+    :param session_id:
+        used to get session or create session if does not
+        exits.
 
+        If session is less than 8 we add *s* to make the session
+        equal to 8
+
+    :param phone_number:
+        This the user identifier
+
+    :param input:
+        This ussd input the user has entered.
+
+    :param language:
+        Language to use to display ussd
+
+    :param kwargs:
+        Extra arguments.
+        All the extra arguments will be set to the self attribute
+
+        For instance:
+
+        .. code-block:: python
+
+            from ussd.core import UssdRequest
+
+            ussdRequest = UssdRequest(
+                '12345678', '702729654', '1', 'en',
+                name='mwas'
+            )
+
+            # accessing kwarg argument
+            ussdRequest.name
+    """
     def __init__(self, session_id, phone_number,
                  ussd_input, language, **kwargs):
         """Represents a USSD request"""
@@ -95,7 +129,18 @@ class UssdRequest(object):
 
 
 class UssdResponse(object):
-    """Represents a USSD response"""
+    """
+    :param text:
+        This is the ussd text to display to the user
+    :param status:
+        This shows the status of ussd session.
+
+        True -> to continue with the session
+
+        False -> to end the session
+    :param session:
+        This is the session object of the ussd session
+    """
     def __init__(self, text, status=True, session=None):
         self.text = text
         self.status = status
@@ -223,6 +268,88 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
 
 class UssdView(APIView):
+    """
+    To create Ussd View requires the following things:
+        - Inherit from **UssdView** (Mandatory)
+            .. code-block:: python
+
+                from ussd.core import UssdView
+
+        - Define Http method either **get** or **post** (Mandatory)
+            The http method should return Ussd Request
+
+                .. autoclass:: ussd.core.UssdRequest
+
+        - define this varialbe *customer_journey_conf*
+            This is the path of the file that has ussd screens
+            If you want your file to be dynamic implement the
+            following method **get_customer_journey_conf** it
+            will be called by request object
+
+        - define this variable *customer_journey_namespace*
+            Ussd_airflow uses this namespace to save the
+            customer journey content in memory. If you want
+            customer_journey_namespace to be dynamic implement
+            this method **get_customer_journey_namespace** it
+            will be called with request object
+
+        - override HttpResponse
+            In ussd airflow the http method return UssdRequest object
+            not Http response. Then ussd view gets UssdResponse object
+            and convert it to HttpResponse. The default HttpResponse
+            returned is a normal HttpResponse with body being ussd text
+
+            To override HttpResponse returned define this method.
+            **ussd_response_handler** it will be called with
+            **UssdResponse** object.
+
+                .. autoclass:: ussd.core.UssdResponse
+
+    Example of Ussd view
+
+    .. code-block:: python
+
+        from ussd.core import UssdView, UssdRequest
+
+
+        class SampleOne(UssdView):
+
+            def get(self, req):
+                return UssdRequest(
+                    phone_number=req.data['phoneNumber'].strip('+'),
+                    session_id=req.data['sessionId'],
+                    ussd_input=text,
+                    service_code=req.data['serviceCode'],
+                    language=req.data.get('language', 'en')
+                )
+
+    Example of Ussd View that defines its own HttpResponse.
+
+    .. code-block:: python
+
+        from ussd.core import UssdView, UssdRequest
+
+
+        class SampleOne(UssdView):
+
+            def get(self, req):
+                return UssdRequest(
+                    phone_number=req.data['phoneNumber'].strip('+'),
+                    session_id=req.data['sessionId'],
+                    ussd_input=text,
+                    service_code=req.data['serviceCode'],
+                    language=req.data.get('language', 'en')
+                )
+
+            def ussd_response_handler(self, ussd_response):
+                    if ussd_response.status:
+                        res = 'CON' + ' ' + str(ussd_response)
+                        response = HttpResponse(res)
+                    else:
+                        res = 'END' + ' ' + str(ussd_response)
+                        response = HttpResponse(res)
+                    return response
+    """
     customer_journey_conf = None
     customer_journey_namespace = None
 
