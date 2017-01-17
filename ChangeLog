@@ -26,5 +26,5 @@ Version 0.0.1.8
 -----------------
 
 Feature
-    - Adding feature when installing this feature to install
+    - Adding feature when installing this package to install
       the packages it depends on.
