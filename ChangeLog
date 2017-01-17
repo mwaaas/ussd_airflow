@@ -28,3 +28,9 @@ Version 0.0.1.8
 Feature
     - Adding feature when installing this package to install
       the packages it depends on.
+
+Version 0.0.1.9
+-----------------
+
+Bug fix
+    - previous version fails when installing
