@@ -39,6 +39,7 @@ setup(
     packages=find_packages(exclude=('ussd_airflow',)),
     url='https://github.com/mwaaas/ussd_airflow',
     install_requires=reqs('default.txt'),
+    include_package_data=True,
     license='MIT',
     author='Mwas',
     author_email='mwasgize@gmail.com',
