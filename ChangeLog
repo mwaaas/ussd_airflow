@@ -41,3 +41,10 @@ Version 0.0.1.9.1
 
 Bug fix
     - previous version fails when installing
+
+
+Version 0.0.1.9.1
+-----------------
+
+Bug fix
+    - adding missing package 'requests' in the dependencies list.
