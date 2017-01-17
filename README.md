@@ -11,4 +11,7 @@
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/231ad345da874835a7c3d8e2bb401864)](https://www.codacy.com/app/francismwangi152/ussd_airflow?utm_source=github.com&utm_medium=referral&utm_content=mwaaas/ussd_airflow&utm_campaign=Badge_Coverage)
 
-[![Documentation Status](https://readthedocs.org/projects/django-ussd-airflow/badge/?version=latest)](http://django-ussd-airflow.readthedocs.io/en/latest/?badge=latest)
+
+For more information
+here is the documentation 
+http://django-ussd-airflow.readthedocs.io/
