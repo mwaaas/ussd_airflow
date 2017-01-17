@@ -21,3 +21,10 @@ Version 0.0.1.7
 
 BugFix
 - if validation in input screen is missing proceed don't fail
+
+Version 0.0.1.8
+-----------------
+
+Feature
+    - Adding feature when installing this feature to install
+      the packages it depends on.

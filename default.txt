@@ -1,0 +1,7 @@
+# This are the requirements required by 3rd party application
+# And will be installed when the application is installed
+django>=1.10
+djangorestframework>=3.5.3
+structlog>=16.1.0
+jinja2>=2.8
+PyStaticConfiguration>=0.10.2
