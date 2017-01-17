@@ -43,8 +43,14 @@ Bug fix
     - previous version fails when installing
 
 
-Version 0.0.1.9.1
+Version 0.0.1.9.2
 -----------------
 
 Bug fix
     - adding missing package 'requests' in the dependencies list.
+
+Version 0.0.1.9.3
+-----------------
+
+Bug fix
+    - adding missing package 'celery' in the dependencies list.

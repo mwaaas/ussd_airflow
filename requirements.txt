@@ -1,6 +1,5 @@
 -r default.txt
 gunicorn==19.6.0
-celery==4.0.0rc3
 psycopg2==2.6.2
 sphinx==1.5.1
 sphinx-autobuild==0.6.0
