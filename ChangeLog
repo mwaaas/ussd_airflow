@@ -79,3 +79,9 @@ Version 0.0.1.9.7
 
 Bug fix
     - Sample view using invalid sample ussd conf
+
+Version 0.0.1.9.8
+-----------------
+
+Bug fix
+    - fixed sample customer journey
