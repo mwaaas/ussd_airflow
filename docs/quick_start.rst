@@ -16,6 +16,12 @@ Setup
         'ussd.apps.UssdConfig',
         ]
 
+- Change session serializer to pickle serializer
+
+    .. code-block:: python
+
+        SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
 - Add ussd view to handle ussd request.
     - To use an existing ussd view that is implemented to handle
       AfricasTalking ussd gateway
