@@ -36,6 +36,26 @@ Setup
                     name='africastalking_url')
                 ]
 
+      To use the existing Africastalking ussd gateway and your own ussd
+      screen. Create a yaml file. On the yaml create your ussd screen.
+      Learn more on how to create ussd screen here :doc:`tutorial`.
+      For quick start copy the below yaml
+
+        .. literalinclude:: .././ussd/tests/sample_screen_definition/sample_customer_journey.yml
+
+      Next step add this to your settings. For ussd airflow to know where your
+      ussd screens files are located.
+
+        .. code-block:: python
+
+            DEFAULT_USSD_SCREEN_JOURNEY = "/file/path/of/the/screen"
+
+      To validate your ussd screen file. Run this command
+
+        .. code-block:: text
+
+            python validate_ussd_journey /file/path
+
       To test the ussd view do this curl request.
 
       .. code-block:: text
@@ -49,3 +69,4 @@ Setup
 
     - To create your own Ussd View.
             .. autoclass:: ussd.core.UssdView
+

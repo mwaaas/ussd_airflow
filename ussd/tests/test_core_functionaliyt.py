@@ -2,6 +2,7 @@ from django.test import TestCase
 from ussd.core import _registered_ussd_handlers, \
     UssdHandlerAbstract, MissingAttribute, InvalidAttribute, UssdRequest
 from rest_framework import serializers
+from ussd.tests import UssdTestCase
 
 
 class SampleSerializer(serializers.Serializer):
@@ -93,3 +94,24 @@ class TestUssdRequestCreation(TestCase):
         self.assertTrue(len(session_id) < 8)
 
         self.assertTrue(len(ussd_request.session_id) >= 8)
+
+
+class TestCoreView(UssdTestCase.BaseUssdTestCase):
+
+    def testing_valid_customer_journey(self):
+        assert True
+
+    def testing_invalid_customer_journey(self):
+        assert True
+
+    def test_africas_talking_is_picking_settings_journey(self):
+        ussd_client = self.ussd_client(generate_customer_journey=False)
+
+        # dial in
+        response = ussd_client.send('')
+
+        self.assertEqual(
+            "Enter your name",
+            response
+        )
+

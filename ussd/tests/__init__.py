@@ -51,10 +51,10 @@ class UssdTestCase(object):
             self._test_ussd_validation(self.invalid_yml, False,
                                        self.validation_error_message)
 
-        def ussd_client(self, **kwargs):
+        def ussd_client(self, generate_customer_journey=True, **kwargs):
             class UssdTestClient(object):
                 def __init__(self, host, session_id=None, phone_number=200,
-                             language='en', extra_payload=None,
+                             language='en', extra_payload={},
                              service_code="test"):
                     self.phone_number = phone_number
                     self.language = language
@@ -83,9 +83,10 @@ class UssdTestCase(object):
                 def send(self, ussd_input):
                     return self.send_(ussd_input).content.decode()
 
-            customer_journey_conf = {
-                'customer_journey_conf': self.valid_yml
-            }
-            kwargs['extra_payload'] = customer_journey_conf
+            if generate_customer_journey:
+                customer_journey_conf = {
+                    'customer_journey_conf': self.valid_yml
+                }
+                kwargs['extra_payload'] = customer_journey_conf
 
             return UssdTestClient(self.live_server_url, **kwargs)

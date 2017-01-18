@@ -16,6 +16,7 @@ from .screens.serializers import UssdBaseSerializer
 from rest_framework.serializers import SerializerMetaclass
 import re
 import json
+import os
 
 _registered_ussd_handlers = {}
 
@@ -376,10 +377,10 @@ class UssdView(APIView):
 
         if not self.customer_journey_namespace in \
                 staticconf.config.configuration_namespaces:
-            staticconf.YamlConfiguration(self.customer_journey_conf,
-                                         namespace=
-                                         self.customer_journey_namespace,
-                                         flatten=False)
+            staticconf.YamlConfiguration(
+                os.path.abspath(self.customer_journey_conf),
+                namespace=self.customer_journey_namespace,
+                flatten=False)
 
     def finalize_response(self, request, response, *args, **kwargs):
 
