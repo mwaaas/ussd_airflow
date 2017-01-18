@@ -54,3 +54,9 @@ Version 0.0.1.9.3
 
 Bug fix
     - adding missing package 'celery' in the dependencies list.
+
+Version 0.0.1.9.4
+-----------------
+
+Bug fix
+    - adding missing package 'yaml' in the dependencies list.
