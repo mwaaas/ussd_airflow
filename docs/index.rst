@@ -2,8 +2,8 @@
 Welcome to Ussd Airflow's documentation!
 ========================================
 
-Ussd Airflow is a platform used to create ussd application using restful apis.
-It can be integrated with any gui to create ussd application using Gui
+Ussd Airflow is a platform used to create ussd application by defining ussd
+screens in a yaml file
 
 Getting Started
 ---------------
