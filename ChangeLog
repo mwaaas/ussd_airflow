@@ -72,3 +72,10 @@ Version 0.0.1.9.6
 
 Bug fix
     - adding sample screens in the package
+
+
+Version 0.0.1.9.7
+-----------------
+
+Bug fix
+    - Sample view using invalid sample ussd conf
