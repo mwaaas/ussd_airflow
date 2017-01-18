@@ -66,3 +66,9 @@ Version 0.0.1.9.5
 
 Bug fix
     - adding missing package 'yaml' in the dependencies list.
+
+Version 0.0.1.9.6
+-----------------
+
+Bug fix
+    - adding sample screens in the package

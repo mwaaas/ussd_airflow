@@ -1,1 +1,2 @@
 include default.txt
+recursive-include ussd/tests/sample_screen_definition *
