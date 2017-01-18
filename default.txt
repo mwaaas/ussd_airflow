@@ -7,4 +7,4 @@ jinja2>=2.8
 PyYaml==3.12
 PyStaticConfiguration>=0.10.2
 requests>=2.12.3
-celery==4.0.0rc3
+celery>=4.0.0rc3
