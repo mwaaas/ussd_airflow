@@ -3,13 +3,13 @@ initial_screen: enter_name
 enter_name:
   type: input_screen
   text: Enter your name
-  session_key: name
+  input_identifier: name
   next_screen: enter_age
 
 enter_age:
   type: input_screen
   text: Enter your age
-  session_key: age
+  input_identifier: age
   next_screen: show_details
 
 show_details:
