@@ -91,3 +91,10 @@ Version 0.0.1.9.9
 
 Feature
     - ussd screens path can be relative
+
+Version 0.0.2
+-----------------
+
+Feature
+    - added support for defining variable files
+    - added support for loop in router screen
