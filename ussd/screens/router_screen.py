@@ -38,6 +38,14 @@ class RouterScreen(UssdHandlerAbstract):
             This is the screen to direct to if all expression in router_options
             failed.
 
+        3. with_items (optional)
+            Sometimes you want to loop over something until an item
+            passes the expression. In this case use with_items.
+            When using with_items you can use variable item in the
+            expression.
+
+            see in the example below for more explanation
+
         Examples of router screens
 
             .. literalinclude:: .././ussd/tests/sample_screen_definition/valid_router_screen_conf.yml
@@ -48,10 +56,31 @@ class RouterScreen(UssdHandlerAbstract):
 
     def handle(self):
         route_options = self.screen_content.get("router_options")
+        loop_items = [0]
+        if self.screen_content.get("with_items"):
+            loop_items = self.get_value_from_variables(
+                self.screen_content["with_items"]
+            ) or loop_items
 
-        for option in route_options:
-            if self.evaluate_jija_expression(option['expression']):
-                return self.ussd_request.forward(option['next_screen'])
+        for item in loop_items:
+            extra_context = {
+                "item": item
+            }
+            if isinstance(loop_items, dict):
+                extra_context.update(
+                    dict(
+                        key=item,
+                        value=loop_items[item],
+                        item={item: loop_items[item]}
+                    )
+                )
+
+            for option in route_options:
+                if self.evaluate_jija_expression(
+                        option['expression'],
+                    extra_context=extra_context
+                ):
+                    return self.ussd_request.forward(option['next_screen'])
         return self.ussd_request.forward(
             self.screen_content['default_next_screen']
         )

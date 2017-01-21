@@ -1,4 +1,5 @@
 from ussd.tests import UssdTestCase
+from ussd.core import ussd_session
 
 
 class TestRouterHandler(UssdTestCase.BaseUssdTestCase):
@@ -13,6 +14,19 @@ class TestRouterHandler(UssdTestCase.BaseUssdTestCase):
         )
     )
 
+    @staticmethod
+    def add_phone_number_status_in_session(ussd_client):
+        session = ussd_session(ussd_client.session_id)
+
+        if ussd_client.phone_number == 205:
+            session['phone_numbers'] = ["no_status"]
+        else:
+            session["phone_numbers"] = ["registered",
+                                        "not_registered",
+                                        "not_there"]
+
+        session.save()
+
     def test(self):
         ussd_client = self.ussd_client(phone_number=200)
 
@@ -26,3 +40,46 @@ class TestRouterHandler(UssdTestCase.BaseUssdTestCase):
 
         self.assertEqual("This is the default screen",
                          ussd_client.send(''))
+
+    def test_route_options_with_list_loop(self):
+
+        ussd_client = self.ussd_client(phone_number=203)
+        # add phone_number in session
+        self.add_phone_number_status_in_session(ussd_client)
+
+        # dial in
+        response = ussd_client.send('')
+
+        self.assertEqual(
+            "You are registered user",
+            response
+        )
+
+        ussd_client = self.ussd_client(phone_number=205)
+        # add phone_number in session
+        self.add_phone_number_status_in_session(ussd_client)
+
+        # dial in
+        response = ussd_client.send('')
+
+        self.assertEqual(
+            "This is the default screen",
+            response
+        )
+
+    def test_router_option_with_dict_loop(self):
+
+        ussd_client = self.ussd_client(phone_number=206)
+
+        self.assertEqual(
+            "This is the default screen",
+            ussd_client.send('')
+        )
+
+        ussd_client = self.ussd_client(phone_number=207)
+
+        self.assertEqual(
+            "This screen has been routed here because the "
+            "phone number is 207",
+            ussd_client.send('')
+        )

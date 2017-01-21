@@ -219,23 +219,6 @@ class MenuScreen(UssdHandlerAbstract):
                     return option.next_screen
         return False
 
-    def get_value_from_variables(self, variable, all_variables: dict):
-        if self._contains_vars(variable):
-            # Check to see if the string we are trying to
-            # render is just referencing a single
-            # var.  In this case we don't want to accidentally
-            # change the type of the variable
-            # to a string by using the jinja template renderer.
-            # We just want to pass it.
-            only_one = self.SINGLE_VAR.match(variable)
-            if only_one:
-                return all_variables.get(
-                    only_one.group(1)
-                )
-            # we don't support other jinja syntax a the moment
-            return []
-        return variable
-
     def get_items(self) -> list:
         """
         This gets ListItems
@@ -253,8 +236,7 @@ class MenuScreen(UssdHandlerAbstract):
                 loop_method = "_" + key
                 loop_value = value_
 
-        items = self.get_value_from_variables(loop_value,
-                                              self._get_session_items())
+        items = self.get_value_from_variables(loop_value)
 
         return getattr(self, loop_method)(
             text, value, items

@@ -8,6 +8,11 @@ router_exa_1:
       next_screen: 200_phone_number
     - expression: "{{ phone_number == 202| string }}"
       next_screen: 202_phone_number
+    - expression: "{{ phone_number in [203|string, 204|string, 205|string] }}"
+      next_screen: sample_router_screen_with_loop
+    - expression: "{{ phone_number in [ 206|string, 207|string] }}"
+      next_screen: sample_router_screen_with_dict_loop
+
 
 200_phone_number:
   type: quit_screen
@@ -20,3 +25,36 @@ router_exa_1:
 default_screen:
   type: quit_screen
   text: This is the default screen
+
+sample_router_screen_with_loop:
+  type: router_screen
+  default_next_screen: default_screen
+  with_items: "{{ phone_numbers}}"
+  router_options:
+    - expression: "{{ item == 'registered' }}"
+      next_screen: registred_screen
+    - expression: "{{ item == 'not_registered'}}"
+      next_screen: not_registered
+
+registred_screen:
+  type: quit_screen
+  text: You are registered user
+
+not_registered:
+  type: quit_screen
+  text: You are not registered user
+
+sample_router_screen_with_dict_loop:
+  type: router_screen
+  default_next_screen: default_screen
+  with_items:
+    phone_number: '207'
+  router_options:
+    - expression: '{{ key == "phone_number" and value == phone_number}}'
+      next_screen: 207_screen
+
+207_screen:
+  type: quit_screen
+  text: >
+    This screen has been routed here because the
+    phone number is {{phone_number}}

@@ -10,7 +10,7 @@ WORKDIR /usr/src/app
 
 COPY . /usr/src/app
 
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --exists-action w -r requirements.txt
 
 EXPOSE 80
 
