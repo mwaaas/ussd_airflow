@@ -18,6 +18,7 @@ import re
 import json
 import os
 from configure import Configuration
+from jinja2 import Environment
 
 _registered_ussd_handlers = {}
 
@@ -212,6 +213,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
         self.SINGLE_VAR = re.compile(r"^%s\s*(\w*)\s*%s$" % (
             '{{', '}}'))
+        self.clean_regex = re.compile(r'^{{\s*(\S*)\s*}}$')
         self.logger = logger or get_logger(__name__).bind(
             **ussd_request.all_variables())
         self.template_namespace = template_namespace
@@ -280,22 +282,21 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         return True
 
     def get_value_from_variables(self, variable, variables=None):
-        if self._contains_vars(variable):
-            # Check to see if the string we are trying to
-            # render is just referencing a single
-            # var.  In this case we don't want to accidentally
-            # change the type of the variable
-            # to a string by using the jinja template renderer.
-            # We just want to pass it.
-            only_one = self.SINGLE_VAR.match(variable)
-            if only_one:
-                if variables is None:
-                    variables = self._get_context()
-                return variables.get(
-                    only_one.group(1)
+
+        if isinstance(variable, str):
+            expression = self.clean_regex.match(variable)
+            if expression:
+                env = Environment()
+                expr = env.compile_expression(
+                    expression.group(1)
                 )
+                context = self._get_context()
+                if variables is not None:
+                    context.update(variables)
+                return expr(context)
+            else:
+                return []
             # we don't support other jinja syntax a the moment
-            return []
         return variable
 
     @classmethod

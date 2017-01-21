@@ -18,13 +18,11 @@ class TestRouterHandler(UssdTestCase.BaseUssdTestCase):
     def add_phone_number_status_in_session(ussd_client):
         session = ussd_session(ussd_client.session_id)
 
-        if ussd_client.phone_number == 205:
-            session['phone_numbers'] = ["no_status"]
-        else:
-            session["phone_numbers"] = ["registered",
-                                        "not_registered",
-                                        "not_there"]
-
+        session["phone_numbers"] = {
+            "203": ["registered"],
+            "204": ["not_registered"],
+            "205": ["not_there"]
+        }
         session.save()
 
     def test(self):
@@ -42,6 +40,17 @@ class TestRouterHandler(UssdTestCase.BaseUssdTestCase):
                          ussd_client.send(''))
 
     def test_route_options_with_list_loop(self):
+        ussd_client = self.ussd_client(phone_number=204)
+        # add phone_number in session
+        self.add_phone_number_status_in_session(ussd_client)
+
+        # dial in
+        response = ussd_client.send('')
+
+        self.assertEqual(
+            "You are not registered user",
+            response
+        )
 
         ussd_client = self.ussd_client(phone_number=203)
         # add phone_number in session

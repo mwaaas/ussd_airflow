@@ -29,7 +29,7 @@ default_screen:
 sample_router_screen_with_loop:
   type: router_screen
   default_next_screen: default_screen
-  with_items: "{{ phone_numbers}}"
+  with_items: "{{ phone_numbers[phone_number]}}"
   router_options:
     - expression: "{{ item == 'registered' }}"
       next_screen: registred_screen
