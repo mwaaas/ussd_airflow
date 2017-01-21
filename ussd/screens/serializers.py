@@ -70,7 +70,8 @@ class NextUssdScreenSerializer(serializers.Serializer):
 
 
 class MenuOptionSerializer(UssdTextSerializer, NextUssdScreenSerializer):
-    input_value = serializers.CharField(required=False, max_length=5)
+    input_value = serializers.CharField(required=False, max_length=5,
+                                        allow_blank=True)
     input_display = serializers.CharField(required=False, max_length=5)
 
 
