@@ -33,6 +33,18 @@ example of one
          type: quit
          text: This is the first screen
 
+Its is also used to define variable file if you have one.
+Example when defining variable file
+
+    .. code-block:: yaml
+
+        initial_screen:
+            screen: screen_one
+            variables:
+                file: /path/of/your/variable/file.yml
+                namespace: used_to_save_the_variable
+
+
 2. Input screen (type -> input_screen)
 --------------------------------------
 

@@ -1,0 +1,58 @@
+initial_screen:
+  screen: screen_one
+  variables:
+    file: ./ussd/tests/sample_screen_definition/sample_variable_two.yml
+    namespace: variable_testing
+
+screen_one:
+  type: menu_screen
+  text: >
+    Displaying variable in the first config {{bar}}.
+    press one to show variable in config two
+  options:
+    - text: Continue
+      next_screen: screen_two
+
+screen_two:
+  type: menu_screen
+  text: >
+    Displaying variable in the second config that has overridden
+    the second config {{foo}}.
+  options:
+    - text: continue
+      next_screen: screen_three
+
+screen_three:
+  type: input_screen
+  text: >
+    Enter your any number we compare it aganist a variable set
+    in the variables.
+  input_identifier: number_input
+  next_screen: screen_four
+
+screen_four:
+  type: router_screen
+  router_options:
+    - expression: "{{number_input|int == number_var}}"
+      next_screen: screen_five
+    - expression: "{{number_input|int > number_var}}"
+      next_screen: screen_six
+    - expression: "{{number_input|int < number_var}}"
+      next_screen: screen_seven
+screen_five:
+  type: quit_screen
+  text: The number you have entered is equal to the variable {{number_var}}
+
+screen_six:
+  type: quit_screen
+  text: The number you have entered is greater than the variable {{number_var}}
+
+screen_seven:
+    type: quit_screen
+    text: >
+      The number you have entered is less than the variable {{number_var}}.
+      Displaing a variable that has not been defined {{not_defined}}
+
+
+
+

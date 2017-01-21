@@ -17,6 +17,7 @@ from rest_framework.serializers import SerializerMetaclass
 import re
 import json
 import os
+from configure import Configuration
 
 _registered_ussd_handlers = {}
 
@@ -53,6 +54,23 @@ def ussd_session(session_id):
             raise DuplicateSessionId("another sever is working"
                                      "on this session id")
     return session
+
+
+def load_variables(file_path, namespace):
+    variables = dict(
+        Configuration.from_file(os.path.abspath(file_path)).configure()
+    )
+    staticconf.DictConfiguration(
+        variables,
+        namespace=namespace,
+        flatten=False)
+
+
+def load_ussd_screen(file_path, namespace):
+    staticconf.YamlConfiguration(
+        os.path.abspath(file_path),
+        namespace=namespace,
+        flatten=False)
 
 
 class UssdRequest(object):
@@ -186,22 +204,36 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     abstract = True
 
     def __init__(self, ussd_request: UssdRequest,
-                 handler: str, screen_content: dict, logger=None):
+                 handler: str, screen_content: dict,
+                 template_namespace=None, logger=None):
         self.ussd_request = ussd_request
         self.handler = handler
         self.screen_content = screen_content
 
         self.SINGLE_VAR = re.compile(r"^%s\s*(\w*)\s*%s$" % (
             '{{', '}}'))
-        self.logger = logger or get_logger(__name__).bind(**ussd_request.all_variables())
+        self.logger = logger or get_logger(__name__).bind(
+            **ussd_request.all_variables())
+        self.template_namespace = template_namespace
+
+        if template_namespace is not None:
+            self.template_namespace = staticconf.config.\
+                configuration_namespaces[self.template_namespace].\
+                configuration_values
 
     def _get_session_items(self) -> dict:
         return dict(iter(self.ussd_request.session.items()))
 
+    def _get_context(self):
+        context = self._get_session_items()
+        context.update(self.ussd_request.all_variables())
+        if self.template_namespace:
+            context.update(self.template_namespace)
+        return context
+
     def _render_text(self, text, context=None, extra=None, encode=None):
         if context is None:
-            context = self._get_session_items()
-            context.update(self.ussd_request.all_variables())
+            context = self._get_context()
 
         if extra:
             context.update(extra)
@@ -234,8 +266,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
         template = Template(expression)
 
-        context = self._get_session_items()
-        context.update(self.ussd_request.all_variables())
+        context = self._get_context()
         results = template.render(
             ussd_request=self.ussd_request,
             **context
@@ -353,6 +384,7 @@ class UssdView(APIView):
     """
     customer_journey_conf = None
     customer_journey_namespace = None
+    template_namespace = None
 
     def initial(self, request, *args, **kwargs):
         # initialize restframework
@@ -377,10 +409,26 @@ class UssdView(APIView):
 
         if not self.customer_journey_namespace in \
                 staticconf.config.configuration_namespaces:
-            staticconf.YamlConfiguration(
-                os.path.abspath(self.customer_journey_conf),
-                namespace=self.customer_journey_namespace,
-                flatten=False)
+            load_ussd_screen(
+                self.customer_journey_conf,
+                self.customer_journey_namespace
+            )
+
+        # check if variables exit and have been loaded
+        initial_screen = staticconf.read(
+            'initial_screen',
+            namespace=self.customer_journey_namespace)
+
+        if isinstance(initial_screen, dict):
+            variable_conf = initial_screen['variables']
+            file_path = variable_conf['file']
+            namespace = variable_conf['namespace']
+
+            # check if it has been loaded
+            if not namespace in \
+                    staticconf.config.configuration_namespaces:
+                load_variables(file_path, namespace)
+            self.template_namespace = namespace
 
     def finalize_response(self, request, response, *args, **kwargs):
 
@@ -420,11 +468,13 @@ class UssdView(APIView):
         return ussd_response
 
     def run_handlers(self, ussd_request):
-        handler = ussd_request.session['_ussd_state']['next_screen'] \
-                  if ussd_request.session['_ussd_state']['next_screen'] \
-                  else staticconf.read(
-            'initial_screen', namespace=self.customer_journey_namespace)
-
+        if ussd_request.session['_ussd_state']['next_screen']:
+            handler = ussd_request.session['_ussd_state']['next_screen']
+        else:
+            handler = staticconf.read(
+                'initial_screen', namespace=self.customer_journey_namespace)
+            if isinstance(handler, dict):
+                handler = handler["screen"]
         ussd_response = (ussd_request, handler)
 
         # Handle any forwarded Requests; loop until a Response is
@@ -440,6 +490,7 @@ class UssdView(APIView):
                 ussd_request,
                 handler,
                 screen_content,
+                template_namespace=self.template_namespace,
                 logger=self.logger
             ).handle()
 

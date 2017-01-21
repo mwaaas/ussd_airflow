@@ -1,0 +1,6 @@
+---
+!extends:sample_variable_one.yml
+
+foo: foo_variable_two
+
+number_var: 50

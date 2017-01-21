@@ -97,12 +97,7 @@ class TestUssdRequestCreation(TestCase):
 
 
 class TestCoreView(UssdTestCase.BaseUssdTestCase):
-
-    def testing_valid_customer_journey(self):
-        assert True
-
-    def testing_invalid_customer_journey(self):
-        assert True
+    validate_ussd = False
 
     def test_africas_talking_is_picking_settings_journey(self):
         ussd_client = self.ussd_client(generate_customer_journey=False)
