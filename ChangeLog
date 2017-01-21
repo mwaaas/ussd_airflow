@@ -98,3 +98,8 @@ Version 0.0.2
 Feature
     - added support for defining variable files
     - added support for loop in router screen
+
+Version 0.0.2.2
+---------------
+Enhancement
+    - improved variable declaration in yaml can now be nested
