@@ -259,7 +259,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             text_context
         )
 
-    def evaluate_jija_expression(self, expression):
+    def evaluate_jija_expression(self, expression, extra_context=None):
         if not expression.endswith("}}") and \
                 not expression.startswith("{{"):
             expression = "{{ " + expression + " }}"
@@ -267,6 +267,9 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         template = Template(expression)
 
         context = self._get_context()
+        if extra_context is not None:
+            context.update(extra_context)
+
         results = template.render(
             ussd_request=self.ussd_request,
             **context
@@ -275,6 +278,25 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         if results == 'False':
             return False
         return True
+
+    def get_value_from_variables(self, variable, variables=None):
+        if self._contains_vars(variable):
+            # Check to see if the string we are trying to
+            # render is just referencing a single
+            # var.  In this case we don't want to accidentally
+            # change the type of the variable
+            # to a string by using the jinja template renderer.
+            # We just want to pass it.
+            only_one = self.SINGLE_VAR.match(variable)
+            if only_one:
+                if variables is None:
+                    variables = self._get_context()
+                return variables.get(
+                    only_one.group(1)
+                )
+            # we don't support other jinja syntax a the moment
+            return []
+        return variable
 
     @classmethod
     def validate(cls, screen_name: str, ussd_content: dict) -> (bool, dict):
