@@ -8,7 +8,6 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
                 "validators": {
                     'text': ['This field is required.']
                 },
-                "text": ['Text for language en is missing'],
                 "next_screen": ['This field is required.']
             },
             enter_age={

@@ -48,12 +48,6 @@ class UssdTextSerializer(serializers.Serializer):
     text = UssdTextField(child=serializers.CharField(max_length=500,
                                                      allow_blank=True))
 
-    def validate_text(self, value):
-        if not value['default'] in value.keys():
-            raise serializers.ValidationError(
-                "Text for language {} is missing".format(value['default'])
-            )
-        return value
 
 class UssdContentBaseSerializer(UssdBaseSerializer, UssdTextSerializer):
     pass

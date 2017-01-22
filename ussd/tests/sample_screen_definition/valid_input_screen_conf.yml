@@ -1,4 +1,6 @@
-initial_screen: enter_height
+initial_screen:
+  screen: enter_height
+  default_language: en
 
 enter_height:
   type: input_screen
@@ -7,7 +9,7 @@ enter_height:
       Enter your height
     sw: |
       Weka ukubwa lako
-    default: en
+
   input_identifier: height
   next_screen: enter_age
   validators:
@@ -17,7 +19,6 @@ enter_height:
           Enter number between 1 and 7
         sw: |
           Weka namba kutoka 1 hadi 7
-        default: en
 
 enter_age:
     type: input_screen
@@ -26,7 +27,7 @@ enter_age:
         Enter your age
       sw: |
         Weka miaka yako
-      default: en
+
     input_identifier: age
     next_screen: show_information
     validators:
@@ -43,7 +44,6 @@ enter_age:
               Number over 100 is not allowed
             sw: |
               Nambari juu ya 100 haikubalishwi
-            default: en
 
 show_information:
     text:
@@ -53,7 +53,6 @@ show_information:
       sw: |
         Miaka yako in {{ age }} na ukubwa wako in {{ height }}.
         Weka kitu ingine yoyote unende kwenye screen ya kwanza
-      default: en
     type: input_screen
     input_identifier: foo
     next_screen: enter_height

@@ -111,12 +111,13 @@ class UssdRequest(object):
             ussdRequest.name
     """
     def __init__(self, session_id, phone_number,
-                 ussd_input, language, **kwargs):
+                 ussd_input, language, default_language=None, **kwargs):
         """Represents a USSD request"""
 
         self.phone_number = phone_number
         self.input = unquote(ussd_input)
         self.language = language
+        self.default_language = default_language or 'en'
         # if session id is less than 8 should provide the
         # suplimentary characters with 's'
         if len(str(session_id)) < 8:
@@ -253,7 +254,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             language = self.ussd_request.language \
                    if self.ussd_request.language \
                           in text_context.keys() \
-                   else text_context['default']
+                   else self.ussd_request.default_language
 
             text_context = text_context[language]
 
@@ -442,7 +443,7 @@ class UssdView(APIView):
             'initial_screen',
             namespace=self.customer_journey_namespace)
 
-        if isinstance(initial_screen, dict):
+        if isinstance(initial_screen, dict) and initial_screen.get('variables'):
             variable_conf = initial_screen['variables']
             file_path = variable_conf['file']
             namespace = variable_conf['namespace']
@@ -497,6 +498,9 @@ class UssdView(APIView):
             handler = staticconf.read(
                 'initial_screen', namespace=self.customer_journey_namespace)
             if isinstance(handler, dict):
+                # set default language from namespace
+                if 'default_language' in handler:
+                    ussd_request.default_language = handler.get('default_language', ussd_request.default_language)
                 handler = handler["screen"]
         ussd_response = (ussd_request, handler)
 
@@ -542,6 +546,8 @@ class UssdView(APIView):
             # all screens should have type attribute
             if screen_name == "initial_screen":
                 # confirm the next screen is in the screen content
+                if isinstance(screen_content, dict):
+                    screen_content = screen_content.get('screen')
                 if not screen_content in ussd_content.keys():
                     is_valid = False
                     errors.update(

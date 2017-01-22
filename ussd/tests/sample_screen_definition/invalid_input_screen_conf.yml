@@ -3,7 +3,6 @@ enter_height:
   type: input_screen
   text:
     sw: Weka jina lako
-    default: en
   input_identifier: height
   # invalid validator, missing text
   validators:
@@ -27,7 +26,7 @@ show_information:
           Enter your any thing to go back to the first screen
       sw: Miaka yako in {age} na ukubwa wako in {height}.
           Weka kitu ingine yoyote unende kwenye screen ya kwanza
-      default: en
+
     type: input
     input_identifier: foo
 
