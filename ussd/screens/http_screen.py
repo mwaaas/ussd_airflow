@@ -4,6 +4,7 @@ from rest_framework import serializers
 import requests
 from ussd.tasks import http_task
 import json
+import inspect
 
 
 class HttpScreenConfSerializer(serializers.Serializer):
@@ -87,7 +88,6 @@ class HttpScreen(UssdHandlerAbstract):
             self.screen_content['http_request']
         )
         response_to_save = {}
-        response_status_code = 200
         if self.screen_content.get('synchronous', False):
             http_task.delay(request_conf=http_request_conf)
         else:
@@ -95,12 +95,23 @@ class HttpScreen(UssdHandlerAbstract):
             response = requests.request(**http_request_conf)
             self.logger.info("response", status_code=response.status_code,
                              content=response.content)
-            response_to_save = json.loads(response.content.decode())
-            response_status_code = response.status_code
-        # save response in session
-        self.ussd_request.session[self.screen_content['session_key']] = dict(
-            content=response_to_save,
-            status_code=response_status_code
-        )
 
+            for i in inspect.getmembers(response):
+                # Ignores anything starting with underscore
+                # (that is, private and protected attributes)
+                if not i[0].startswith('_'):
+                    # Ignores methods
+                    if not inspect.ismethod(i[1]):
+                        if len(i) == 2:
+                            response_to_save.update(
+                                {i[0]: i[1]}
+                            )
+
+            response_to_save.update(
+                json.loads(response.content.decode())
+            )
+
+        # save response in session
+        self.ussd_request.session[self.screen_content['session_key']] = \
+            response_to_save
         return self.ussd_request.forward(self.screen_content['next_screen'])

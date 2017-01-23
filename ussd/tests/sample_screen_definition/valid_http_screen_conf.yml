@@ -59,4 +59,4 @@ end_of_http_example:
   text: >
     Testing response is being saved in session status code is
     {{http_post_response.status_code}} and content is
-    {{http_post_response.content}}
+    {{http_post_response.balance}}.
