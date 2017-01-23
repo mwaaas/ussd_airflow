@@ -87,14 +87,20 @@ class HttpScreen(UssdHandlerAbstract):
             self.screen_content['http_request']
         )
         response_to_save = {}
+        response_status_code = 200
         if self.screen_content.get('synchronous', False):
             http_task.delay(request_conf=http_request_conf)
         else:
             self.logger.info("sending_request", **http_request_conf)
             response = requests.request(**http_request_conf)
-            self.logger.info("response", status_code=response.status_code, content=response.content)
+            self.logger.info("response", status_code=response.status_code,
+                             content=response.content)
             response_to_save = json.loads(response.content.decode())
+            response_status_code = response.status_code
         # save response in session
-        self.ussd_request.session[self.screen_content['session_key']] = response_to_save
+        self.ussd_request.session[self.screen_content['session_key']] = dict(
+            content=response_to_save,
+            status_code=response_status_code
+        )
 
         return self.ussd_request.forward(self.screen_content['next_screen'])
