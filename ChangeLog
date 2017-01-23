@@ -103,3 +103,8 @@ Version 0.0.2.2
 ---------------
 Enhancement
     - improved variable declaration in yaml can now be nested
+
+Version 0.0.2.3
+---------------
+Enhancement
+    - http screen should save status_code and content
