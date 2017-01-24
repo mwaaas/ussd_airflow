@@ -119,3 +119,9 @@ Version 0.0.2.5
 ---------------
 Enhancement
     - Support for using os variable in ussd template
+
+Version 0.0.2.6
+---------------
+Enhancement
+    - removed url validation in http screen.
+        This is to enable url can be a variable
