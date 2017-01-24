@@ -11,7 +11,7 @@ class HttpScreenConfSerializer(serializers.Serializer):
     method = serializers.ChoiceField(
         ("post", "get", "put", "delete")
     )
-    url = serializers.URLField()
+    url = serializers.CharField(max_length=255)
 
 
 class HttpScreenSerializer(NextUssdScreenSerializer):
