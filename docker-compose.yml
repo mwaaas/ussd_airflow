@@ -52,6 +52,8 @@ services:
       - CODACY_PROJECT_TOKEN=7911468d4aa94f0f941148a355a953d0
       - CODECOV_TOKEN=b9e923ec-1dea-4111-bc1c-ecaf28c0f0da
       - 'DATABASE_URL=postgres://postgres:django-ussd-airflow@db:5432/django-ussd-airflow'
+      - TEST_VARIABLE=variable_test
+      - ENVIRONMENT=sample_variable_two
     labels:
       - "traefik.frontend.rule=PathPrefix:/"
       - "traefik.backend=web"

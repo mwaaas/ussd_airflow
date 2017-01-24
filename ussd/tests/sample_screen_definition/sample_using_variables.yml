@@ -1,7 +1,7 @@
 initial_screen:
   screen: screen_one
   variables:
-    file: ./ussd/tests/sample_screen_definition/sample_variable_two.yml
+    file: ./ussd/tests/sample_screen_definition/{{ENVIRONMENT}}.yml
     namespace: variable_testing
 
 screen_one:

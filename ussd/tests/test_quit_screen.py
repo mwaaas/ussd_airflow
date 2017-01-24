@@ -15,6 +15,6 @@ class TestQuitHandler(UssdTestCase.BaseUssdTestCase):
         ussd_client = self.ussd_client(service_code="test_")
 
         self.assertEqual(
-            "END End of this session",
+            "END Test getting variable from os environmen. variable_test",
             ussd_client.send('')
         )

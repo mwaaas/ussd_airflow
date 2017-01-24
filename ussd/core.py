@@ -58,6 +58,7 @@ def ussd_session(session_id):
 
 
 def load_variables(file_path, namespace):
+    file_path = Template(file_path).render(os.environ)
     variables = dict(
         Configuration.from_file(os.path.abspath(file_path)).configure()
     )
@@ -230,6 +231,9 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     def _get_context(self):
         context = self._get_session_items()
         context.update(self.ussd_request.all_variables())
+        context.update(
+            dict(os.environ)
+        )
         if self.template_namespace:
             context.update(self.template_namespace)
         return context
