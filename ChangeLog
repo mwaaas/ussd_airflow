@@ -114,3 +114,8 @@ Version 0.0.2.4
 Bugfix
     - fixed backward incompatibility introduced by previous version
       in http_screen.
+
+Version 0.0.2.5
+---------------
+Enhancement
+    - Support for using os variable in ussd template
