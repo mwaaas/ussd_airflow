@@ -21,11 +21,6 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
                 method=['"done" is not a valid choice.'],
             )
         ),
-        http_screen_invalid_url=dict(
-            http_request=dict(
-                url=['Enter a valid URL.'],
-            )
-        ),
         http_screen_invalid_synchronous=dict(
             synchronous=['"not boolean" is not a valid boolean.']
         )
