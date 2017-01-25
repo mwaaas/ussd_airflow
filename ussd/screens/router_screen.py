@@ -58,7 +58,7 @@ class RouterScreen(UssdHandlerAbstract):
         route_options = self.screen_content.get("router_options")
         loop_items = [0]
         if self.screen_content.get("with_items"):
-            loop_items = self.get_value_from_variables(
+            loop_items = self.evaluate_jija_expression(
                 self.screen_content["with_items"]
             ) or loop_items
 

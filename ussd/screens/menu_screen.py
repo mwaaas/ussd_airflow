@@ -236,7 +236,7 @@ class MenuScreen(UssdHandlerAbstract):
                 loop_method = "_" + key
                 loop_value = value_
 
-        items = self.get_value_from_variables(loop_value)
+        items = self.evaluate_jija_expression(loop_value)
 
         return getattr(self, loop_method)(
             text, value, items
@@ -312,7 +312,7 @@ class MenuScreen(UssdHandlerAbstract):
                         text,
                         extra=context
                     ),
-                    self.get_value_from_variables(value, context)
+                    self.evaluate_jija_expression(value, context)
                 )
             )
         return list_items

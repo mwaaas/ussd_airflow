@@ -11,14 +11,13 @@ from django.conf import settings
 from importlib import import_module
 from django.contrib.sessions.backends import signed_cookies
 from django.contrib.sessions.backends.base import CreateError
-from jinja2 import Template
+from jinja2 import Template, Environment, TemplateSyntaxError
 from .screens.serializers import UssdBaseSerializer
 from rest_framework.serializers import SerializerMetaclass
 import re
 import json
 import os
 from configure import Configuration
-from jinja2 import Environment
 
 _registered_ussd_handlers = {}
 
@@ -228,14 +227,20 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     def _get_session_items(self) -> dict:
         return dict(iter(self.ussd_request.session.items()))
 
-    def _get_context(self):
+    def _get_context(self, extra_context=None):
         context = self._get_session_items()
-        context.update(self.ussd_request.all_variables())
+        context.update(
+            dict(
+                ussd_request=self.ussd_request.all_variables()
+            )
+        )
         context.update(
             dict(os.environ)
         )
         if self.template_namespace:
             context.update(self.template_namespace)
+        if extra_context is not None:
+            context.update(extra_context)
         return context
 
     def _render_text(self, text, context=None, extra=None, encode=None):
@@ -267,42 +272,19 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         )
 
     def evaluate_jija_expression(self, expression, extra_context=None):
-        if not expression.endswith("}}") and \
-                not expression.startswith("{{"):
-            expression = "{{ " + expression + " }}"
 
-        template = Template(expression)
-
-        context = self._get_context()
-        if extra_context is not None:
-            context.update(extra_context)
-
-        results = template.render(
-            ussd_request=self.ussd_request,
-            **context
-        )
-
-        if results == 'False':
-            return False
-        return True
-
-    def get_value_from_variables(self, variable, variables=None):
-
-        if isinstance(variable, str):
-            expression = self.clean_regex.match(variable)
-            if expression:
+        if isinstance(expression, str):
+            context = self._get_context(extra_context=extra_context)
+            expression = expression.replace("{{", "").replace("}}", "")
+            try:
                 env = Environment()
                 expr = env.compile_expression(
-                    expression.group(1)
+                    expression
                 )
-                context = self._get_context()
-                if variables is not None:
-                    context.update(variables)
-                return expr(context)
-            else:
+            except TemplateSyntaxError:
                 return []
-            # we don't support other jinja syntax a the moment
-        return variable
+            return expr(context)
+        return expression
 
     @classmethod
     def validate(cls, screen_name: str, ussd_content: dict) -> (bool, dict):
