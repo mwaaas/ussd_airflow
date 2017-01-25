@@ -125,3 +125,8 @@ Version 0.0.2.6
 Enhancement
     - removed url validation in http screen.
         This is to enable url can be a variable
+
+Version 0.0.2.7
+---------------
+Enhancement
+    - refactored the logic for evaluating jinja template
