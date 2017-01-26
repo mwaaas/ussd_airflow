@@ -18,7 +18,7 @@ The Ussd Gateway (telecom) then sends the request to your ussd application
 receiving user’s request.)
 
 Your ussd application then responds to the request, and Ussd gateway goes ahead and
-displays you content to the user
+displays your content to the user
 
 Below is a another diagram to help understand the concept
 
