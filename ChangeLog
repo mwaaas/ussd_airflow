@@ -130,3 +130,9 @@ Version 0.0.2.7
 ---------------
 Enhancement
     - refactored the logic for evaluating jinja template
+
+Version 0.0.2.8
+---------------
+Feature
+    - initial support for custom filters
+    - added built in date filters
