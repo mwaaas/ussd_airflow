@@ -7,3 +7,4 @@ sphinx_rtd_theme==0.1.9
 coverage==4.1
 codacy-coverage==1.2.18
 dj-database-url==0.4.1
+freezegun

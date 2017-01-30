@@ -18,8 +18,11 @@ import re
 import json
 import os
 from configure import Configuration
+from datetime import datetime
+
 
 _registered_ussd_handlers = {}
+_registered_filters = {}
 
 
 class MissingAttribute(Exception):
@@ -32,6 +35,11 @@ class InvalidAttribute(Exception):
 
 class DuplicateSessionId(Exception):
     pass
+
+
+def register_filter(func_name, *args, **kwargs):
+    filter_name = func_name.__name__
+    _registered_filters[filter_name] = func_name
 
 
 def ussd_session(session_id):
@@ -224,6 +232,10 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                 configuration_namespaces[self.template_namespace].\
                 configuration_values
 
+        # initialize jinja2 environment
+        self.env = Environment(keep_trailing_newline=True)
+        self.env.filters.update(_registered_filters)
+
     def _get_session_items(self) -> dict:
         return dict(iter(self.ussd_request.session.items()))
 
@@ -241,6 +253,11 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             context.update(self.template_namespace)
         if extra_context is not None:
             context.update(extra_context)
+
+        # add timestamp in the context
+        context.update(
+            dict(now=datetime.now())
+        )
         return context
 
     def _render_text(self, text, context=None, extra=None, encode=None):
@@ -250,7 +267,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         if extra:
             context.update(extra)
 
-        template = Template(text or '', keep_trailing_newline=True)
+        template = self.env.from_string(text or '')
         text = template.render(context)
         return json.dumps(text) if encode is 'json' else text
 
@@ -277,8 +294,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             context = self._get_context(extra_context=extra_context)
             expression = expression.replace("{{", "").replace("}}", "")
             try:
-                env = Environment()
-                expr = env.compile_expression(
+                expr = self.env.compile_expression(
                     expression
                 )
             except TemplateSyntaxError:

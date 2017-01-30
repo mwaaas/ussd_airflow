@@ -1,0 +1,13 @@
+initial_screen: screen_with_date_filters
+
+screen_with_date_filters:
+  type: quit_screen
+  text: >
+    The date today is {{now}}. We are on the {{now|month}} th month and we are
+    on year {{now|year}}. Month in words is {{now|month_name}}. And day
+    in words {{now|day_name}}.
+    And next month {{now|month|add_month(3)|month_name}}
+
+    Testing striping date. After striping this date 2017-01-20 we should get
+    the year, month and day.
+    The day is {{"2017-01-20"|strip("%Y-%m-%d")|day}}
