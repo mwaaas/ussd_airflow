@@ -1,0 +1,7 @@
+# define your screens here as documented here https://django-ussd-airflow.readthedocs.io/en/latest/
+
+initial_screen: ExampleInitialScreen
+
+ExampleInitialScreen:
+  type: quit_screen
+  text: Example Quit Screen. Delete this and define your own customer journey screens.
