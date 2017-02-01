@@ -142,3 +142,8 @@ Version 0.0.2.9
 Feature
     - http screen to support none json response
     - added django command for creating new ussd application
+
+Version 0.0.3
+---------------
+Bug fix
+    - http screen with non json response failing.
