@@ -136,3 +136,9 @@ Version 0.0.2.8
 Feature
     - initial support for custom filters
     - added built in date filters
+
+Version 0.0.2.9
+---------------
+Feature
+    - http screen to support none json response
+    - added django command for creating new ussd application
