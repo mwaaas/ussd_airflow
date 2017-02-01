@@ -58,5 +58,6 @@ end_of_http_example:
   type: quit_screen
   text: >
     Testing response is being saved in session status code is
-    {{http_post_response.status_code}} and content is
-    {{http_post_response.balance}}.
+    {{http_post_response.status_code}} and balance is
+    {{http_post_response.balance}} and full content {{http_post_response.content}}.
+

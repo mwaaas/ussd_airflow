@@ -112,8 +112,15 @@ class HttpScreen(UssdHandlerAbstract):
                 response_content = json.loads(response.content.decode())
             except JSONDecodeError:
                 response_content = response.content.decode()
+
+            if isinstance(response_content, dict):
+                response_to_save.update(
+                    response_content
+                )
+
+            # update content to save the one that has been decoded
             response_to_save.update(
-                response_content
+                {"content": response_content}
             )
 
         # save response in session

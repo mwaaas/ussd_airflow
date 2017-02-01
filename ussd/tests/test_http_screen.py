@@ -37,7 +37,7 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
         self.assertEqual(
             "Testing response is being saved in "
             "session status code is 200 and "
-            "content is 250.\n",
+            "balance is 250 and full content {'balance': 250}.\n",
             ussd_client.send('')
         )
         expected_calls = [
@@ -103,4 +103,12 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
 
         ussd_client = self.ussd_client()
         ussd_client.send('')
+
+        self.assertEqual(
+            "Testing response is being saved in "
+            "session status code is 200 and "
+            "balance is  and full content Balance is 257.\n",
+            ussd_client.send('')
+        )
+
 
