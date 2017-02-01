@@ -1,3 +1,5 @@
+from json import JSONDecodeError
+
 from ussd.core import UssdHandlerAbstract
 from ussd.screens.serializers import NextUssdScreenSerializer
 from rest_framework import serializers
@@ -106,9 +108,12 @@ class HttpScreen(UssdHandlerAbstract):
                             response_to_save.update(
                                 {i[0]: i[1]}
                             )
-
+            try:
+                response_content = json.loads(response.content.decode())
+            except JSONDecodeError:
+                response_content = response.content.decode()
             response_to_save.update(
-                json.loads(response.content.decode())
+                response_content
             )
 
         # save response in session
