@@ -110,3 +110,43 @@ class TestCoreView(UssdTestCase.BaseUssdTestCase):
             response
         )
 
+
+class TestInheritance(UssdTestCase.BaseUssdTestCase):
+
+    def test(self):
+        ussd_client = self.ussd_client(
+            generate_customer_journey=False,
+            extra_payload={
+                "customer_journey_conf": "sample_using_inheritance.yml"
+            }
+        )
+
+        inherited_text = "Enter anything"
+
+        # dial in
+        self.assertEqual(
+            inherited_text,
+            ussd_client.send('')
+        )
+
+        # enter my first name
+        self.assertEqual(
+            inherited_text,
+            ussd_client.send('Francis')
+        )
+
+        # enter second name
+        self.assertEqual(
+            "First input was Francis and second input was Mwangi",
+            ussd_client.send("Mwangi")
+        )
+
+    def testing_valid_customer_journey(self):
+        self._test_ussd_validation(
+            'sample_using_inheritance.yml',
+            True,
+            {}
+        )
+
+    def testing_invalid_customer_journey(self):
+        pass

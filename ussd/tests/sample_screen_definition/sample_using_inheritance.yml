@@ -1,0 +1,16 @@
+initial_screen: screen_one
+
+screen_one:
+  type: input_screen
+  text: Enter anything
+  input_identifier: one
+  next_screen: screen_two
+
+screen_two:
+  inherit: screen_one
+  input_identifier: two
+  next_screen: screen_three
+
+screen_three:
+  type: quit_screen
+  text: First input was {{one}} and second input was {{two}}

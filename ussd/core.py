@@ -64,20 +64,14 @@ def ussd_session(session_id):
     return session
 
 
-def load_variables(file_path, namespace):
+def load_yaml(file_path, namespace):
     file_path = Template(file_path).render(os.environ)
-    variables = dict(
-        Configuration.from_file(os.path.abspath(file_path)).configure()
-    )
+    yaml_dict = Configuration.from_file(
+            os.path.abspath(file_path),
+            configure=False
+        )
     staticconf.DictConfiguration(
-        variables,
-        namespace=namespace,
-        flatten=False)
-
-
-def load_ussd_screen(file_path, namespace):
-    staticconf.YamlConfiguration(
-        os.path.abspath(file_path),
+        yaml_dict,
         namespace=namespace,
         flatten=False)
 
@@ -435,7 +429,7 @@ class UssdView(APIView):
 
         if not self.customer_journey_namespace in \
                 staticconf.config.configuration_namespaces:
-            load_ussd_screen(
+            load_yaml(
                 self.customer_journey_conf,
                 self.customer_journey_namespace
             )
@@ -453,7 +447,7 @@ class UssdView(APIView):
             # check if it has been loaded
             if not namespace in \
                     staticconf.config.configuration_namespaces:
-                load_variables(file_path, namespace)
+                load_yaml(file_path, namespace)
             self.template_namespace = namespace
 
     def finalize_response(self, request, response, *args, **kwargs):

@@ -3,7 +3,7 @@ import requests
 import staticconf
 from django.test import LiveServerTestCase
 from django.urls import reverse
-from ussd.core import UssdView
+from ussd.core import UssdView, load_yaml
 from ussd.tests.sample_screen_definition import path
 
 
@@ -28,11 +28,8 @@ class UssdTestCase(object):
 
             if self.validate_ussd:
                 namespace = self.namespace + str(expected_validation)
-                staticconf.YamlConfiguration(
-                    path + '/' + yaml_to_validate,
-                    namespace=namespace,
-                    flatten=False)
-
+                file_path = path + '/' + yaml_to_validate
+                load_yaml(file_path, namespace)
                 ussd_screens = staticconf.config. \
                     get_namespace(namespace). \
                     get_config_values()
