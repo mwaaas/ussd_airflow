@@ -2,7 +2,7 @@ from json import JSONDecodeError
 
 from ussd.tests import UssdTestCase
 from unittest import mock
-from django.http.response import JsonResponse as Response
+from django.http.response import JsonResponse, HttpResponse
 from django.test.utils import override_settings
 
 
@@ -30,7 +30,7 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
 
     @mock.patch("ussd.screens.http_screen.requests.request")
     def test(self, mock_request):
-        mock_response = Response({"balance": 250})
+        mock_response = JsonResponse({"balance": 250})
         mock_request.return_value = mock_response
         ussd_client = self.ussd_client()
 
@@ -80,7 +80,7 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
     @mock.patch("ussd.screens.http_screen.http_task")
     @mock.patch("ussd.tasks.requests.request")
     def test_async_workflow(self, mock_request, mock_http_task):
-        mock_response = Response({"balance": 257})
+        mock_response = JsonResponse({"balance": 257})
         mock_request.return_value = mock_response
 
         ussd_client = self.ussd_client()
@@ -96,19 +96,11 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
             )
         )
 
-    def test_json_decoding(self):
-        from django.http.response import HttpResponse
-        # expect this response to raise an error
-        response = HttpResponse('Plain text')
-        import json
-        with self.assertRaises(JSONDecodeError):
-            json.loads(response.content.decode())
-        response_content = response.content.decode()
-        try:
-            decoded_text = json.loads(response_content)
-        except JSONDecodeError:
-            decoded_text = response_content
-        self.assertEqual(type(decoded_text), str)
-        response_ = HttpResponse(json.dumps({'data': 'Data'}))
-        json.loads(response_.content.decode())
+    @mock.patch("ussd.screens.http_screen.requests.request")
+    def test_json_decoding(self, mock_request):
+        mock_response = HttpResponse("Balance is 257")
+        mock_request.return_value = mock_response
+
+        ussd_client = self.ussd_client()
+        ussd_client.send('')
 
