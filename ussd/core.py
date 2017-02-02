@@ -318,6 +318,14 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                     return True
         return False
 
+    def get_loop_items(self):
+        loop_items = self.evaluate_jija_expression(
+            self.screen_content["with_items"]
+        ) if self.screen_content.get("with_items") else [0] or [0]
+        return loop_items
+
+
+
 
 class UssdView(APIView):
     """

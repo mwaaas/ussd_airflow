@@ -1,0 +1,21 @@
+initial_screen: screen_one
+
+# missing all attributes
+screen_one:
+  type: update_session_screen
+
+# missing session_update
+screen_two:
+  type: update_session_screen
+  next_screen: screen_three
+  values_to_update:
+    - expression: "{{True}}"
+
+# missing attributes in session update
+screen_three:
+  type: update_session_screen
+  next_screen: screen_one
+  values_to_update:
+    - expression: "{{True}}"
+      a: b
+

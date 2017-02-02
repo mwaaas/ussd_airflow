@@ -27,3 +27,5 @@ class UssdConfig(AppConfig):
             print("loaded screens:", i)
         print("loading filters")
         from ussd.filters import date_filters
+        from ussd.filters import dict_filters
+        from ussd.filters import list_filters

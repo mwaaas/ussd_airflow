@@ -1,0 +1,47 @@
+initial_screen: screen_one
+
+screen_one:
+  type: update_session_screen
+  next_screen: screen_two
+  values_to_update:
+    - expression: "{{phone_number == 200|string}}"
+      key: customer_status
+      value: registered
+    - expression: "{{phone_number == 404|string}}"
+      key: customer_status
+      value: not_registered
+    - key: aged_24
+      value: "{{[]}}"
+    - key: height_54
+      value: "{{[]}}"
+
+screen_two:
+  type: update_session_screen
+  next_screen: show_saved_status
+  with_items:
+    - name: Francis Mwangi
+      age: 24
+      height: 5.4
+    - name: Isaac Karanja
+      age: 22
+      height: 5.4
+    - name: Stephen Gitigi
+      age: 20
+      height: 5.5
+    - name: Wambui
+      age: 24
+      height: 5.4
+  values_to_update:
+    - expression: "{{item.age == 24}}"
+      key: aged_24
+      value: "{{aged_24|append(item)}}"
+    - expression: "{{item.height == 5.4}}"
+      key: "height_54"
+      value: "{{height_54|append(item)}}"
+
+show_saved_status:
+  type: quit_screen
+  text: |
+    The customer status is {{customer_status}}.
+    People aged 24 {{aged_24}}
+    People with height 5.4 {{height_54}}

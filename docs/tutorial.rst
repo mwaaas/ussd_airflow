@@ -73,6 +73,10 @@ Example when defining variable file
 
 .. autoclass:: ussd.screens.router_screen.RouterScreen
 
+7. Update session screen (type -> update_session_screen)
+--------------------------------------------------------
+
+.. autoclass:: ussd.screens.update_session_screen.UpdateSessionScreen
 
 **Once you have created your ussd screens run the following code to validate
 them:**
