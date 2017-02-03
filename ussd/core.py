@@ -282,19 +282,21 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             text_context
         )
 
-    def evaluate_jija_expression(self, expression, extra_context=None):
+    def evaluate_jija_expression(self, expression, extra_context=None,
+                                 lazy_evaluating=False):
+        if not isinstance(expression, str) or \
+                (lazy_evaluating and not self._contains_vars(expression)):
+            return expression
 
-        if isinstance(expression, str):
-            context = self._get_context(extra_context=extra_context)
-            expression = expression.replace("{{", "").replace("}}", "")
-            try:
-                expr = self.env.compile_expression(
-                    expression
-                )
-            except TemplateSyntaxError:
-                return []
-            return expr(context)
-        return expression
+        context = self._get_context(extra_context=extra_context)
+        expression = expression.replace("{{", "").replace("}}", "")
+        try:
+            expr = self.env.compile_expression(
+                expression
+            )
+        except TemplateSyntaxError:
+            return []
+        return expr(context)
 
     @classmethod
     def validate(cls, screen_name: str, ussd_content: dict) -> (bool, dict):
@@ -323,8 +325,6 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             self.screen_content["with_items"]
         ) if self.screen_content.get("with_items") else [0] or [0]
         return loop_items
-
-
 
 
 class UssdView(APIView):
@@ -442,22 +442,6 @@ class UssdView(APIView):
                 self.customer_journey_namespace
             )
 
-        # check if variables exit and have been loaded
-        initial_screen = staticconf.read(
-            'initial_screen',
-            namespace=self.customer_journey_namespace)
-
-        if isinstance(initial_screen, dict) and initial_screen.get('variables'):
-            variable_conf = initial_screen['variables']
-            file_path = variable_conf['file']
-            namespace = variable_conf['namespace']
-
-            # check if it has been loaded
-            if not namespace in \
-                    staticconf.config.configuration_namespaces:
-                load_yaml(file_path, namespace)
-            self.template_namespace = namespace
-
     def finalize_response(self, request, response, *args, **kwargs):
 
         if isinstance(response, UssdRequest):
@@ -496,16 +480,11 @@ class UssdView(APIView):
         return ussd_response
 
     def run_handlers(self, ussd_request):
-        if ussd_request.session['_ussd_state']['next_screen']:
-            handler = ussd_request.session['_ussd_state']['next_screen']
-        else:
-            handler = staticconf.read(
-                'initial_screen', namespace=self.customer_journey_namespace)
-            if isinstance(handler, dict):
-                # set default language from namespace
-                if 'default_language' in handler:
-                    ussd_request.default_language = handler.get('default_language', ussd_request.default_language)
-                handler = handler["screen"]
+
+        handler = ussd_request.session['_ussd_state']['next_screen'] \
+            if ussd_request.session.get('_ussd_state', {}).get('next_screen') \
+            else "initial_screen"
+
         ussd_response = (ussd_request, handler)
 
         # Handle any forwarded Requests; loop until a Response is
@@ -517,11 +496,18 @@ class UssdView(APIView):
                 handler,
                 namespace=self.customer_journey_namespace)
 
-            ussd_response = _registered_ussd_handlers[screen_content['type']](
+            screen_type = 'initial_screen' \
+                if handler == "initial_screen" and \
+                   isinstance(screen_content, str) \
+                else screen_content['type']
+
+            ussd_response = _registered_ussd_handlers[screen_type](
                 ussd_request,
                 handler,
                 screen_content,
-                template_namespace=self.template_namespace,
+                template_namespace=ussd_request.session.get(
+                    'template_namespace', None
+                ),
                 logger=self.logger
             ).handle()
 
@@ -548,10 +534,8 @@ class UssdView(APIView):
             )
         for screen_name, screen_content in ussd_content.items():
             # all screens should have type attribute
-            if screen_name == "initial_screen":
-                # confirm the next screen is in the screen content
-                if isinstance(screen_content, dict):
-                    screen_content = screen_content.get('screen')
+            if screen_name == "initial_screen" and \
+                    isinstance(screen_content, str):
                 if not screen_content in ussd_content.keys():
                     is_valid = False
                     errors.update(

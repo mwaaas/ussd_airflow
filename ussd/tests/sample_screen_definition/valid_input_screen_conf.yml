@@ -1,5 +1,6 @@
 initial_screen:
-  screen: enter_height
+  type: initial_screen
+  next_screen: enter_height
   default_language: en
 
 enter_height:

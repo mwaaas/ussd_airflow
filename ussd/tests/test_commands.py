@@ -24,7 +24,8 @@ class ValidateCustomerJourneyConfig(TestCase):
     def testing_invalid_ussd_journey(self):
         out = StringIO()
         file_name = "{0}/invalid_quit_screen_conf.yml".format(path)
-        self.assertRaises(CommandError, call_command, 'validate_ussd_journey', file_name, stdout=out)
+        self.assertRaises(CommandError, call_command, 'validate_ussd_journey',
+                          file_name, stdout=out)
 
     def test_called_with_multiple_files(self):
         out = StringIO()

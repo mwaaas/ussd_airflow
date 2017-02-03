@@ -1,4 +1,5 @@
 from ussd.tests import UssdTestCase
+from ussd.core import ussd_session
 
 
 class TestScreensUsingVariable(UssdTestCase.BaseUssdTestCase):
@@ -11,6 +12,22 @@ class TestScreensUsingVariable(UssdTestCase.BaseUssdTestCase):
                 "customer_journey_conf": "sample_using_variables.yml"
             }
         )
+
+    def test_initial_variables_are_created(self):
+        ussd_client = self.get_ussd_client()
+
+        # dial in
+        ussd_client.send('')
+
+        session = ussd_session(ussd_client.session_id)
+
+        # check ussd variables were created
+        expected_variables = {"name": "mwas", "hobbies": [],
+                              "environment": "sample_variable_two"}
+
+        for key, value in expected_variables.items():
+            self.assertTrue(key in session)
+            self.assertEqual(session[key], value)
 
     def test_using_variable(self):
         client = self.get_ussd_client()

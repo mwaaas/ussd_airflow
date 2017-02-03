@@ -1,4 +1,4 @@
-initial_screen: http_invalid_screen
+initial_screen: missing_screen
 
 # missing all madatory fields
 http_invalid_screen:

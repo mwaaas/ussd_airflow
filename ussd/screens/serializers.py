@@ -52,6 +52,7 @@ class UssdTextSerializer(serializers.Serializer):
 class UssdContentBaseSerializer(UssdBaseSerializer, UssdTextSerializer):
     pass
 
+
 class NextUssdScreenSerializer(serializers.Serializer):
     next_screen = serializers.CharField(max_length=50)
 

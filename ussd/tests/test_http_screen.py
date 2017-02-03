@@ -13,6 +13,7 @@ from django.test.utils import override_settings
     )
 class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
     validation_error_message = dict(
+        screen_name="Screen not available",
         http_invalid_screen=dict(
             next_screen=['This field is required.'],
             session_key=['This field is required.'],

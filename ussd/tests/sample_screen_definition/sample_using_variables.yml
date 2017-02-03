@@ -1,8 +1,14 @@
 initial_screen:
-  screen: screen_one
+  next_screen: screen_one
+  type: initial_screen
   variables:
     file: ./ussd/tests/sample_screen_definition/{{ENVIRONMENT}}.yml
     namespace: variable_testing
+  create_ussd_variables:
+    name: "mwas"
+    hobbies: []
+    environment: "{{ENVIRONMENT}}"
+
 
 screen_one:
   type: menu_screen
