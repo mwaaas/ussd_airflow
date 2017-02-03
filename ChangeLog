@@ -159,3 +159,10 @@ Version 0.0.3.2
 Feature
     - add screen that can save something in the session.
 
+Version 0.0.3.3
+---------------
+
+Feature
+    - refactored initial_screen to be able to
+      support session variable assignment
+
