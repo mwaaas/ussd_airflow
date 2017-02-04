@@ -1,5 +1,4 @@
 from ussd.core import UssdHandlerAbstract, UssdResponse
-import datetime
 from ussd.screens.serializers import UssdContentBaseSerializer, \
     UssdTextSerializer, NextUssdScreenSerializer
 from django.utils.encoding import force_text
@@ -53,15 +52,7 @@ class InputScreen(UssdHandlerAbstract):
 
     def handle(self):
         if not self.ussd_request.input:
-            response_text = self.get_text()
-            ussd_screen = dict(
-                name=self.handler,
-                start=datetime.datetime.now(),
-                screen_text=response_text
-            )
-            self.ussd_request.session['steps'].append(ussd_screen)
-
-            return UssdResponse(response_text)
+            return UssdResponse(self.get_text())
         else:
             # validate input
             validation_rules = self.screen_content.get("validators", {})
@@ -92,8 +83,4 @@ class InputScreen(UssdHandlerAbstract):
             self.ussd_request.session[session_key] = \
                 self.ussd_request.input
 
-            self.ussd_request.session['steps'][-1].update(
-                end=datetime.datetime.now(),
-                selection=self.ussd_request.input
-            )
             return self.ussd_request.forward(next_handler)

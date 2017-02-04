@@ -460,7 +460,7 @@ class UssdView(APIView):
         if '_ussd_state' not in ussd_request.session:
             ussd_request.input = ''
             ussd_request.session['_ussd_state'] = {'next_screen': ''}
-            ussd_request.session['steps'] = []
+            ussd_request.session['ussd_interaction'] = []
             ussd_request.session['posted'] = False
             ussd_request.session['submit_data'] = {}
             ussd_request.session['session_id'] = ussd_request.session_id
@@ -486,6 +486,11 @@ class UssdView(APIView):
             else "initial_screen"
 
         ussd_response = (ussd_request, handler)
+
+        if handler != "initial_screen":
+            ussd_request.session["ussd_interaction"][-1].update(
+                {"input": ussd_request.input}
+            )
 
         # Handle any forwarded Requests; loop until a Response is
         # eventually returned.
@@ -513,7 +518,13 @@ class UssdView(APIView):
 
         ussd_request.session['_ussd_state']['next_screen'] = handler
 
-
+        ussd_request.session['ussd_interaction'].append(
+            {
+                "screen_name": handler,
+                "screen_text": str(ussd_response),
+                "input": ussd_request.input
+            }
+        )
         # Attach session to outgoing response
         ussd_response.session = ussd_request.session
 

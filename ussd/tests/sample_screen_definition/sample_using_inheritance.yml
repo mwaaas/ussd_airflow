@@ -12,5 +12,21 @@ screen_two:
   next_screen: screen_three
 
 screen_three:
-  type: quit_screen
+  type: menu_screen
   text: First input was {{one}} and second input was {{two}}
+  options:
+    - text: Continue
+      next_screen: screen_four
+
+screen_four:
+  type: menu_screen
+  text: Press 1 to exit or 2 to go back
+  options:
+    - text: Exit
+      next_screen: screen_five
+    - text: Back
+      next_screen: screen_three
+
+screen_five:
+  type: quit_screen
+  text: This is the last screen

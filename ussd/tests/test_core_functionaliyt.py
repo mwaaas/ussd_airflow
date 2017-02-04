@@ -1,6 +1,7 @@
 from django.test import TestCase
 from ussd.core import _registered_ussd_handlers, \
-    UssdHandlerAbstract, MissingAttribute, InvalidAttribute, UssdRequest
+    UssdHandlerAbstract, MissingAttribute, \
+    InvalidAttribute, UssdRequest, ussd_session
 from rest_framework import serializers
 from ussd.tests import UssdTestCase
 
@@ -113,13 +114,16 @@ class TestCoreView(UssdTestCase.BaseUssdTestCase):
 
 class TestInheritance(UssdTestCase.BaseUssdTestCase):
 
-    def test(self):
-        ussd_client = self.ussd_client(
+    def get_client(self):
+        return self.ussd_client(
             generate_customer_journey=False,
             extra_payload={
                 "customer_journey_conf": "sample_using_inheritance.yml"
             }
         )
+
+    def test(self):
+        ussd_client = self.get_client()
 
         inherited_text = "Enter anything"
 
@@ -137,8 +141,88 @@ class TestInheritance(UssdTestCase.BaseUssdTestCase):
 
         # enter second name
         self.assertEqual(
-            "First input was Francis and second input was Mwangi",
+            "First input was Francis and second input was Mwangi\n"
+            "1. Continue\n",
             ussd_client.send("Mwangi")
+        )
+
+    def test_steps_recording(self):
+        ussd_client = self.get_client()
+
+        # dial in
+        ussd_client.send('')
+
+        # enter first name
+        ussd_client.send('Francis')
+
+        # enter second name
+        ussd_client.send('Mwangi')
+
+        # enter 1 to continue
+        ussd_client.send('1')
+
+        # press two to go back
+        ussd_client.send('2')
+
+        # enter 1 to continue
+        ussd_client.send('1')
+
+        # enter 1 to exit
+        self.assertEqual(
+            "This is the last screen",
+            ussd_client.send('1')
+        )
+
+        expected_screen_interaction = [
+            {
+                "screen_name": "screen_one",
+                "screen_text": "Enter anything",
+                "input": "Francis"
+            },
+            {
+                "screen_name": "screen_two",
+                "screen_text": "Enter anything",
+                "input": "Mwangi"
+            },
+            {
+                "screen_name": "screen_three",
+                "screen_text": "First input was Francis and "
+                               "second input was Mwangi\n1. Continue\n",
+                "input": "1"
+            },
+            {
+                "screen_name": "screen_four",
+                "screen_text": "Press 1 to exit or 2 to go back\n"
+                               "1. Exit\n"
+                               "2. Back\n",
+                "input": "2"
+            },
+            {
+                "screen_name": "screen_three",
+                "screen_text": "First input was Francis and "
+                               "second input was Mwangi\n1. Continue\n",
+                "input": "1"
+            },
+            {
+                "screen_name": "screen_four",
+                "screen_text": "Press 1 to exit or 2 to go back\n"
+                               "1. Exit\n"
+                               "2. Back\n",
+                "input": "1"
+            },
+            {
+                "screen_name": "screen_five",
+                "screen_text": "This is the last screen",
+                "input": ""
+            }
+
+        ]
+
+        session = ussd_session(ussd_client.session_id)
+
+        self.assertEqual(
+            session['ussd_interaction'],
+            expected_screen_interaction
         )
 
     def testing_valid_customer_journey(self):
