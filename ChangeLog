@@ -166,3 +166,9 @@ Feature
     - refactored initial_screen to be able to
       support session variable assignment
 
+Version 0.0.3.4
+---------------
+
+Feature
+    - added recording screen interactions in the session
+
