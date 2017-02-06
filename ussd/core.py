@@ -442,6 +442,22 @@ class UssdView(APIView):
                 self.customer_journey_namespace
             )
 
+        # confirm variable template has been loaded
+        # get initial screen
+
+        screen_content = staticconf.read(
+            "initial_screen",
+            namespace=self.customer_journey_namespace)
+
+        if isinstance(screen_content, dict) and \
+                screen_content.get('variables'):
+            variable_conf = screen_content['variables']
+            file_path = variable_conf['file']
+            namespace = variable_conf['namespace']
+            if not namespace in \
+                    staticconf.config.configuration_namespaces:
+                load_yaml(file_path, namespace)
+
     def finalize_response(self, request, response, *args, **kwargs):
 
         if isinstance(response, UssdRequest):
