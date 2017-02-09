@@ -1,6 +1,11 @@
 Ussd Airflow Changelog
 ======================
 
+Version 0.0.3.7
+---------------
+Bug fix
+    - error as a result of copying unsave variable
+
 Version 0.0.3.6
 ---------------
 Bug fix
