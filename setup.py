@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-__version__ = '0.0.3.5'
+__version__ = '0.0.3.6'
 
 
 def _strip_comments(l):
