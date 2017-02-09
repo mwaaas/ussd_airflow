@@ -143,7 +143,7 @@ class UssdRequest(object):
         return new_request, handler_name
 
     def all_variables(self):
-        all_variables = deepcopy(self.__dict__)
+        all_variables = copy(self.__dict__)
 
         # delete session if it exist
         all_variables.pop("session", None)
