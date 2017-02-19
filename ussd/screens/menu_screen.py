@@ -175,23 +175,25 @@ class MenuScreen(UssdHandlerAbstract):
             else self.get_text(self.screen_content["error_message"])
 
     def handle(self):
-        # get items
+
+        ussd_text = self._add_end_line(self.get_text()) + \
+                    self.display_options(self.list_options) + \
+                    self.display_options(
+                        self.menu_options,
+                        start_index=len(self.list_options) + 1
+                    )
+
         if not self.ussd_request.input:
-
-            ussd_text = self._add_end_line(self.get_text()) + \
-                        self.display_options(self.list_options) + \
-                        self.display_options(
-                            self.menu_options,
-                            start_index=len(self.list_options) + 1
-                        )
-
             return UssdResponse(ussd_text)
 
         else:
             next_screen = self.evaluate_input()
             if next_screen:
                 return self.ussd_request.forward(next_screen)
-            return UssdResponse(self.error_message)
+            return UssdResponse(
+                self._add_end_line(
+                    self.get_text(self.error_message)) + ussd_text
+            )
 
     def evaluate_input(self):
         """

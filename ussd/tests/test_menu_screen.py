@@ -132,14 +132,16 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
 
         # select invalid option
         self.assertEqual(ussd_client.send('9'),
-                         "You have selected invalid option try again\n"
+                         "You have selected invalid option try again\n" +
+                         self.choose_meal
                          )
 
         # select the correct option 2 for drinks
         self.assertEqual(ussd_client.send('3'), self.type_of_drinks)
 
         # select invalid back option
-        self.assertEqual(ussd_client.send('*'), self.error_message)
+        self.assertEqual(ussd_client.send('*'),
+                         self.error_message + self.type_of_drinks)
 
         # select the correct back option
         self.assertEqual(ussd_client.send('0'), self.choose_meal)
@@ -207,7 +209,7 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
 
         # choose invalid option for vegetables
         self.assertEqual(
-            self.error_message,
+            self.error_message + self.types_of_vegetables,
             ussd_client.send('9')
         )
 
