@@ -31,6 +31,11 @@ enter_age:
 
     input_identifier: age
     next_screen: show_information
+    options:
+      - text:
+          en: back
+          sw: rudi
+        next_screen: enter_height
     validators:
         - regex: ^[0-9]{1,7}$
           text:

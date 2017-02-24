@@ -40,7 +40,6 @@ class ItemsSerializer(UssdTextSerializer, NextUssdScreenSerializer):
     def validate_with_dict(self, value):
         return self.validate_with_items(value, 'with_items')
 
-
 class MenuScreenSerializer(UssdContentBaseSerializer):
     """
     - text:
@@ -160,6 +159,8 @@ class MenuScreen(UssdHandlerAbstract):
 
         - option and items are mutual exclusive.
 
+    Example:
+        .. literalinclude:: .././ussd/tests/sample_screen_definition/valid_menu_screen_conf.yml
     """
     screen_type = "menu_screen"
     serializer = MenuScreenSerializer
@@ -174,26 +175,23 @@ class MenuScreen(UssdHandlerAbstract):
             if not self.screen_content.get('error_message') \
             else self.get_text(self.screen_content["error_message"])
 
-    def handle(self):
-
-        ussd_text = self._add_end_line(self.get_text()) + \
+        self.ussd_text = self._add_end_line(self.get_text()) + \
                     self.display_options(self.list_options) + \
                     self.display_options(
                         self.menu_options,
                         start_index=len(self.list_options) + 1
                     )
 
+    def handle(self):
+
         if not self.ussd_request.input:
-            return UssdResponse(ussd_text)
+            return UssdResponse(self.ussd_text)
 
         else:
             next_screen = self.evaluate_input()
             if next_screen:
                 return self.ussd_request.forward(next_screen)
-            return UssdResponse(
-                self._add_end_line(
-                    self.get_text(self.error_message)) + ussd_text
-            )
+            return self.handle_invalid_input()
 
     def evaluate_input(self):
         """
@@ -289,6 +287,12 @@ class MenuScreen(UssdHandlerAbstract):
                 else customized_option
 
         return text + customized_option
+
+    def handle_invalid_input(self):
+        return UssdResponse(
+                self._add_end_line(
+                    self.get_text(self.error_message)) + self.ussd_text
+            )
 
     def _with_items(self, text, value, items):
         list_items = []

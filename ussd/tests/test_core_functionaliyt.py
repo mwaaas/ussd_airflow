@@ -107,7 +107,7 @@ class TestCoreView(UssdTestCase.BaseUssdTestCase):
         response = ussd_client.send('')
 
         self.assertEqual(
-            "Enter your name",
+            "Enter your name\n",
             response
         )
 
@@ -125,7 +125,7 @@ class TestInheritance(UssdTestCase.BaseUssdTestCase):
     def test(self):
         ussd_client = self.get_client()
 
-        inherited_text = "Enter anything"
+        inherited_text = "Enter anything\n"
 
         # dial in
         self.assertEqual(
@@ -176,12 +176,12 @@ class TestInheritance(UssdTestCase.BaseUssdTestCase):
         expected_screen_interaction = [
             {
                 "screen_name": "screen_one",
-                "screen_text": "Enter anything",
+                "screen_text": "Enter anything\n",
                 "input": "Francis"
             },
             {
                 "screen_name": "screen_two",
-                "screen_text": "Enter anything",
+                "screen_text": "Enter anything\n",
                 "input": "Mwangi"
             },
             {

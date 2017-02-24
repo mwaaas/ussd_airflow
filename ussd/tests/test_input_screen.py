@@ -1,4 +1,5 @@
 from ussd.tests import UssdTestCase
+from ussd.core import ussd_session
 
 
 class TestInputHandler(UssdTestCase.BaseUssdTestCase):
@@ -13,6 +14,7 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
             enter_age={
                 "input_identifier": ['This field is required.'],
                 "next_screen": ['thank_you_screen is missing in ussd journey'],
+                "options": ['Expected a list of items but got type "bool".']
             },
             show_information={
                 "type": ['Invalid screen type not supported']
@@ -25,30 +27,33 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
     def test_showing_screen_content(self):
         ussd_client = self.ussd_client()
 
-        # dial in
-        response = ussd_client.send('')
+        self.assertEqual(
+            "Enter your height\n",
+            ussd_client.send('')  # dial in
+        )
+
+        self.assertEqual(
+            "Enter your age\n1. back\n",
+            ussd_client.send('5')  # enter height
+        )
+
+        # confirm height entered is 5 before going back
+        self.assertEqual(
+            ussd_session(ussd_client.session_id)["height"],
+            '5'
+        )
 
         self.assertEqual(
             "Enter your height\n",
-            response
+            ussd_client.send('1')  # enter one to go back
         )
 
-        # enter height
-        response = ussd_client.send('6')
-
-        self.assertEqual(
-            "Enter your age\n",
-            response
-        )
-
-        # enter age
-
-        response = ussd_client.send('24')
+        ussd_client.send('6')  # enter height
 
         self.assertEqual(
             "Your age is 24 and your height is 6.\n"
             "Enter anything to go back to the first screen\n",
-            response
+            ussd_client.send('24') # enter age
         )
 
     def test_multilanguage_support(self):
@@ -67,7 +72,7 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
         response = ussd_client.send('7')
 
         self.assertEqual(
-            "Weka miaka yako\n",
+            "Weka miaka yako\n1. rudi\n",
             response
         )
 
@@ -100,7 +105,7 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
         response = ussd_client.send('6')
 
         self.assertEqual(
-            "Enter your age\n",
+            "Enter your age\n1. back\n",
             response
         )
 

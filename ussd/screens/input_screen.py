@@ -1,9 +1,10 @@
 from ussd.core import UssdHandlerAbstract, UssdResponse
 from ussd.screens.serializers import UssdContentBaseSerializer, \
-    UssdTextSerializer, NextUssdScreenSerializer
+    UssdTextSerializer, NextUssdScreenSerializer, MenuOptionSerializer
 from django.utils.encoding import force_text
 import re
 from rest_framework import serializers
+from ussd.screens.menu_screen import MenuScreen
 
 
 class InputValidatorSerializer(UssdTextSerializer):
@@ -20,9 +21,13 @@ class InputSerializer(UssdContentBaseSerializer, NextUssdScreenSerializer):
         child=InputValidatorSerializer(),
         required=False
     )
+    options = serializers.ListField(
+        child=MenuOptionSerializer(),
+        required=False
+    )
 
 
-class InputScreen(UssdHandlerAbstract):
+class InputScreen(MenuScreen):
     """
 
     This screen prompts the user to enter an input
@@ -42,6 +47,19 @@ class InputScreen(UssdHandlerAbstract):
              will be called ussd request object
               text: This the message thats going to be displayed if expression
               returns False
+        - options (This field is optional):
+            This is a list of options to display to the user
+            each option is a key value pair of option text to display
+            and next_screen to redirect if option is selected.
+            Example of option:
+
+            .. code-block:: yaml
+
+                   options:
+                    - text: option one
+                      next_screen: screen_one
+                    - text: option two
+                      next_screen: screen_two
 
     Example:
         .. literalinclude:: .././ussd/tests/sample_screen_definition/valid_input_screen_conf.yml
@@ -50,37 +68,34 @@ class InputScreen(UssdHandlerAbstract):
     screen_type = "input_screen"
     serializer = InputSerializer
 
-    def handle(self):
-        if not self.ussd_request.input:
-            return UssdResponse(self.get_text())
-        else:
-            # validate input
-            validation_rules = self.screen_content.get("validators", {})
-            for validation_rule in validation_rules:
+    def handle_invalid_input(self):
+        # validate input
+        validation_rules = self.screen_content.get("validators", {})
+        for validation_rule in validation_rules:
 
-                if 'regex' in validation_rule:
-                    regex_expression = validation_rule['regex']
-                    regex = re.compile(regex_expression)
-                    is_valid = bool(
-                        regex.search(
-                            force_text(self.ussd_request.input)
-                        ))
-                else:
-                    is_valid = self.evaluate_jija_expression(
-                        validation_rule['expression']
+            if 'regex' in validation_rule:
+                regex_expression = validation_rule['regex']
+                regex = re.compile(regex_expression)
+                is_valid = bool(
+                    regex.search(
+                        force_text(self.ussd_request.input)
+                    ))
+            else:
+                is_valid = self.evaluate_jija_expression(
+                    validation_rule['expression']
+                )
+
+            # show error message if validation failed
+            if not is_valid:
+                return UssdResponse(
+                    self.get_text(
+                        validation_rule['text']
                     )
+                )
 
-                # show error message if validation failed
-                if not is_valid:
-                    return UssdResponse(
-                        self.get_text(
-                            validation_rule['text']
-                        )
-                    )
+        session_key = self.screen_content['input_identifier']
+        next_handler = self.screen_content['next_screen']
+        self.ussd_request.session[session_key] = \
+            self.ussd_request.input
 
-            session_key = self.screen_content['input_identifier']
-            next_handler = self.screen_content['next_screen']
-            self.ussd_request.session[session_key] = \
-                self.ussd_request.input
-
-            return self.ussd_request.forward(next_handler)
+        return self.ussd_request.forward(next_handler)
