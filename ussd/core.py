@@ -230,6 +230,19 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         self.env = Environment(keep_trailing_newline=True)
         self.env.filters.update(_registered_filters)
 
+    def handle(self):
+        if not self.ussd_request.input:
+            ussd_response = self.show_ussd_content()
+            return ussd_response if isinstance(ussd_response, UssdResponse) \
+                else UssdResponse(str(ussd_response))
+        return self.handle_ussd_input(self.ussd_request.input)
+
+    def show_ussd_content(self):
+        raise NotImplementedError
+
+    def handle_ussd_input(self, ussd_input):
+        raise NotImplementedError
+
     def _get_session_items(self) -> dict:
         return dict(iter(self.ussd_request.session.items()))
 
@@ -301,10 +314,11 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     @classmethod
     def validate(cls, screen_name: str, ussd_content: dict) -> (bool, dict):
         screen_content = ussd_content[screen_name]
-
+        # adding screen name in context might be needed by validator
+        ussd_content['screen_name'] = screen_name
         validation = cls.serializer(data=screen_content,
                                      context=ussd_content)
-
+        del ussd_content['screen_name']
         if validation.is_valid():
             return True, {}
         return False, validation.errors
@@ -462,7 +476,11 @@ class UssdView(APIView):
 
         if isinstance(response, UssdRequest):
             self.logger = get_logger(__name__).bind(**response.all_variables())
-            ussd_response = self.ussd_dispatcher(response)
+            try:
+                ussd_response = self.ussd_dispatcher(response)
+            except Exception as e:
+                if settings.DEBUG:
+                    ussd_response = UssdResponse(str(e))
             return self.ussd_response_handler(ussd_response)
         return super(UssdView, self).finalize_response(
             request, response, args, kwargs)

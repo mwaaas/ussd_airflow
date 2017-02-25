@@ -18,7 +18,7 @@ class UssdBaseSerializer(serializers.Serializer):
         if value not in _registered_ussd_handlers.keys():
             raise serializers.ValidationError("Invalid screen "
                                               "type not supported")
-        return value in _registered_ussd_handlers.keys()
+        return value
 
 
 class UssdTextField(serializers.DictField):

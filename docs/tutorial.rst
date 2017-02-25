@@ -78,8 +78,14 @@ Example when defining variable file
 
 .. autoclass:: ussd.screens.update_session_screen.UpdateSessionScreen
 
-**Once you have created your ussd screens run the following code to validate
-them:**
+8. Custom screen (type -> custom_screen)
+----------------------------------------
+
+.. autoclass:: ussd.screens.custom_screen.CustomScreen
+
+
+***Once you have created your ussd screens run the following code to validate
+them:***
 
    .. code-block:: text
 

@@ -1,0 +1,25 @@
+initial_screen: custom_screen_1
+
+# missing screen_obj
+custom_screen_0:
+  type: custom_screen
+
+# invalid screen obj
+custom_screen_1:
+  type: custom_screen
+  screen_obj: ussd.tests.test_custom_screen.InvalidCustomHandler
+
+# invalid screen obj import path
+custom_screen_2:
+  type: custom_screen
+  screen_obj: ussd.tests.test_custom_screen.SampleCustomHandler3
+
+# doesn't have all fields in the serializer
+custom_screen_3:
+  type: custom_screen
+  screen_obj: ussd.tests.test_custom_screen.SampleCustomHandlerWithSerializer
+  random_field: random_field
+
+quit:
+  type: quit_screen
+  text: Your custom screen has modified your input to {{var1}}

@@ -1,0 +1,16 @@
+initial_screen: custom_screen_1
+
+custom_screen_1:
+  type: custom_screen
+  screen_obj: ussd.tests.test_custom_screen.SampleCustomHandler1
+
+
+custom_screen_2:
+  type: custom_screen
+  screen_obj: ussd.tests.test_custom_screen.SampleCustomHandlerWithSerializer
+  next_screen: quit
+  input_identifier: var1
+
+quit:
+  type: quit_screen
+  text: Your custom screen has modified your input to {{var1}}
