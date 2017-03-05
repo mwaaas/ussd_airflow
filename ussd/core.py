@@ -522,8 +522,18 @@ class UssdView(APIView):
         ussd_response = (ussd_request, handler)
 
         if handler != "initial_screen":
+            # get start time
+            start_time = ussd_request.session["ussd_interaction"][-1][
+                "start_time"]
+            end_time = datetime.now()
+            # Report in milliseconds
+            duration = (end_time - start_time).total_seconds() * 1000
             ussd_request.session["ussd_interaction"][-1].update(
-                {"input": ussd_request.input}
+                {
+                    "input": ussd_request.input,
+                    "end_time": end_time,
+                    "duration": duration
+                }
             )
 
         # Handle any forwarded Requests; loop until a Response is
@@ -556,7 +566,8 @@ class UssdView(APIView):
             {
                 "screen_name": handler,
                 "screen_text": str(ussd_response),
-                "input": ussd_request.input
+                "input": ussd_request.input,
+                "start_time": datetime.now()
             }
         )
         # Attach session to outgoing response
