@@ -1,6 +1,12 @@
 Ussd Airflow Changelog
 ======================
 
+Version 0.0.3.8
+---------------
+Feature
+    - adding custom handler support
+    - adding pagination in menu screen still experimental
+
 Version 0.0.3.7
 ---------------
 Bug fix
