@@ -4,6 +4,8 @@ from ussd.core import _registered_ussd_handlers, \
     InvalidAttribute, UssdRequest, ussd_session
 from rest_framework import serializers
 from ussd.tests import UssdTestCase
+from freezegun import freeze_time
+from datetime import datetime
 
 
 class SampleSerializer(serializers.Serializer):
@@ -132,6 +134,7 @@ class TestInheritance(UssdTestCase.BaseUssdTestCase):
             ussd_client.send("Mwangi")
         )
 
+    @freeze_time(datetime.now())
     def test_steps_recording(self):
         ussd_client = self.get_client()
 
@@ -159,47 +162,67 @@ class TestInheritance(UssdTestCase.BaseUssdTestCase):
             ussd_client.send('1')
         )
 
+        now = datetime.now()
         expected_screen_interaction = [
             {
                 "screen_name": "screen_one",
                 "screen_text": "Enter anything\n",
-                "input": "Francis"
+                "input": "Francis",
+                "start_time": now,
+                "end_time": now,
+                "duration": 0.0
             },
             {
                 "screen_name": "screen_two",
                 "screen_text": "Enter anything\n",
-                "input": "Mwangi"
+                "input": "Mwangi",
+                "start_time": now,
+                "end_time": now,
+                "duration": 0.0
             },
             {
                 "screen_name": "screen_three",
                 "screen_text": "First input was Francis and "
                                "second input was Mwangi\n1. Continue\n",
-                "input": "1"
+                "input": "1",
+                "start_time": now,
+                "end_time": now,
+                "duration": 0.0
             },
             {
                 "screen_name": "screen_four",
                 "screen_text": "Press 1 to exit or 2 to go back\n"
                                "1. Exit\n"
                                "2. Back\n",
-                "input": "2"
+                "input": "2",
+                "start_time": now,
+                "end_time": now,
+                "duration": 0.0
             },
             {
                 "screen_name": "screen_three",
                 "screen_text": "First input was Francis and "
                                "second input was Mwangi\n1. Continue\n",
-                "input": "1"
+                "input": "1",
+                "start_time": now,
+                "end_time": now,
+                "duration": 0.0
             },
             {
                 "screen_name": "screen_four",
                 "screen_text": "Press 1 to exit or 2 to go back\n"
                                "1. Exit\n"
                                "2. Back\n",
-                "input": "1"
+                "input": "1",
+                "start_time": now,
+                "end_time": now,
+                "duration": 0.0
             },
             {
                 "screen_name": "screen_five",
                 "screen_text": "This is the last screen",
-                "input": ""
+                "input": "",
+                "start_time": now
             }
 
         ]

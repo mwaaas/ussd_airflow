@@ -19,6 +19,7 @@ import json
 import os
 from configure import Configuration
 from datetime import datetime
+from ussd import defaults
 
 
 _registered_ussd_handlers = {}
@@ -209,7 +210,8 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
     def __init__(self, ussd_request: UssdRequest,
                  handler: str, screen_content: dict,
-                 template_namespace=None, logger=None):
+                 initial_screen: dict, template_namespace=None,
+                 logger=None):
         self.ussd_request = ussd_request
         self.handler = handler
         self.screen_content = screen_content
@@ -220,6 +222,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         self.logger = logger or get_logger(__name__).bind(
             **ussd_request.all_variables())
         self.template_namespace = template_namespace
+        self.initial_screen = initial_screen
 
         if template_namespace is not None:
             self.template_namespace = staticconf.config.\
@@ -237,7 +240,11 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                 else UssdResponse(str(ussd_response))
         return self.handle_ussd_input(self.ussd_request.input)
 
-    def show_ussd_content(self):
+    def get_text_limit(self):
+        return self.initial_screen.get("ussd_text_limit",
+                                       defaults.ussd_text_limit)
+
+    def show_ussd_content(self, **kwargs):
         raise NotImplementedError
 
     def handle_ussd_input(self, ussd_input):
@@ -459,18 +466,22 @@ class UssdView(APIView):
         # confirm variable template has been loaded
         # get initial screen
 
-        screen_content = staticconf.read(
+        initial_screen = staticconf.read(
             "initial_screen",
             namespace=self.customer_journey_namespace)
 
-        if isinstance(screen_content, dict) and \
-                screen_content.get('variables'):
-            variable_conf = screen_content['variables']
+        if isinstance(initial_screen, dict) and \
+                initial_screen.get('variables'):
+            variable_conf = initial_screen['variables']
             file_path = variable_conf['file']
             namespace = variable_conf['namespace']
             if not namespace in \
                     staticconf.config.configuration_namespaces:
                 load_yaml(file_path, namespace)
+
+        self.initial_screen = initial_screen \
+            if isinstance(initial_screen, dict) \
+            else {"initial_screen": initial_screen}
 
     def finalize_response(self, request, response, *args, **kwargs):
 
@@ -519,11 +530,22 @@ class UssdView(APIView):
             if ussd_request.session.get('_ussd_state', {}).get('next_screen') \
             else "initial_screen"
 
+
         ussd_response = (ussd_request, handler)
 
         if handler != "initial_screen":
+            # get start time
+            start_time = ussd_request.session["ussd_interaction"][-1][
+                "start_time"]
+            end_time = datetime.now()
+            # Report in milliseconds
+            duration = (end_time - start_time).total_seconds() * 1000
             ussd_request.session["ussd_interaction"][-1].update(
-                {"input": ussd_request.input}
+                {
+                    "input": ussd_request.input,
+                    "end_time": end_time,
+                    "duration": duration
+                }
             )
 
         # Handle any forwarded Requests; loop until a Response is
@@ -547,6 +569,7 @@ class UssdView(APIView):
                 template_namespace=ussd_request.session.get(
                     'template_namespace', None
                 ),
+                initial_screen=self.initial_screen,
                 logger=self.logger
             ).handle()
 
@@ -556,7 +579,8 @@ class UssdView(APIView):
             {
                 "screen_name": handler,
                 "screen_text": str(ussd_response),
-                "input": ussd_request.input
+                "input": ussd_request.input,
+                "start_time": datetime.now()
             }
         )
         # Attach session to outgoing response

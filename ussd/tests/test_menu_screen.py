@@ -11,14 +11,15 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
                   "1. food\n" \
                   "2. fruits\n" \
                   "3. drinks\n" \
-                  "4. vegetables\n"
+                  "4. vegetables\n" \
+                  "5. test pagination\n"
 
     types_of_food = "Choose your favourite food\n" \
                     "1. rice\n" \
                     "2. back\n"
 
     types_of_fruit = "No fruits available choose * to go back\n" \
-                     "*back\n"
+                     "*. back\n"
 
     rice_chosen = "Your rice will be delivered shortly. " \
                   "Choose 1 to go back\n1. back\n"
@@ -33,7 +34,7 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
                           "2. Vege Carrot\n" \
                           "3. Vege Cabbage\n"
 
-    choose_quantity = "Choose vegetable quantity\n" \
+    choose_quantity = "Choose vegetable size\n" \
                       "1. small at Ksh 50\n" \
                       "2. medium at Ksh 100\n" \
                       "3. large at Ksh 150\n" \
@@ -124,6 +125,7 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
         # choose 0 to go back
         self.assertEqual(self.choose_meal, ussd_client.send('0'))
 
+    # todo test invalid option with screen that have multiple pages
     def test_invalid_input(self):
         ussd_client = self.ussd_client()
 
@@ -215,3 +217,146 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
 
         # choose the cabbage
         ussd_client.send('3')
+
+    def test_text_pagination(self):
+        ussd_client = self.ussd_client()
+
+        # dial in
+        ussd_client.send('')
+
+        # select testing pagination
+        response = ussd_client.send('5')
+
+        page_one = "Ussd airflow should be able to wrap anytext " \
+                   "that is larger than the one\n98. More\n"
+
+        self.assertEqual(
+            response,
+            page_one
+        )
+
+        # select more
+        response = ussd_client.send('98')
+
+        self.assertEqual(
+            "specified into two screens.\n1. next\n00. Back\n",
+            response
+        )
+
+        # test back option
+        self.assertEqual(
+            page_one,
+            ussd_client.send('00')
+        )
+
+        self.assertEqual(
+            "An example of screen with "
+            "multiple options that need to be paginated\n98. More\n",
+            ussd_client.send('1')  # select next screen without viewing that option
+        )
+
+        # select more to see the next option
+        self.assertEqual(
+            "1. screen_with_both_text_and_menu_options_pagination\n"
+            "00. Back\n"
+            "98. More\n",
+            ussd_client.send('98')
+        )
+
+        # select more to view the next screen
+        self.assertEqual(
+            "2. screen_with_both_text_item_options_pagination\n00. Back\n",
+            ussd_client.send('98')
+        )
+
+        # select option 1 to test pagination in both text and options
+        self.assertEqual(
+            "This screen has both large text and options that exceed the "
+            "limit required so\n"
+            "98. More\n",
+            ussd_client.send('1')
+        )
+
+        # select 98 to view more
+        self.assertEqual(
+            "both the prompt and options will be paginated.\n"
+            "1. go back to the previous screen\n"
+            "00. Back\n"
+            "98. More\n",
+            ussd_client.send('98')
+        )
+
+        # select 98 to view more
+        self.assertEqual(
+            "2. quit this session\n"
+            "3. this options will be showed in the next_screen\n"
+            "00. Back\n",
+            ussd_client.send('98')
+        )
+
+        # select 3 to test pagination with options and items
+        self.assertEqual(
+            "This screen has both large text, options, "
+            "items that exceed ussd text limit part\n"
+            "98. More\n",
+            ussd_client.send('3')
+        )
+
+        # Todo fix this tests
+        # # select 98 to view more
+        # self.assertEqual(
+        #     "of this text would be displayed in the next screen\n"
+        #     "1. apple\n"
+        #     "2. boy\n"
+        #     "00. Back\n"
+        #     "98. More\n",
+        #     ussd_client.send('98')
+        # )
+        #
+        # # select 98 to view more
+        # self.assertEqual(
+        #     "3. cat\n"
+        #     "4. dog\n"
+        #     "5. egg\n"
+        #     "6. frog\n"
+        #     "7. girl\n"
+        #     "8. house\n"
+        #     "9. ice\n"
+        #     "10. joyce\n"
+        #     "00. Back\n"
+        #     "98. More\n",
+        #     ussd_client.send('98')
+        # )
+        #
+        # # select 98 to view more
+        # self.assertEqual(
+        #     "11. kettle\n"
+        #     "12. lamp\n"
+        #     "13. mum\n"
+        #     "14. nurse\n"
+        #     "15. ostrich\n"
+        #     "16. pigeon\n"
+        #     "17. queen\n"
+        #     "00. Back\n"
+        #     "98. More\n",
+        #     ussd_client.send('98')
+        # )
+        #
+        # # select 98 to view more
+        # self.assertEqual(
+        #     "18. river\n"
+        #     "19. sweet\n"
+        #     "20. tiger\n"
+        #     "21. umbrella\n"
+        #     "22. van\n"
+        #     "23. water\n"
+        #     "24. quit_session\n"
+        #     "00. Back\n",
+        #     ussd_client.send('98')
+        # )
+        #
+        # # choose apple
+        # self.assertEqual(
+        #     "end of session apple",
+        #     ussd_client.send('1')
+        # )
