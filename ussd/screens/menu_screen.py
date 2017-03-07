@@ -3,7 +3,8 @@ from .serializers import UssdContentBaseSerializer, \
     MenuOptionSerializer, NextUssdScreenSerializer, UssdTextSerializer
 from rest_framework.serializers import ListField, ValidationError, \
     CharField
-
+from django.core.paginator import Paginator
+import textwrap
 
 class WithItemField(CharField):
     def to_internal_value(self, data):
@@ -39,6 +40,7 @@ class ItemsSerializer(UssdTextSerializer, NextUssdScreenSerializer):
 
     def validate_with_dict(self, value):
         return self.validate_with_items(value, 'with_items')
+
 
 class MenuScreenSerializer(UssdContentBaseSerializer):
     """
@@ -165,8 +167,8 @@ class MenuScreen(UssdHandlerAbstract):
     screen_type = "menu_screen"
     serializer = MenuScreenSerializer
 
-    def __init__(self, ussd_request, handler, screen_content, **kwargs):
-        super(MenuScreen, self).__init__(ussd_request, handler, screen_content, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super(MenuScreen, self).__init__(*args, **kwargs)
         self.list_options = [] if self.screen_content.get('items') is None \
             else self.get_items()
         self.menu_options = [] if self.screen_content.get('options') is None \
@@ -175,23 +177,111 @@ class MenuScreen(UssdHandlerAbstract):
             if not self.screen_content.get('error_message') \
             else self.get_text(self.screen_content["error_message"])
 
-        self.ussd_text = self._add_end_line(self.get_text()) + \
-                    self.display_options(self.list_options) + \
-                    self.display_options(
-                        self.menu_options,
-                        start_index=len(self.list_options) + 1
-                    )
+        # all options
+        self.options = self.list_options + \
+                       ([] if self.screen_content.get('options') is None else
+                        self.get_menu_options(
+                            start_index=len(self.list_options) + 1))
 
-    def handle(self):
+        self.paginator = self.get_paginator()
 
-        if not self.ussd_request.input:
-            return UssdResponse(self.ussd_text)
+    def show_ussd_content(self):
+        self.ussd_request.session['_ussd_state']['page'] = 1
+        return self._render_django_page(1)
 
+    def _render_django_page(self, index):
+        return self.paginator.page(index).object_list[0]
+
+    def get_paginator(self):
+        pages = []
+        ussd_title = self._add_end_line(self.get_text())
+
+        # get ussd text limit
+        ussd_text_limit = self.get_text_limit()
+
+        # paginate menu screen text
+        while len(ussd_title) > ussd_text_limit:
+            # Lets create pages
+            text = ""
+            if len(pages) > 0:
+                text += "00. Back\n"
+            text += "98. More\n"
+
+            # update ussd_text_limit to the one that considers pages
+            ussd_text_limit = ussd_text_limit - len(text) - 1
+
+            ussd_text_subsets = textwrap.wrap(
+                ussd_title, width=ussd_text_limit
+            )
+
+            pages.append(
+                self._add_end_line(ussd_text_subsets[0]) + text
+            )
+
+            ussd_title = self._add_end_line(' '.join(ussd_text_subsets[1:]))
+
+        self.paginate_options(ussd_title, pages, self.options[:])
+
+        return Paginator(pages, 1)
+
+
+
+    def paginate_options(self, ussd_text, pages, options):
+        """
+        Assumptions:
+            - ussd_text is within the limit
+        """
+        # Todo use back off strategy to generate the pages
+        text = ""
+        if len(pages) > 0:
+            text += "00. Back\n"
+
+        if not options:
+            pages.append(
+                ussd_text + text
+            )
+            return pages
+
+        ussd_text_cadidate = ussd_text + options[0].text
+        # detect if there might be more optoins
+        text += "98. More\n" \
+            if len(ussd_text_cadidate) > self.get_text_limit() - len(text) \
+            else ''
+        if len(ussd_text_cadidate) <= self.get_text_limit() - len(text):
+            ussd_text = ussd_text + options[0].text
         else:
-            next_screen = self.evaluate_input()
-            if next_screen:
-                return self.ussd_request.forward(next_screen)
-            return self.handle_invalid_input()
+            pages.append(
+                ussd_text + text
+            )
+            ussd_text = options[0].text
+        return self.paginate_options(
+                ussd_text,
+                pages,
+                options[1:]
+            )
+
+
+    def handle_ussd_input(self, ussd_input):
+        # check if input is for previous or next page
+        if self.ussd_request.input.strip() in ("98", "00"):
+            page = self.paginator.page(
+                self.ussd_request.session['_ussd_state']['page']
+            )
+            if self.ussd_request.input.strip() == "98" and page.has_next():
+                new_page_number = page.next_page_number()
+                self.ussd_request.session['_ussd_state']['page'] = \
+                    new_page_number
+                return UssdResponse(self._render_django_page(new_page_number))
+            elif self.ussd_request.input.strip() == '00' and \
+                    page.has_previous():
+                new_page_number = page.previous_page_number()
+                self.ussd_request.session['_ussd_state']['page'] = \
+                    new_page_number
+                return UssdResponse(self._render_django_page(new_page_number))
+        next_screen = self.evaluate_input()
+        if next_screen:
+            return self.ussd_request.forward(next_screen)
+        return self.handle_invalid_input()
 
     def evaluate_input(self):
         """
@@ -219,7 +309,7 @@ class MenuScreen(UssdHandlerAbstract):
                     return option.next_screen
         return False
 
-    def get_items(self) -> list:
+    def get_items(self, start_index: int = 1) -> list:
         """
         This gets ListItems
         :return:
@@ -239,18 +329,28 @@ class MenuScreen(UssdHandlerAbstract):
         items = self.evaluate_jija_expression(loop_value)
 
         return getattr(self, loop_method)(
-            text, value, items
+            text, value, items, start_index
         )
 
-    def get_menu_options(self) -> list:
+    def get_menu_options(self, start_index: int = 1) -> list:
         menu_options = []
-        for option in self.screen_content.get('options', []):
+        for i, option in enumerate(self.screen_content.get('options', []),
+                                   start_index):
+            input_value = option.get('input_value') or i
+            input_display = option.get('input_display') or \
+                            "{index}. ".format(index=input_value)
+            text = "{display_option}{text}".format(
+                display_option=input_display,
+                text=self._add_end_line(
+                    self.get_text(text_context=option['text'])
+                )
+            )
             menu_options.append(
                 MenuOption(
-                    self.get_text(text_context=option['text']),
+                    text,
                     option['next_screen'],
-                    option.get('input_display'),
-                    option.get('input_value')
+                    input_display,
+                    input_value
                 )
             )
         return menu_options
@@ -290,13 +390,14 @@ class MenuScreen(UssdHandlerAbstract):
 
     def handle_invalid_input(self):
         return UssdResponse(
-                self._add_end_line(
-                    self.get_text(self.error_message)) + self.ussd_text
-            )
+            self._add_end_line(
+                self.get_text(self.error_message)) +
+            self._render_django_page(1)
+        )
 
-    def _with_items(self, text, value, items):
+    def _with_items(self, text, value, items, start_index):
         list_items = []
-        for item in items:
+        for index, item in enumerate(items, start_index):
             context = {}
             extra = {
                 "item": item
@@ -314,14 +415,20 @@ class MenuScreen(UssdHandlerAbstract):
 
             list_items.append(
                 ListItem(
-                    self._render_text(
-                        text,
-                        extra=context
+                    self._add_end_line("{index}. {text}".format(
+                        index=index,
+                        text=self._render_text(
+                            text,
+                            extra=context
+                        )
+                    )
                     ),
                     self.evaluate_jija_expression(value, context)
                 )
             )
         return list_items
 
-    def _with_dict(self, text, value, items):
-        return self._with_items(text, value, items)
+    def _with_dict(self, text, value, items, start_index):
+        return self._with_items(text, value, items, start_index)
+
+

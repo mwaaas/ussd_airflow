@@ -92,6 +92,9 @@ class CustomScreen(UssdHandlerAbstract):
     serializer = CustomScreenSerializer
 
     def handle(self):
+        # Todo initiate the class in the core. to avoid double changing
+        # if the parameter changes.
+
         # calling the custom screen handler method
         return str_to_class(
             self.screen_content['screen_obj']
@@ -99,6 +102,7 @@ class CustomScreen(UssdHandlerAbstract):
             self.ussd_request,
             self.handler,
             self.screen_content,
+            initial_screen={},
             template_namespace=self.ussd_request.session.get(
                 'template_namespace', None
             )
