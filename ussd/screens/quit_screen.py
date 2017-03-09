@@ -1,6 +1,6 @@
 from ussd.core import UssdHandlerAbstract, UssdResponse
 from ussd.screens.serializers import UssdContentBaseSerializer
-
+from ussd import defaults as ussd_airflow_variables
 
 class QuitScreen(UssdHandlerAbstract):
     """
@@ -16,4 +16,5 @@ class QuitScreen(UssdHandlerAbstract):
     serializer = UssdContentBaseSerializer
 
     def handle(self):
+        self.ussd_request.session[ussd_airflow_variables.expiry] = True
         return UssdResponse(self.get_text(), status=False)

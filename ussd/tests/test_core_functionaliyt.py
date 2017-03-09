@@ -6,6 +6,8 @@ from rest_framework import serializers
 from ussd.tests import UssdTestCase
 from freezegun import freeze_time
 from datetime import datetime
+import time
+from ussd import defaults as ussd_airflow_variables
 
 
 class SampleSerializer(serializers.Serializer):
@@ -83,6 +85,26 @@ class TestUssdRequestCreation(TestCase):
         self.assertTrue(len(session_id) < 8)
 
         self.assertTrue(len(ussd_request.session_id) >= 8)
+
+        # test creating with session id as None
+        self.assertRaises(InvalidAttribute,
+                          UssdRequest,
+                          None,
+                          '200',
+                          '',
+                          'en')
+
+
+        # session_id and using custom session_id can't been defined
+        self.assertRaises(
+            InvalidAttribute,
+            UssdRequest,
+            "sfewevae",
+            "200",
+            "",
+            "en",
+            use_built_in_session_management=True
+        )
 
 
 class TestCoreView(UssdTestCase.BaseUssdTestCase):
@@ -243,3 +265,118 @@ class TestInheritance(UssdTestCase.BaseUssdTestCase):
 
     def testing_invalid_customer_journey(self):
         pass
+
+
+class TestSessionManagement(UssdTestCase.BaseUssdTestCase):
+    validate_ussd = False
+
+    def get_client(self):
+        return self.ussd_client(
+            generate_customer_journey=False,
+            extra_payload={
+                "customer_journey_conf":
+                    "sample_used_for_testing_session_management.yml",
+                "use_built_in_session_management": True
+            }
+        )
+
+    @staticmethod
+    def _create_ussd_request(phone_number):
+        return UssdRequest(None, phone_number, '', 'en',
+                           use_built_in_session_management=True,
+                           expiry=1)
+
+    def test_session_expiry(self):
+        phone_number = 200
+        req = self._create_ussd_request(phone_number)
+
+        # test a new session created within the time session id remains
+        self.assertEqual(req.session_id,
+                         self._create_ussd_request(phone_number).session_id
+                         )
+        time.sleep(1)
+
+        # test after one second a new session_id will be created.
+        self.assertNotEqual(req.session_id,
+                            self._create_ussd_request(phone_number).session_id
+                            )
+
+    def test_session_expiry_using_inactivity(self):
+        # Test session expiry is using last time session was updated
+        phone_number = '201'
+        req = self._create_ussd_request(phone_number)
+
+        time.sleep(0.8)
+
+        # confirm session_id hasn't changed
+        self.assertEqual(
+            req.session_id,
+            self._create_ussd_request(phone_number).session_id
+        )
+
+        # make a change in session
+        req = self._create_ussd_request(phone_number)
+        req.session['name'] = 'mwas'
+        req.session[ussd_airflow_variables.last_update] = datetime.now()
+        req.session.save()
+
+        time.sleep(0.8)
+
+        # confirm even after the session was created 1.6 sec ago hasn't
+        # been closed
+
+        self.assertEqual(
+            req.session_id,
+            self._create_ussd_request(phone_number).session_id
+        )
+
+        time.sleep(0.3)
+
+        # test now the session has been closed
+        self.assertNotEqual(
+            req.session_id,
+            self._create_ussd_request(phone_number).session_id
+        )
+
+    def test_quit_screen_terminates_session(self):
+
+        ussd_client = self.get_client()
+
+        self.assertEqual(
+            "Enter your name\n",
+            ussd_client.send('')  # dial in
+        )
+
+        self.assertEqual(
+            "Enter your age\n",
+            ussd_client.send('Mwas')  # enter name
+        )
+
+        self.assertEqual(
+            "You have entered your name as Mwas "
+            "and your age as 24",
+            ussd_client.send('24')
+        )
+
+        # dial in again to test the session has been closed
+        self.assertEqual(
+            "Enter your name\n",
+            ussd_client.send('1')
+        )
+
+    def test_session_expiry_on_ussd(self):
+
+        ussd_client = self.get_client()
+
+        self.assertEqual(
+            "Enter your name\n",
+            ussd_client.send('')
+        )
+
+        # sleep for 1 sec for session to expiry
+        time.sleep(1)
+
+        self.assertEqual(
+            "Enter your name\n",
+            ussd_client.send('')
+        )

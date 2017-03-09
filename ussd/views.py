@@ -11,12 +11,17 @@ class AfricasTalkingUssdGateway(UssdView):
         text = "*" if len(list_of_inputs) >= 2 and list_of_inputs[-1] == "" and list_of_inputs[-2] == "" else list_of_inputs[
             -1]
 
+        session_id = req.data['sessionId']
+        if req.data.get('use_built_in_session_management', False):
+            session_id = None
         ussd_request = UssdRequest(
             phone_number=req.data['phoneNumber'].strip('+'),
-            session_id=req.data['sessionId'],
+            session_id=session_id,
             ussd_input=text,
             service_code=req.data['serviceCode'],
-            language=req.data.get('language', 'en')
+            language=req.data.get('language', 'en'),
+            use_built_in_session_management=req.data.get(
+                'use_built_in_session_management', False)
         )
 
         return ussd_request
