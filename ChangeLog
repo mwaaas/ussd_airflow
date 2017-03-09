@@ -4,6 +4,11 @@ Ussd Airflow Changelog
 Version 0.0.3.8
 ---------------
 Feature
+    - adding built in option for session management
+
+Version 0.0.3.8
+---------------
+Feature
     - adding custom handler support
     - adding pagination in menu screen still experimental
 
