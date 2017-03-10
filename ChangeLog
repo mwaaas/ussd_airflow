@@ -1,7 +1,12 @@
 Ussd Airflow Changelog
 ======================
 
-Version 0.0.3.8
+Version 0.0.3.9.1
+-----------------
+Enhancement
+    - pagination options to be defined on customer journey
+
+Version 0.0.3.9
 ---------------
 Feature
     - adding built in option for session management
