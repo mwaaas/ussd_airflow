@@ -204,8 +204,11 @@ class MenuScreen(UssdHandlerAbstract):
             # Lets create pages
             text = ""
             if len(pages) > 0:
-                text += "00. Back\n"
-            text += "98. More\n"
+                text += "00. {back_option}".format(
+                    back_option=self.pagination_back_option)
+            text += "98. {more_option}".format(
+                more_option=self.pagination_more_option
+            )
 
             # update ussd_text_limit to the one that considers pages
             ussd_text_limit = ussd_text_limit - len(text) - 1
@@ -224,8 +227,6 @@ class MenuScreen(UssdHandlerAbstract):
 
         return Paginator(pages, 1)
 
-
-
     def paginate_options(self, ussd_text, pages, options):
         """
         Assumptions:
@@ -234,7 +235,8 @@ class MenuScreen(UssdHandlerAbstract):
         # Todo use back off strategy to generate the pages
         text = ""
         if len(pages) > 0:
-            text += "00. Back\n"
+            text += "00. {back_option}".format(
+                back_option=self.pagination_back_option)
 
         if not options:
             pages.append(
@@ -244,7 +246,8 @@ class MenuScreen(UssdHandlerAbstract):
 
         ussd_text_cadidate = ussd_text + options[0].text
         # detect if there might be more optoins
-        text += "98. More\n" \
+        text += "98. {more_option}".format(more_option=
+                                           self.pagination_more_option) \
             if len(ussd_text_cadidate) > self.get_text_limit() - len(text) \
             else ''
         if len(ussd_text_cadidate) <= self.get_text_limit() - len(text):
@@ -259,7 +262,6 @@ class MenuScreen(UssdHandlerAbstract):
                 pages,
                 options[1:]
             )
-
 
     def handle_ussd_input(self, ussd_input):
         # check if input is for previous or next page
@@ -354,39 +356,6 @@ class MenuScreen(UssdHandlerAbstract):
                 )
             )
         return menu_options
-
-    @staticmethod
-    def _add_end_line(text):
-        if text and '\n' not in text:
-            text += '\n'
-        return text
-
-    def display_options(self, list_items: list, start_index: int = 1) -> str:
-        text = ""
-        customized_option = ""
-        for index, item in enumerate(list_items, start_index):
-            index = "{index}. ".format(index=index) \
-                if getattr(item, 'index_display', None) is None \
-                else item.index_display
-
-            option_text = "{index}{text}".format(
-                index=index,
-                text=self._add_end_line(
-                    self.get_text(text_context=item.text)
-                )
-            )
-
-            # options that have a customized way presenting menu
-            # should appear last after the once that are numbered
-            text = text + option_text \
-                if getattr(item, 'index_display', None) is None \
-                else text
-
-            customized_option = customized_option + option_text \
-                if getattr(item, 'index_display', None) is not None \
-                else customized_option
-
-        return text + customized_option
 
     def handle_invalid_input(self):
         return UssdResponse(

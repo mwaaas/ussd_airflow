@@ -1,7 +1,12 @@
 initial_screen:
   type: initial_screen
   next_screen: choose_meal
-  ussd_text_limit: 90
+  pagination_config:
+    ussd_text_limit: 90
+    more_option:
+      en: More
+    back_option:
+      en: Back
 
 
 choose_meal:

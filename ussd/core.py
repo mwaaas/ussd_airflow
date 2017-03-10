@@ -311,6 +311,22 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         self.env = Environment(keep_trailing_newline=True)
         self.env.filters.update(_registered_filters)
 
+        self.pagination_config = self.initial_screen.get('pagination_config',
+                                                         {})
+
+        self.pagination_more_option = self._add_end_line(
+            self.get_text(
+                self.pagination_config.get('more_option', "more\n")
+            )
+        )
+        self.pagination_back_option = self._add_end_line(
+            self.get_text(
+                self.pagination_config.get('back_option', "back\n")
+            )
+        )
+        self.ussd_text_limit = self.pagination_config.\
+            get("ussd_text_limit", ussd_airflow_variables.ussd_text_limit)
+
     def handle(self):
         if not self.ussd_request.input:
             ussd_response = self.show_ussd_content()
@@ -319,8 +335,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         return self.handle_ussd_input(self.ussd_request.input)
 
     def get_text_limit(self):
-        return self.initial_screen.get("ussd_text_limit",
-                                       ussd_airflow_variables.ussd_text_limit)
+        return self.ussd_text_limit
 
     def show_ussd_content(self, **kwargs):
         raise NotImplementedError
@@ -418,6 +433,12 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                 if marker in data:
                     return True
         return False
+
+    @staticmethod
+    def _add_end_line(text):
+        if text and '\n' not in text:
+            text += '\n'
+        return text
 
     def get_loop_items(self):
         loop_items = self.evaluate_jija_expression(
