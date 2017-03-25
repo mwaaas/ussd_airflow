@@ -1,4 +1,7 @@
 import importlib
+from datetime import datetime
+
+date_format = "%Y-%m-%d %H:%M:%S.%f"
 
 
 def str_to_class(import_path):
@@ -12,3 +15,11 @@ def str_to_class(import_path):
     except ImportError:
         raise Exception('Module does not exist')
     return class_
+
+
+def datetime_to_string(date_obj: datetime):
+    return date_obj.strftime(date_format)
+
+
+def string_to_datetime(date_str_obj: str):
+    return datetime.strptime(date_str_obj, date_format)

@@ -26,6 +26,7 @@ from django.utils import timezone
 import requests
 import inspect
 from ussd.tasks import report_session
+from ussd import utilities
 
 _registered_ussd_handlers = {}
 _registered_filters = {}
@@ -220,11 +221,15 @@ class UssdRequest(object):
         else:
             session = ussd_session(session_mapping.session_id)
 
+            # get last time session was updated
+            if session.get(ussd_airflow_variables.last_update):
+                last_updated = utilities.string_to_datetime(
+                    session[ussd_airflow_variables.last_update])
+            else:
+                last_updated = timezone.make_naive(session_mapping.updated_at)
+
             # check inactivity or if session has been closed
-            inactivity_duration = (datetime.now() - session.get(
-                ussd_airflow_variables.last_update,
-                timezone.make_naive(session_mapping.updated_at))
-                                   ).total_seconds()
+            inactivity_duration = (datetime.now() - last_updated).total_seconds()
             if inactivity_duration > self.expiry or \
                     session.get(ussd_airflow_variables.expiry):
 
@@ -725,7 +730,7 @@ class UssdView(APIView):
         # Invoke handlers
         ussd_response = self.run_handlers(ussd_request)
         ussd_request.session[ussd_airflow_variables.last_update] = \
-            datetime.now()
+            utilities.datetime_to_string(datetime.now())
         # Save session
         ussd_request.session.save()
         self.logger.debug('gateway_response', text=ussd_response.dumps(),
@@ -744,15 +749,15 @@ class UssdView(APIView):
 
         if handler != "initial_screen":
             # get start time
-            start_time = ussd_request.session["ussd_interaction"][-1][
-                "start_time"]
+            start_time = utilities.string_to_datetime(
+                ussd_request.session["ussd_interaction"][-1]["start_time"])
             end_time = datetime.now()
             # Report in milliseconds
             duration = (end_time - start_time).total_seconds() * 1000
             ussd_request.session["ussd_interaction"][-1].update(
                 {
                     "input": ussd_request.input,
-                    "end_time": end_time,
+                    "end_time": utilities.datetime_to_string(end_time),
                     "duration": duration
                 }
             )
@@ -786,7 +791,7 @@ class UssdView(APIView):
                 "screen_name": handler,
                 "screen_text": str(ussd_response),
                 "input": ussd_request.input,
-                "start_time": datetime.now()
+                "start_time": utilities.datetime_to_string(datetime.now())
             }
         )
         # Attach session to outgoing response
