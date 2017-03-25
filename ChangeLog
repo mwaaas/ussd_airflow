@@ -1,5 +1,9 @@
 Ussd Airflow Changelog
 ======================
+Version 0.0.4
+-----------------
+Enhancement
+    - changed to convert datetime to string before saving it to session
 
 Version 0.0.4
 -----------------
