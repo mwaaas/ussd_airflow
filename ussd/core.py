@@ -26,7 +26,7 @@ from django.utils import timezone
 
 _registered_ussd_handlers = {}
 _registered_filters = {}
-
+_customer_journey_files = []
 
 class MissingAttribute(Exception):
     pass
@@ -255,6 +255,15 @@ class UssdResponse(object):
         return self.dumps()
 
 
+class UssdViewMetaClass(type):
+    def __init__(cls,name,bases,attr,**kwargs):
+        super(UssdViewMetaClass,cls).__init__(
+            name,bases,attr)
+        path = getattr(cls,'customer_journey_conf')
+        if path is not None:
+            _customer_journey_files.append(getattr(cls,'customer_journey_conf'))
+
+
 class UssdHandlerMetaClass(type):
 
     def __init__(cls, name, bases, attr, **kwargs):
@@ -447,7 +456,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         return loop_items
 
 
-class UssdView(APIView):
+class UssdView(APIView, metaclass=UssdViewMetaClass):
     """
     To create Ussd View requires the following things:
         - Inherit from **UssdView** (Mandatory)
