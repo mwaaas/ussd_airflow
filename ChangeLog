@@ -1,6 +1,11 @@
 Ussd Airflow Changelog
 ======================
 
+Version 0.0.4
+-----------------
+Feature
+    - adding option for report session
+
 Version 0.0.3.9.1
 -----------------
 Enhancement
