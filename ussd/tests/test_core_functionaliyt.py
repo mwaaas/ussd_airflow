@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from datetime import datetime
 import time
 from ussd import defaults as ussd_airflow_variables
+from ussd.utilities import datetime_to_string, string_to_datetime
 
 
 class SampleSerializer(serializers.Serializer):
@@ -184,7 +185,7 @@ class TestInheritance(UssdTestCase.BaseUssdTestCase):
             ussd_client.send('1')
         )
 
-        now = datetime.now()
+        now = datetime_to_string(datetime.now())
         expected_screen_interaction = [
             {
                 "screen_name": "screen_one",
@@ -317,7 +318,8 @@ class TestSessionManagement(UssdTestCase.BaseUssdTestCase):
         # make a change in session
         req = self._create_ussd_request(phone_number)
         req.session['name'] = 'mwas'
-        req.session[ussd_airflow_variables.last_update] = datetime.now()
+        req.session[ussd_airflow_variables.last_update] = datetime_to_string(
+            datetime.now())
         req.session.save()
 
         time.sleep(0.8)
@@ -380,3 +382,12 @@ class TestSessionManagement(UssdTestCase.BaseUssdTestCase):
             "Enter your name\n",
             ussd_client.send('')
         )
+
+
+class TestDatetimeConversion(TestCase):
+
+    def test(self):
+        now = datetime.now()
+        now_str = datetime_to_string(now)
+
+        self.assertEqual(now, string_to_datetime(now_str))
