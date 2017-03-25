@@ -1,12 +1,7 @@
-from json import JSONDecodeError
-
 from ussd.core import UssdHandlerAbstract
 from ussd.screens.serializers import NextUssdScreenSerializer
 from rest_framework import serializers
-import requests
 from ussd.tasks import http_task
-import json
-import inspect
 
 
 class HttpScreenConfSerializer(serializers.Serializer):
@@ -64,68 +59,19 @@ class HttpScreen(UssdHandlerAbstract):
     screen_type = "http_screen"
     serializer = HttpScreenSerializer
 
-    def render_request_conf(self, data):
-        if isinstance(data, str):
-            return self._render_text(data)
-
-        elif isinstance(data, list):
-            list_data = []
-            for i in data:
-                list_data.append(self.render_request_conf(i))
-
-            return list_data
-
-        elif isinstance(data, dict):
-            dict_data = {}
-            for key, value in data.items():
-                dict_data.update(
-                    {key: self.render_request_conf(value)}
-                )
-            return dict_data
-        else:
-            return data
-
     def handle(self):
         http_request_conf = self.render_request_conf(
+            self.ussd_request.session,
             self.screen_content['http_request']
         )
-        response_to_save = {}
+
         if self.screen_content.get('synchronous', False):
             http_task.delay(request_conf=http_request_conf)
         else:
-            self.logger.info("sending_request", **http_request_conf)
-            response = requests.request(**http_request_conf)
-            self.logger.info("response", status_code=response.status_code,
-                             content=response.content)
-
-            for i in inspect.getmembers(response):
-                # Ignores anything starting with underscore
-                # (that is, private and protected attributes)
-                if not i[0].startswith('_'):
-                    # Ignores methods
-                    if not inspect.ismethod(i[1]) and \
-                                    type(i[1]) in \
-                                    (str, dict, int, dict, float, list, tuple):
-                        if len(i) == 2:
-                            response_to_save.update(
-                                {i[0]: i[1]}
-                            )
-            try:
-                response_content = json.loads(response.content.decode())
-            except JSONDecodeError:
-                response_content = response.content.decode()
-
-            if isinstance(response_content, dict):
-                response_to_save.update(
-                    response_content
-                )
-
-            # update content to save the one that has been decoded
-            response_to_save.update(
-                {"content": response_content}
+            self.make_request(
+                http_request_conf=http_request_conf,
+                response_session_key_save=self.screen_content['session_key'],
+                session=self.ussd_request.session,
+                logger=self.logger
             )
-
-        # save response in session
-        self.ussd_request.session[self.screen_content['session_key']] = \
-            response_to_save
         return self.ussd_request.forward(self.screen_content['next_screen'])

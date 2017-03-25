@@ -7,6 +7,8 @@ enter_height:
   # invalid validator, missing text
   validators:
     - regex: ^[0-9]{1,7}$
+  ussd_report_session:
+    name: invalid_ussd_report_session
 
 # missing input_indentifier and invalid options
 enter_age:

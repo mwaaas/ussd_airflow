@@ -23,9 +23,16 @@ from ussd.models import SessionLookup
 from annoying.functions import get_object_or_None
 from ussd import defaults as ussd_airflow_variables
 from django.utils import timezone
+import requests
+import inspect
+from ussd.tasks import report_session
 
 _registered_ussd_handlers = {}
 _registered_filters = {}
+
+# initialize jinja2 environment
+env = Environment(keep_trailing_newline=True)
+env.filters.update(_registered_filters)
 
 
 class MissingAttribute(Exception):
@@ -263,7 +270,7 @@ class UssdHandlerMetaClass(type):
 
         abstract = attr.get('abstract', False)
 
-        if not abstract:
+        if not abstract or attr.get('screen_type', '') == 'custom_screen':
             required_attributes = ('screen_type', 'serializer', 'handle')
 
             # check all attributes have been defined
@@ -288,8 +295,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
     def __init__(self, ussd_request: UssdRequest,
                  handler: str, screen_content: dict,
-                 initial_screen: dict, template_namespace=None,
-                 logger=None):
+                 initial_screen: dict, logger=None):
         self.ussd_request = ussd_request
         self.handler = handler
         self.screen_content = screen_content
@@ -298,18 +304,11 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             '{{', '}}'))
         self.clean_regex = re.compile(r'^{{\s*(\S*)\s*}}$')
         self.logger = logger or get_logger(__name__).bind(
-            **ussd_request.all_variables())
-        self.template_namespace = template_namespace
+            handler=self.handler,
+            screen_type=getattr(self, 'screen_type', 'custom_screen'),
+            **ussd_request.all_variables(),
+        )
         self.initial_screen = initial_screen
-
-        if template_namespace is not None:
-            self.template_namespace = staticconf.config.\
-                configuration_namespaces[self.template_namespace].\
-                configuration_values
-
-        # initialize jinja2 environment
-        self.env = Environment(keep_trailing_newline=True)
-        self.env.filters.update(_registered_filters)
 
         self.pagination_config = self.initial_screen.get('pagination_config',
                                                          {})
@@ -343,21 +342,18 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     def handle_ussd_input(self, ussd_input):
         raise NotImplementedError
 
-    def _get_session_items(self) -> dict:
-        return dict(iter(self.ussd_request.session.items()))
+    @staticmethod
+    def get_session_items(session) -> dict:
+        return dict(iter(session.items()))
 
-    def _get_context(self, extra_context=None):
-        context = self._get_session_items()
-        context.update(
-            dict(
-                ussd_request=self.ussd_request.all_variables()
-            )
-        )
+    @classmethod
+    def get_context(cls, session, extra_context=None):
+        context = cls.get_session_items(session)
+
         context.update(
             dict(os.environ)
         )
-        if self.template_namespace:
-            context.update(self.template_namespace)
+
         if extra_context is not None:
             context.update(extra_context)
 
@@ -367,14 +363,17 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         )
         return context
 
-    def _render_text(self, text, context=None, extra=None, encode=None):
+    @staticmethod
+    def render_text(session, text, context=None, extra=None, encode=None):
         if context is None:
-            context = self._get_context()
+            context = UssdHandlerAbstract.get_context(
+                session
+            )
 
         if extra:
             context.update(extra)
 
-        template = self.env.from_string(text or '')
+        template = env.from_string(text or '')
         text = template.render(context)
         return json.dumps(text) if encode is 'json' else text
 
@@ -391,20 +390,26 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
             text_context = text_context[language]
 
-        return self._render_text(
+        return self.render_text(
+            self.ussd_request.session,
             text_context
         )
 
-    def evaluate_jija_expression(self, expression, extra_context=None,
+    @classmethod
+    def evaluate_jija_expression(cls, expression, session,
+                                 extra_context=None,
                                  lazy_evaluating=False):
         if not isinstance(expression, str) or \
-                (lazy_evaluating and not self._contains_vars(expression)):
+                (lazy_evaluating and not cls._contains_vars(
+                    expression)):
             return expression
 
-        context = self._get_context(extra_context=extra_context)
+        context = cls.get_context(
+            session, extra_context=extra_context)
+
         expression = expression.replace("{{", "").replace("}}", "")
         try:
-            expr = self.env.compile_expression(
+            expr = env.compile_expression(
                 expression
             )
         except TemplateSyntaxError:
@@ -442,9 +447,104 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
     def get_loop_items(self):
         loop_items = self.evaluate_jija_expression(
-            self.screen_content["with_items"]
+            self.screen_content["with_items"],
+            session=self.ussd_request.session
         ) if self.screen_content.get("with_items") else [0] or [0]
         return loop_items
+
+    @classmethod
+    def render_request_conf(cls, session, data):
+        if isinstance(data, str):
+            return cls.render_text(session, data)
+
+        elif isinstance(data, list):
+            list_data = []
+            for i in data:
+                list_data.append(cls.render_request_conf(
+                    session, i))
+
+            return list_data
+
+        elif isinstance(data, dict):
+            dict_data = {}
+            for key, value in data.items():
+                dict_data.update(
+                    {key: cls.render_request_conf(
+                        session, value)}
+                )
+            return dict_data
+        else:
+            return data
+
+    @staticmethod
+    def get_variables_from_response_obj(response):
+        response_varialbes = {}
+
+        for i in inspect.getmembers(response):
+            # Ignores anything starting with underscore
+            # (that is, private and protected attributes)
+            if not i[0].startswith('_'):
+                # Ignores methods
+                if not inspect.ismethod(i[1]) and \
+                                type(i[1]) in \
+                                (str, dict, int, dict, float, list, tuple):
+                    if len(i) == 2:
+                        response_varialbes.update(
+                            {i[0]: i[1]}
+                        )
+
+        try:
+            response_content = json.loads(response.content.decode())
+        except json.JSONDecodeError:
+            response_content = response.content.decode()
+
+        if isinstance(response_content, dict):
+            response_varialbes.update(
+                response_content
+            )
+
+        # update content to save the one that has been decoded
+        response_varialbes.update(
+            {"content": response_content}
+        )
+
+        return response_varialbes
+    @classmethod
+    def make_request(cls, http_request_conf, response_session_key_save,
+                     session, logger=None
+                     ):
+        logger = logger or get_logger(__name__).bind(
+            action="make_request",
+            session_id=session.session_key
+        )
+        logger.info("sending_request", **http_request_conf)
+        response = requests.request(**http_request_conf)
+        logger.info("response", status_code=response.status_code,
+                         content=response.content)
+
+        response_to_save = cls.get_variables_from_response_obj(response)
+
+        # save response in session
+        session[response_session_key_save] = response_to_save
+
+        return response
+
+    @staticmethod
+    def fire_ussd_report_session_task(initial_screen: dict, session_id: str,
+                            support_countdown=True):
+        ussd_report_session = initial_screen['ussd_report_session']
+        args = (session_id,)
+        kwargs = {'screen_content': initial_screen}
+        keyword_args = ussd_report_session.get("async_parameters",
+                                               {"countdown": 900}).copy()
+        if not support_countdown and keyword_args.get('countdown'):
+            del keyword_args['countdown']
+
+        report_session.apply_async(
+            args=args,
+            kwargs=kwargs,
+            **keyword_args
+        )
 
 
 class UssdView(APIView):
@@ -532,7 +632,6 @@ class UssdView(APIView):
     """
     customer_journey_conf = None
     customer_journey_namespace = None
-    template_namespace = None
 
     def initial(self, request, *args, **kwargs):
         # initialize restframework
@@ -610,7 +709,16 @@ class UssdView(APIView):
             ussd_request.session['session_id'] = ussd_request.session_id
             ussd_request.session['phone_number'] = ussd_request.phone_number
 
+        # update ussd_request variable to session and template variables
+        # to be used later for jinja2 evaluation
         ussd_request.session.update(ussd_request.all_variables())
+
+        # for backward compatibility
+        # there are some jinja template using ussd_request
+        # eg. {{ussd_request.session_id}}
+        ussd_request.session.update(
+            {"ussd_request": ussd_request.all_variables()}
+        )
 
         self.logger.debug('gateway_request', text=ussd_request.input)
 
@@ -667,9 +775,6 @@ class UssdView(APIView):
                 ussd_request,
                 handler,
                 screen_content,
-                template_namespace=ussd_request.session.get(
-                    'template_namespace', None
-                ),
                 initial_screen=self.initial_screen,
                 logger=self.logger
             ).handle()

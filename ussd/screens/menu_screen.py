@@ -328,7 +328,9 @@ class MenuScreen(UssdHandlerAbstract):
                 loop_method = "_" + key
                 loop_value = value_
 
-        items = self.evaluate_jija_expression(loop_value)
+        items = self.evaluate_jija_expression(loop_value,
+                                              session=self.ussd_request.session
+                                              )
 
         return getattr(self, loop_method)(
             text, value, items, start_index
@@ -386,13 +388,17 @@ class MenuScreen(UssdHandlerAbstract):
                 ListItem(
                     self._add_end_line("{index}. {text}".format(
                         index=index,
-                        text=self._render_text(
+                        text=UssdHandlerAbstract.render_text(
+                            self.ussd_request.session,
                             text,
                             extra=context
                         )
                     )
                     ),
-                    self.evaluate_jija_expression(value, context)
+                    self.evaluate_jija_expression(value,
+                                                  session=
+                                                  self.ussd_request.session,
+                                                  extra_context=context)
                 )
             )
         return list_items

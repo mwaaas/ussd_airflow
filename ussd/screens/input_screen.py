@@ -82,7 +82,8 @@ class InputScreen(MenuScreen):
                     ))
             else:
                 is_valid = self.evaluate_jija_expression(
-                    validation_rule['expression']
+                    validation_rule['expression'],
+                    session=self.ussd_request.session
                 )
 
             # show error message if validation failed

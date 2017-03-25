@@ -1,0 +1,10 @@
+initial_screen:
+  type: initial_screen
+  next_screen: invalid_screen
+  variables:
+    invalid_key: invalid_value
+  create_ussd_varibles:
+    - invalid_data_type
+  default_language: 12
+  ussd_report_session:
+    invalid_key: invalid_value

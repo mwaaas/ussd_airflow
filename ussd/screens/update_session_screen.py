@@ -69,19 +69,23 @@ class UpdateSessionScreen(UssdHandlerAbstract):
                 if not (update_value.get('expression') and
                             self.evaluate_jija_expression(
                                 update_value['expression'],
+                                session=self.ussd_request.session,
                                 extra_context=extra_context)):
                     continue
 
                 # evaluate key
                 key = update_value['key'] \
-                    if not self._contains_vars(update_value['key']) \
+                    if not UssdHandlerAbstract._contains_vars(
+                    update_value['key']) \
                     else self.evaluate_jija_expression(
                     update_value['key'],
+                    session=self.ussd_request.session,
                     extra_context=extra_context
                 )
 
                 value = self.evaluate_jija_expression(
                     update_value['value'],
+                    session=self.ussd_request.session,
                     extra_context=extra_context
                 ) or update_value['value']
 

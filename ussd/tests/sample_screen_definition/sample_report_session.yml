@@ -1,0 +1,28 @@
+initial_screen:
+  type: initial_screen
+  next_screen: screen_one
+  ussd_report_session:
+    session_key: reported
+    retry_mechanism:
+      max_retries: 3
+    validate_response:
+      - expression: "{{reported.status_code}} == 200"
+    request_conf:
+      url: localhost:8006/api
+      method: post
+      data:
+        ussd_interaction: "{{ussd_interaction}}"
+        session_id: "{{session_id}}"
+    async_parameters:
+      queue: report_session
+      countdown: 900
+
+screen_one:
+  type: input_screen
+  text: Enter you name
+  input_identifier: name
+  next_screen: display_name
+
+display_name:
+  type: quit_screen
+  text: "Your name is {{name}}"

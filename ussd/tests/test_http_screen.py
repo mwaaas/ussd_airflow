@@ -1,5 +1,3 @@
-from json import JSONDecodeError
-
 from ussd.tests import UssdTestCase
 from unittest import mock
 from django.http.response import JsonResponse, HttpResponse
@@ -29,7 +27,7 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
         )
     )
 
-    @mock.patch("ussd.screens.http_screen.requests.request")
+    @mock.patch("ussd.core.requests.request")
     def test(self, mock_request):
         mock_response = JsonResponse({"balance": 250})
         mock_request.return_value = mock_response
@@ -67,12 +65,6 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
                 verify=True,
                 timeout=30,
                 headers={"content-type": "application/json"}
-            ),
-            mock.call(
-                method='get',
-                url="https://localhost:8000/mock/submission",
-                params={'phone_number': '200',
-                        'session_id': ussd_client.session_id}
             )
         ]
         # test requests that were made
@@ -97,7 +89,7 @@ class TestHttpScreen(UssdTestCase.BaseUssdTestCase):
             )
         )
 
-    @mock.patch("ussd.screens.http_screen.requests.request")
+    @mock.patch("ussd.core.requests.request")
     def test_json_decoding(self, mock_request):
         mock_response = HttpResponse("Balance is 257")
         mock_request.return_value = mock_response

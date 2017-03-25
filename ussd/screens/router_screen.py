@@ -59,7 +59,8 @@ class RouterScreen(UssdHandlerAbstract):
         loop_items = [0]
         if self.screen_content.get("with_items"):
             loop_items = self.evaluate_jija_expression(
-                self.screen_content["with_items"]
+                self.screen_content["with_items"],
+                session=self.ussd_request.session
             ) or loop_items
 
         for item in loop_items:
@@ -78,7 +79,8 @@ class RouterScreen(UssdHandlerAbstract):
             for option in route_options:
                 if self.evaluate_jija_expression(
                         option['expression'],
-                    extra_context=extra_context
+                        session=self.ussd_request.session,
+                        extra_context=extra_context
                 ):
                     return self.ussd_request.forward(option['next_screen'])
         return self.ussd_request.forward(

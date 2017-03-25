@@ -29,3 +29,6 @@ class UssdConfig(AppConfig):
         from ussd.filters import date_filters
         from ussd.filters import dict_filters
         from ussd.filters import list_filters
+
+        from ussd.core import env, _registered_filters
+        env.filters.update(_registered_filters)

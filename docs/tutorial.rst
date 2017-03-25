@@ -20,30 +20,9 @@ The following are types of ussd and the rules to write them.
 
 1. Initial screen (type -> initial_screen)
 ------------------------------------------
-This screen is mandatory in any customer journey.
-It is the screen all new ussd session go to.
 
-example of one
-
-   .. code-block:: yaml
-
-      initial_screen: enter_height
-
-      first_screen:
-         type: quit
-         text: This is the first screen
-
-Its is also used to define variable file if you have one.
-Example when defining variable file
-
-    .. code-block:: yaml
-
-        initial_screen:
-            screen: screen_one
-            variables:
-                file: /path/of/your/variable/file.yml
-                namespace: used_to_save_the_variable
-
+.. automodule:: ussd.screens.initial_screen
+    :members: InitialScreen
 
 2. Input screen (type -> input_screen)
 --------------------------------------

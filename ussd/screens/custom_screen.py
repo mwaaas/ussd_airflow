@@ -103,7 +103,4 @@ class CustomScreen(UssdHandlerAbstract):
             self.handler,
             self.screen_content,
             initial_screen={},
-            template_namespace=self.ussd_request.session.get(
-                'template_namespace', None
-            )
         ).handle()

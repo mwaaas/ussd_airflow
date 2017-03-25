@@ -1,7 +1,7 @@
 import uuid
 import requests
 import staticconf
-from django.test import LiveServerTestCase
+from django.test import LiveServerTestCase, TestCase
 from django.urls import reverse
 from ussd.core import UssdView, load_yaml
 from ussd.tests.sample_screen_definition import path
@@ -22,6 +22,8 @@ class UssdTestCase(object):
             self.invalid_yml = 'invalid_' + file_yml
             self.namespace = self.__module__.split('.')[-1]
             self.maxDiff = None
+
+            super(UssdTestCase.BaseUssdTestCase, self).setUp()
 
         def _test_ussd_validation(self, yaml_to_validate, expected_validation,
                                   expected_errors):
