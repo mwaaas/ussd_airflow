@@ -30,6 +30,7 @@ from ussd import utilities
 
 _registered_ussd_handlers = {}
 _registered_filters = {}
+_built_in_functions = {}
 
 # initialize jinja2 environment
 env = Environment(keep_trailing_newline=True)
@@ -51,6 +52,11 @@ class DuplicateSessionId(Exception):
 def register_filter(func_name, *args, **kwargs):
     filter_name = func_name.__name__
     _registered_filters[filter_name] = func_name
+
+
+def register_function(func_name, *args, **kwargs):
+    function_name = func_name.__name__
+    _built_in_functions[function_name] = func_name
 
 
 def get_session_engine():
@@ -365,6 +371,11 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         # add timestamp in the context
         context.update(
             dict(now=datetime.now())
+        )
+
+        # add all built in functions
+        context.update(
+            _built_in_functions
         )
         return context
 

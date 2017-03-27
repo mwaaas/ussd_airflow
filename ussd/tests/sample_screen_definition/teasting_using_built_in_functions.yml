@@ -1,0 +1,5 @@
+initial_screen: show_version
+
+show_version:
+  type: quit_screen
+  text: "You are using this version {{ussd_airflow_version()}}"

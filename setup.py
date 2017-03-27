@@ -1,7 +1,6 @@
 from setuptools import setup, find_packages
 import os
-
-__version__ = '0.0.4.1'
+from ussd import VERSION
 
 
 def _strip_comments(l):
@@ -35,7 +34,7 @@ def reqs(*f):
 
 setup(
     name='ussd_airflow',
-    version=__version__,
+    version=VERSION,
     packages=find_packages(exclude=('ussd_airflow',)),
     url='https://github.com/mwaaas/ussd_airflow',
     install_requires=reqs('default.txt'),
