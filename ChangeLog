@@ -1,5 +1,11 @@
 Ussd Airflow Changelog
 ======================
+
+Version 0.0.4.2
+-----------------
+Feature
+    - adding option for adding buit in function
+
 Version 0.0.4.1
 -----------------
 Enhancement
