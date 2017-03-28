@@ -3,6 +3,11 @@ Ussd Airflow Changelog
 
 Version 0.0.4.2
 -----------------
+enhancement
+    - make request to use jinja2 evaluation
+
+Version 0.0.4.2
+-----------------
 Feature
     - adding option for adding built in function
 
