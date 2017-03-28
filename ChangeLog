@@ -1,7 +1,7 @@
 Ussd Airflow Changelog
 ======================
 
-Version 0.0.4.2
+Version 0.0.4.3
 -----------------
 enhancement
     - make request to use jinja2 evaluation
