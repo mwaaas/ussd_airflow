@@ -414,7 +414,8 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     @classmethod
     def evaluate_jija_expression(cls, expression, session,
                                  extra_context=None,
-                                 lazy_evaluating=False):
+                                 lazy_evaluating=False,
+                                 default=None):
         if not isinstance(expression, str) or \
                 (lazy_evaluating and not cls._contains_vars(
                     expression)):
@@ -423,14 +424,16 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         context = cls.get_context(
             session, extra_context=extra_context)
 
-        expression = expression.replace("{{", "").replace("}}", "")
         try:
             expr = env.compile_expression(
-                expression
+                expression.replace("{{", "").replace("}}", "")
             )
-        except TemplateSyntaxError:
-            return []
-        return expr(context)
+            return expr(context)
+        except Exception:
+            try:
+                return env.from_string(expression or '').render(context)
+            except Exception:
+                return default
 
     @classmethod
     def validate(cls, screen_name: str, ussd_content: dict) -> (bool, dict):
@@ -471,7 +474,8 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
     @classmethod
     def render_request_conf(cls, session, data):
         if isinstance(data, str):
-            return cls.render_text(session, data)
+            jinja_results = cls.evaluate_jija_expression(data, session)
+            return data if jinja_results is None else jinja_results
 
         elif isinstance(data, list):
             list_data = []

@@ -329,7 +329,8 @@ class MenuScreen(UssdHandlerAbstract):
                 loop_value = value_
 
         items = self.evaluate_jija_expression(loop_value,
-                                              session=self.ussd_request.session
+                                              session=self.ussd_request.session,
+                                              default=[]
                                               )
 
         return getattr(self, loop_method)(

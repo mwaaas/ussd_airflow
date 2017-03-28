@@ -204,7 +204,7 @@ class TestingUssdReportSession(UssdTestCase.BaseUssdTestCase, TestCase):
             url="localhost:8006/api",
             method="post",
             data=dict(
-                ussd_interaction='[]',
+                ussd_interaction=[],
                 session_id=session.session_key
             )
         )
