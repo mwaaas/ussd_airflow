@@ -1,0 +1,248 @@
+<html>
+<head>
+    <title>Screens</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/static/jquery.autocomplete.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        .search-screen {
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            width: 25%;
+            display: inline !important;
+        }
+    </style>
+</head>
+<body>
+<div class='search-screen'>
+
+
+    <form class="form-inline">
+        <div class="form-group">
+            <input type="text" class="form-control" id="screen-search" placeholder="Search screen">
+        </div>
+        <div class="form-group">
+            <div class="dropdown">
+                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Open
+                    <span class="caret"></span></button>
+                <ul class="dropdown-menu">
+                    {% for file in yaml_files %}
+                        <li><a onclick="return openFile(this)">{{ file }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </form>
+
+
+</div>
+
+
+<div id="myDiagramDiv" style="width:100%;height:100%;background-color:white"></div>
+<script src="/static/go.js"></script>
+<script src="/static/jquery-2.2.2.js"></script>
+<script src="/static/jquery.autocomplete.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script>
+    //initialize autocomplete with empty source
+    $('#screen-search').autocomplete({
+        source: [[]],
+        valueKey: 'title'
+    });
+
+    $('#screen-search').on('selected.xdsoft', function (e, d) {
+        node = myDiagram.findNodeForData(d);
+        myDiagram.centerRect(node.actualBounds);
+        myDiagram.select(node);
+    })
+
+    var portClicked = function (e, button) {
+        var node = button.part;
+
+        if (node instanceof go.Adornment)
+            node = node.adornedPart;
+        if (!(node instanceof go.Node))
+            return;
+        var diagram = node.diagram;
+
+        diagram.startTransaction("highlight");
+        diagram.clearSelection();
+        node.findLinksOutOf(button.portId).each(function (l) {
+            l.isSelected = true;
+        })
+        node.findNodesOutOf(button.portId).each(function (n) {
+            n.isSelected = true;
+            diagram.centerRect(n.actualBounds);
+        });
+        diagram.commitTransaction("highlight");
+    }
+
+    var $go = go.GraphObject.make;
+    var myDiagram = $go(go.Diagram, "myDiagramDiv",
+        {
+            minScale: 0.1,
+            grid: $go(go.Panel, "Grid",
+                $go(go.Shape, "LineH", {stroke: "gray", strokeWidth: 0.5}),
+                $go(go.Shape, "LineH", {stroke: "darkslategray", strokeWidth: 1.5, interval: 10}),
+                $go(go.Shape, "LineV", {stroke: "gray", strokeWidth: 0.5}),
+                $go(go.Shape, "LineV", {stroke: "darkslategray", strokeWidth: 1.5, interval: 10}),
+            ),
+            initialContentAlignment: go.Spot.Left,
+            "toolManager.mouseWheelBehavior": go.ToolManager.WheelZoom,
+            "textEditingTool.starting": go.TextEditingTool.SingleClick,
+            "draggingTool.isGridSnapEnabled": true,
+            "undoManager.isEnabled": true
+        });
+    myDiagram.layout = $go(go.LayeredDigraphLayout, {columnSpacing: 10});
+    myDiagram.linkTemplate = $go(go.Link, {
+            routing: go.Link.Orthogonal, corner: 0,
+            curve: go.Link.JumpOver
+        },
+        $go(go.Shape, {strokeWidth: 3, stroke: "#555"}),
+        $go(go.Shape, {toArrow: "Standard", stroke: null}));
+
+
+    myDiagram.nodeTemplate =
+        $go(go.Node, "Vertical",
+            {
+                background: "black", toSpot: go.Spot.Left, portId: "IN",
+                name: "Screen"
+            },
+            $go(go.Panel, "Auto",
+                {},
+                $go(go.Shape, "RoundedRectangle",
+                    {fill: "#EFEFEF"}),
+                $go(go.Panel, "Vertical",
+                    $go(go.TextBlock, "Screen",
+                        {},
+                        new go.Binding("text", "key", function (arg) {
+                            return "Screen " + arg;
+                        })),
+                    $go(go.Panel, "Auto", {alignment: go.Spot.Center},
+                        $go(go.Shape, "RoundedRectangle",
+                            {fill: "white", width: 242}),
+                        $go(go.TextBlock, "",
+                            {width: 230, font: "normal 18px san-serif", wrap: go.TextBlock.WrapFit},
+                            new go.Binding("text", "title")
+                        )
+                    ),
+                    $go(go.Panel, "Vertical",
+                        new go.Binding("itemArray", "items"),
+                        {
+                            itemTemplate: $go(go.Panel, "Horizontal",
+                                {margin: 1},
+                                $go(go.Panel, "Spot",
+                                    $go(go.Shape, "Rectangle",
+                                        {height: 50, width: 300, fill: "#EFEFEF", stroke: null}),
+                                    $go(go.TextBlock,
+                                        {
+                                            margin: 2,
+                                            alignment: new go.Spot(0.04, 0.5),
+                                            alignmentFocus: new go.Spot(0, 0.5),
+                                            width: 10,
+                                            name: "ObjectIndex"
+                                        },
+                                        new go.Binding("text", "index")),
+                                    $go(go.Panel, "Auto",
+                                        {alignment: go.Spot.Center},
+                                        $go(go.Shape, "RoundedRectangle",
+                                            {fill: "#FFFFFF", width: 242},
+                                        ),
+                                        $go(go.TextBlock,
+                                            {
+                                                background: "#FFFFFF",
+                                                width: 230,
+                                                font: "normal 18px san-serif",
+                                                wrap: go.TextBlock.WrapFit
+                                            },
+                                            new go.Binding("text"))),
+                                    $go("Button",
+                                        {
+                                            name: "THREEBUTTON",
+                                            width: 20, height: 20,
+                                            alignment: new go.Spot(1, 0.5),
+                                            visible: true,
+                                            fromSpot: go.Spot.Right,
+                                            doubleClick: portClicked
+                                        },
+                                        new go.Binding("portId", "portName")
+                                    )
+                                ))
+                        })
+                ))
+        );
+
+    var model = $go(go.GraphLinksModel);
+    model.linkFromPortIdProperty = "fromPort";
+    model.linkToPortIdProperty = "toPort";
+    //model.nodeDataArray =
+    //[
+    //{key:"1",title:"initial_screen",items:[{index:1,portName:"out1",text:"Enter name"}]},
+    //{key:"2",title:"welcome_screen",items:[{index:1,portName:"out1",text:"Enter date of birth"}]}
+    //];
+
+    //model.linkDataArray = [
+    //{from : "1",to: "2",fromPort:"out1"}
+    //]
+
+    //myDiagram.model  = model;
+
+
+    $.get('ussd-airflow/journey_visual_data').then(function (data) {
+        model.nodeDataArray = data['data'];
+        model.linkDataArray = data['links'];
+        myDiagram.currentTool.doCancel();
+        myDiagram.model = model;
+
+    }, function (error) {
+        console.log('error when fetching journey yaml data');
+        console.log(error)
+    })
+
+    myDiagram.addDiagramListener("InitialLayoutCompleted", function (e) {
+        if (model.nodeDataArray.length > 0) {
+            var data = model.nodeDataArray[0];
+            var node = myDiagram.findNodeForData(data);
+            myDiagram.centerRect(node.actualBounds);
+            myDiagram.select(node);
+        }
+
+        $('#screen-search').autocomplete('setSource', model.nodeDataArray, 0);
+
+    })
+    function openFile(e) {
+        loadYaml(e.innerHTML);
+    }
+
+    loaded_yaml = {};
+    function loadYaml(file)
+    {
+        yaml = loaded_yaml[file];
+        if(!yaml)
+        {
+            $.get('ussd-airflow/journey_visual_data?file='+file).then(function (data) {
+                updateModel(data)
+                loaded_yaml[file] = data;
+
+            }, function (error) {
+                console.log('error when fetching journey yaml data');
+                console.log(error)
+            })
+        }else{
+            updateModel(yaml);
+        }
+    }
+
+    function updateModel(data)
+    {
+        model.nodeDataArray = data['data'];
+        model.linkDataArray = data['links'];
+        myDiagram.currentTool.doCancel();
+        myDiagram.model = model;
+        $('#screen-search').autocomplete('setSource', model.nodeDataArray, 0);
+    }
+
+</script>
+</body>
+</html>

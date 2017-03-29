@@ -1,7 +1,11 @@
-from ussd.core import UssdView, UssdRequest
+from ussd.core import UssdView, UssdRequest,_customer_journey_files
 from ussd.tests.sample_screen_definition import path
 from django.http import HttpResponse
 from django.conf import settings
+
+from django.shortcuts import render
+import json
+from ussd.utilities import YamlToGo
 
 
 class AfricasTalkingUssdGateway(UssdView):
@@ -50,3 +54,14 @@ class AfricasTalkingUssdGateway(UssdView):
             res = 'END' + ' ' + str(ussd_response)
             response = HttpResponse(res)
         return response
+
+def journey_visual(request):
+    return render(request,'journey_visual.html',{'yaml_files':_customer_journey_files})
+
+
+def journey_visual_data(request):
+    yaml = request.GET.get('file',_customer_journey_files[0])
+    if yaml == None:
+        return HttpResponse()
+    res = YamlToGo(yaml).get_model_data()
+    return HttpResponse(json.dumps(res),content_type='application/json')
