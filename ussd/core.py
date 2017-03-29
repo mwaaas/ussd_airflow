@@ -30,6 +30,7 @@ from ussd import utilities
 
 _registered_ussd_handlers = {}
 _registered_filters = {}
+_customer_journey_files = []
 _built_in_functions = {}
 
 # initialize jinja2 environment
@@ -271,6 +272,15 @@ class UssdResponse(object):
 
     def __str__(self):
         return self.dumps()
+
+
+class UssdViewMetaClass(type):
+    def __init__(cls,name,bases,attr,**kwargs):
+        super(UssdViewMetaClass,cls).__init__(
+            name,bases,attr)
+        path = getattr(cls,'customer_journey_conf')
+        if path is not None:
+            _customer_journey_files.append(getattr(cls,'customer_journey_conf'))
 
 
 class UssdHandlerMetaClass(type):
@@ -567,7 +577,7 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
         )
 
 
-class UssdView(APIView):
+class UssdView(APIView, metaclass=UssdViewMetaClass):
     """
     To create Ussd View requires the following things:
         - Inherit from **UssdView** (Mandatory)

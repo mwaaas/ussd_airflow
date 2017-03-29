@@ -97,7 +97,7 @@ ENV/
 *.sqlite3
 
 # django static files
-static/
+/static
 
 # virtual environtme
 .venv
