@@ -1,9 +1,9 @@
 from django.core.management import BaseCommand
 from django.core.management import CommandError
 from django.core.management import call_command
-from ussd_airflow.settings import BASE_DIR
+from django.conf import settings
 
-path = BASE_DIR + '/ussd_airflow_app_tpl'
+path = settings.BASE_DIR + '/ussd_airflow_app_tpl'
 
 
 class Command(BaseCommand):
