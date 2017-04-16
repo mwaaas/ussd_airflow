@@ -16,7 +16,8 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
 
     types_of_food = "Choose your favourite food\n" \
                     "1. rice\n" \
-                    "2. back\n"
+                    "2. back\n" \
+                    "3. test next screen routing\n"
 
     types_of_fruit = "No fruits available choose * to go back\n" \
                      "*. back\n"
@@ -55,7 +56,7 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
         ),
         types_of_fruit=dict(
             options=dict(
-                next_screen=["invalid_screen is missing in ussd journey"]
+                next_screen={'next_screen': ["invalid_screen is missing in ussd journey"]}
             )
         ),
         types_of_drinks=dict(
@@ -360,3 +361,22 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
         #     "end of session apple",
         #     ussd_client.send('1')
         # )
+
+    def test_routing_option(self):
+        ussd_client = self.ussd_client(phone_number='200')
+        ussd_client.send('') # dial in
+        ussd_client.send('1') # choose food
+
+        self.assertEqual(
+            "screen_one",
+            ussd_client.send('3') # choose option with routing
+        )
+
+        ussd_client = self.ussd_client(phone_number='201')
+        ussd_client.send('')
+        ussd_client.send('1')  # choose food
+
+        self.assertEqual(
+            "screen_two",
+            ussd_client.send('3') # choose option with routing
+        )

@@ -142,7 +142,7 @@ class InitialScreen(UssdHandlerAbstract):
                                                    )
         else:
             next_screen = self.screen_content
-        return self.ussd_request.forward(next_screen)
+        return self.route_options(route_options=next_screen)
 
     def create_variables(self):
         for key, value in \

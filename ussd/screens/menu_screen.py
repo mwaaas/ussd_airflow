@@ -282,7 +282,7 @@ class MenuScreen(UssdHandlerAbstract):
                 return UssdResponse(self._render_django_page(new_page_number))
         next_screen = self.evaluate_input()
         if next_screen:
-            return self.ussd_request.forward(next_screen)
+            return self.route_options(next_screen)
         return self.handle_invalid_input()
 
     def evaluate_input(self):

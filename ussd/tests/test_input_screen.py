@@ -5,24 +5,27 @@ from ussd.core import ussd_session
 class TestInputHandler(UssdTestCase.BaseUssdTestCase):
 
     validation_error_message = dict(
-            enter_height={
-                "validators": {
-                    'text': ['This field is required.']
+        enter_height={
+            "validators": {
+                'text': ['This field is required.']
                 },
                 "next_screen": ['This field is required.']
             },
-            enter_age={
-                "input_identifier": ['This field is required.'],
-                "next_screen": ['thank_you_screen is missing in ussd journey'],
-                "options": ['Expected a list of items but got type "bool".']
-            },
-            show_information={
-                "type": ['Invalid screen type not supported']
-            },
-            hidden_fields={
-                "initial_screen": ["This field is required."]
-            }
+        enter_age={
+            "input_identifier": ['This field is required.'],
+            "next_screen": {'next_screen': ['thank_you_screen is missing in ussd journey']},
+            "options": ['Expected a list of items but got type "bool".']
+        },
+        show_information={
+            "type": ['Invalid screen type not supported']
+        },
+        hidden_fields={
+            "initial_screen": ["This field is required."]
+        },
+        invalid_next_screen=dict(
+            next_screen={'next_screen': ['This field is required.']}
         )
+    )
 
     def test_showing_screen_content(self):
         ussd_client = self.ussd_client()
@@ -124,4 +127,21 @@ class TestInputHandler(UssdTestCase.BaseUssdTestCase):
             "Your age is 23 and your height is 6.\n"
             "Enter anything to go back to the first screen\n",
             response
+        )
+
+    def test_next_screen_configuration(self):
+        ussd_client = self.ussd_client()
+        ussd_client.send('')  # dial in
+
+        self.assertEqual(
+            "We are not interested with height above 60",
+            ussd_client.send('60')
+        )
+
+        ussd_client = self.ussd_client()
+        ussd_client.send('')  # dial in
+
+        self.assertEqual(
+            "We are not interested with height below 30",
+            ussd_client.send('30')
         )

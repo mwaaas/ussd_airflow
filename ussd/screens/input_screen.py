@@ -94,9 +94,8 @@ class InputScreen(MenuScreen):
                     )
                 )
 
-        session_key = self.screen_content['input_identifier']
-        next_handler = self.screen_content['next_screen']
-        self.ussd_request.session[session_key] = \
-            self.ussd_request.input
+        self.ussd_request.session[
+            self.screen_content['input_identifier']
+        ] = self.ussd_request.input
 
-        return self.ussd_request.forward(next_handler)
+        return self.route_options()

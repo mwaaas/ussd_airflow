@@ -10,9 +10,13 @@ enter_height:
       Enter your height
     sw: |
       Weka ukubwa lako
-
   input_identifier: height
-  next_screen: enter_age
+  default_next_screen: enter_age
+  next_screen:
+    - condition: input|int == 60
+      next_screen: height_above_60
+    - condition: input|int == 30
+      next_screen: height_below_30
   validators:
     - regex: ^[0-9]{1,7}$
       text:
@@ -28,7 +32,6 @@ enter_age:
         Enter your age
       sw: |
         Weka miaka yako
-
     input_identifier: age
     next_screen: show_information
     options:
@@ -62,3 +65,11 @@ show_information:
     type: input_screen
     input_identifier: foo
     next_screen: enter_height
+
+height_above_60:
+  type: quit_screen
+  text: We are not interested with height above 60
+
+height_below_30:
+  type: quit_screen
+  text: We are not interested with height below 30

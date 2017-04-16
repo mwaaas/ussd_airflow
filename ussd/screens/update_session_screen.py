@@ -91,7 +91,5 @@ class UpdateSessionScreen(UssdHandlerAbstract):
 
                 # save them in the session store
                 self.ussd_request.session[key] = value
-        return self.ussd_request.forward(
-            self.screen_content['next_screen']
-        )
+        return self.route_options()
 

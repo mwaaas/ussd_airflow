@@ -53,8 +53,31 @@ class UssdContentBaseSerializer(UssdBaseSerializer, UssdTextSerializer):
     pass
 
 
-class NextUssdScreenSerializer(serializers.Serializer):
-    next_screen = serializers.CharField(max_length=50)
+class UssdNextScreenField(serializers.ListField):
+    """
+    Overriding next screen so that it can be defined as a string or a list filed for 
+    backward compatibility
+    
+    Two ways of defining next screen:
+        1. 
+        next_screen: screen_one
+        
+        2. 
+        next_screen:
+            - condition: true
+              screen: screen_two
+    """
+    def to_internal_value(self, data):
+        if not isinstance(data, list):
+            data = [
+                {"condition": 'true', "next_screen": data}
+            ]
+        return super(UssdNextScreenField, self).to_internal_value(data)
+
+
+class NextUssdScreenChildSerializer(serializers.Serializer):
+    condition = serializers.CharField(max_length=255)
+    next_screen = serializers.CharField(max_length=100)
 
     def validate_next_screen(self, value):
         if value not in self.context.keys():
@@ -62,6 +85,10 @@ class NextUssdScreenSerializer(serializers.Serializer):
                 "{screen} is missing in ussd journey".format(screen=value)
             )
         return value
+
+
+class NextUssdScreenSerializer(serializers.Serializer):
+    next_screen = UssdNextScreenField(child=NextUssdScreenChildSerializer())
 
 
 class MenuOptionSerializer(UssdTextSerializer, NextUssdScreenSerializer):

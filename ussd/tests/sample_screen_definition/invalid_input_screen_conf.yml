@@ -33,3 +33,10 @@ show_information:
     type: input
     input_identifier: foo
 
+invalid_next_screen:
+  type: input_screen
+  text: contains invalid next screen format
+  input_identifier: 56
+  next_screen:
+    - condition: 5 > 9
+

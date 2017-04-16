@@ -55,34 +55,6 @@ class RouterScreen(UssdHandlerAbstract):
     serializer = RouterSerializer
 
     def handle(self):
-        route_options = self.screen_content.get("router_options")
-        loop_items = [0]
-        if self.screen_content.get("with_items"):
-            loop_items = self.evaluate_jija_expression(
-                self.screen_content["with_items"],
-                session=self.ussd_request.session
-            ) or loop_items
-
-        for item in loop_items:
-            extra_context = {
-                "item": item
-            }
-            if isinstance(loop_items, dict):
-                extra_context.update(
-                    dict(
-                        key=item,
-                        value=loop_items[item],
-                        item={item: loop_items[item]}
-                    )
-                )
-
-            for option in route_options:
-                if self.evaluate_jija_expression(
-                        option['expression'],
-                        session=self.ussd_request.session,
-                        extra_context=extra_context
-                ):
-                    return self.ussd_request.forward(option['next_screen'])
-        return self.ussd_request.forward(
-            self.screen_content['default_next_screen']
+        return self.route_options(
+            self.screen_content.get("router_options")
         )

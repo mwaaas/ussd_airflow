@@ -35,6 +35,12 @@ types_of_food:
       next_screen: rice_chosen
     - text: back
       next_screen: choose_meal
+    - text: test next screen routing
+      next_screen:
+        - condition: phone_number == '200'
+          next_screen: test_next_screen_routing_one
+        - condition: phone_number == '201'
+          next_screen: test_next_screen_routing_two
 
 types_of_fruit:
   type: menu_screen
@@ -207,3 +213,11 @@ test_pagination_in_both_text_options_items:
 last_screen:
   type: quit_screen
   text: end of session {{testing}}
+
+test_next_screen_routing_one:
+  type: quit_screen
+  text: screen_one
+
+test_next_screen_routing_two:
+  type: quit_screen
+  text: screen_two

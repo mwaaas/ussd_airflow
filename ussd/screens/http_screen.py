@@ -74,4 +74,4 @@ class HttpScreen(UssdHandlerAbstract):
                 session=self.ussd_request.session,
                 logger=self.logger
             )
-        return self.ussd_request.forward(self.screen_content['next_screen'])
+        return self.route_options()
