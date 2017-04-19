@@ -1,6 +1,12 @@
 Ussd Airflow Changelog
 ======================
-Version 0.0.4.3
+
+Version 0.0.4.5
+-----------------
+fix-bug
+    - fixing bug validation command failing if inheritance has been used
+
+Version 0.0.4.4
 -----------------
 feature
     - next screen can now have routing options
