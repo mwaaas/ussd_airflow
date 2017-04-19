@@ -32,11 +32,13 @@ class ValidateCustomerJourneyConfig(TestCase):
         file_1 = "{0}/valid_quit_screen_conf.yml".format(path)
         file_2 = "{0}/valid_http_screen_conf.yml".format(path)
         file_3 = "{0}/valid_input_screen_conf.yml".format(path)
+        file_4 = "{0}/sample_using_inheritance.yml".format(path)
         call_command(
             "validate_ussd_journey",
             file_1,
             file_2,
             file_3,
+            file_4,
             stdout=out)
 
         expected_output = {
@@ -49,6 +51,10 @@ class ValidateCustomerJourneyConfig(TestCase):
                 error_message={}
             ),
             file_3: dict(
+                valid=True,
+                error_message={}
+            ),
+            file_4: dict(
                 valid=True,
                 error_message={}
             )
