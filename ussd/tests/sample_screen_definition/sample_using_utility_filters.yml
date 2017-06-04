@@ -1,0 +1,7 @@
+initial_screen: screen_with_utility_filters
+
+screen_with_utility_filters:
+  type: quit_screen
+  text: >
+    Formatting numbers {{1000|format_number}} and currency conversation
+    {{1000|format_currency('Ksh')}}
