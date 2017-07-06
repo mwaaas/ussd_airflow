@@ -449,12 +449,12 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                        else text_context
 
         if isinstance(text_context, dict):
-            language = self.ussd_request.language \
+            language = (self.ussd_request.session.get('override_language') or self.ussd_request.language) \
                    if self.ussd_request.language \
                           in text_context.keys() \
                    else self.ussd_request.default_language
-
             text_context = text_context[language]
+
 
         return self.render_text(
             self.ussd_request.session,

@@ -1,0 +1,90 @@
+initial_screen:
+  type: initial_screen
+  next_screen: update_session
+  pagination_config:
+    ussd_text_limit: 90
+    more_option:
+      en: More
+      fr: Plus
+      sw: Endelea
+    back_option:
+      en: Back
+      fr: Arrière
+      sw: Nyuma
+
+update_session:
+  type: update_session_screen
+  next_screen: welcome_screen
+  values_to_update:
+    - expression: "{{True}}"
+      key: override_language
+      value: fr
+
+welcome_screen:
+  type: menu_screen
+  text:
+    en: |
+      Welcome
+    sw: |
+      Karibu
+    fr: |
+      Bienvenue
+  error_message:
+    en: |
+       You have selected invalid option try again.
+    sw: |
+       Umechagua vibaya
+    fr: |
+       Vous avez sélectionné une option invalide pour réessayer.
+    default: kin
+  options:
+      - text:
+          en: |
+            Welcome
+          sw: |
+            Karibu
+          fr: |
+            Bienvenue
+          default: en
+        next_screen: Input
+
+Input:
+  type: input_screen
+  text:
+    en: |
+      To complete enter any value
+    sw: |
+      Kumaliza jaza kitu chochote
+    fr: |
+      Pour compléter, saisissez une valeur
+  error_message:
+    en: |
+       You have selected invalid option try again.
+    sw: |
+      Ibyo uhisemo ntibyakunze, ongera ugerageze.
+    fr: |
+       Umechagua vibaya
+    default: en
+  input_identifier: anything
+  next_screen: Quit
+  validators:
+    - regex: "^[0-9]+$"
+      text:
+        en: |
+          Please re-enter
+        fr: |
+          Re-entrer
+        sw: |
+          Jaribu tena
+        default: en
+
+
+Quit:
+  type: quit_screen
+  text:
+    en: |
+      Bye
+    sw: |
+      Kwaheri
+    fr: |
+      Au revoir
