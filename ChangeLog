@@ -1,6 +1,11 @@
 Ussd Airflow Changelog
 ======================
 
+Version 0.0.4.6
+-----------------
+Feature
+    - Allow Content Provider to determine language to use to display screens
+
 Version 0.0.4.5
 -----------------
 fix-bug
