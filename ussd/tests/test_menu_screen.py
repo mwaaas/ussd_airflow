@@ -4,6 +4,7 @@ This module is involved in testing Menu screen only
 from ussd.tests import UssdTestCase
 from ussd.core import ussd_session
 from collections import OrderedDict
+from django.test import override_settings
 
 
 class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
@@ -125,6 +126,32 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
 
         # choose 0 to go back
         self.assertEqual(self.choose_meal, ussd_client.send('0'))
+
+    @override_settings(
+        USSD_INDEX_FORMAT='& '
+    )
+    def test_index_format(self):
+        # Test for menu options
+        ussd_client = self.ussd_client()
+        response = ussd_client.send('')
+        expected_text = self.choose_meal
+        expected_text = expected_text.replace('. ', '& ')
+        self.assertEqual(expected_text, response)
+
+        # Test for list options
+        ussd_client = self.ussd_client()
+        self.add_vegetable_list_in_session(ussd_client)
+
+        # dial in
+        ussd_client.send('')
+
+        # choose vegetables
+        expected_text = self.types_of_vegetables
+        expected_text = expected_text.replace('. ', '& ')
+        self.assertEqual(
+            expected_text,
+            ussd_client.send('4')
+        )
 
     # todo test invalid option with screen that have multiple pages
     def test_invalid_input(self):

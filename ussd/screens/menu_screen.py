@@ -5,6 +5,9 @@ from rest_framework.serializers import ListField, ValidationError, \
     CharField
 from django.core.paginator import Paginator
 import textwrap
+from django.conf import settings
+from ussd import defaults
+
 
 class WithItemField(CharField):
     def to_internal_value(self, data):
@@ -342,8 +345,11 @@ class MenuScreen(UssdHandlerAbstract):
         for i, option in enumerate(self.screen_content.get('options', []),
                                    start_index):
             input_value = option.get('input_value') or i
-            input_display = option.get('input_display') or \
-                            "{index}. ".format(index=input_value)
+            input_display = option.get('input_display') or "{index}{index_format}".format(
+                index=input_value,
+                index_format=getattr(settings, 'USSD_INDEX_FORMAT', defaults.index_format)
+            )
+
             text = "{display_option}{text}".format(
                 display_option=input_display,
                 text=self._add_end_line(
@@ -385,10 +391,14 @@ class MenuScreen(UssdHandlerAbstract):
 
             context.update(extra)
 
+            index_text = "{index}{index_format}".format(
+                index=index,
+                index_format=getattr(settings, 'USSD_INDEX_FORMAT', defaults.index_format))
+
             list_items.append(
                 ListItem(
-                    self._add_end_line("{index}. {text}".format(
-                        index=index,
+                    self._add_end_line("{index_text}{text}".format(
+                        index_text=index_text,
                         text=UssdHandlerAbstract.render_text(
                             self.ussd_request.session,
                             text,
