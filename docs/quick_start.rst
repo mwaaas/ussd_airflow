@@ -54,7 +54,7 @@ Setup
 
         .. code-block:: text
 
-            python validate_ussd_journey /file/path
+            python manage.py validate_ussd_journey /file/path
 
       To test the ussd view do this curl request.
 
