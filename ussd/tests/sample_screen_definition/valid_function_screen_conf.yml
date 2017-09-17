@@ -1,0 +1,12 @@
+initial_screen: get_name
+
+get_name:
+  type: function_screen
+  next_screen: display_name
+  session_key: func_response
+  function: ussd.tests.utils.display_name
+
+
+display_name:
+  type: quit_screen
+  text: "Your name is {{func_response.name}} and phone number is {{func_response.phone_number}}"

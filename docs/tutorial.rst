@@ -62,6 +62,11 @@ The following are types of ussd and the rules to write them.
 
 .. autoclass:: ussd.screens.custom_screen.CustomScreen
 
+9. Function screen ( type -> function_screen )
+----------------------------------------------
+
+.. autoclass:: ussd.screens.function_screen.FunctionScreen
+
 
 ***Once you have created your ussd screens run the following code to validate
 them:***

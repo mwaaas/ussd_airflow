@@ -1,0 +1,28 @@
+initial_screen: get_name
+
+get_name:
+  type: function_screen
+  next_screen: get_height
+  session_key: func_response
+  function: ussd.tests.utils.show_name # function does not exists
+
+get_height:
+  type: function_screen
+  next_screen: get_weight
+  session_key: func_response
+  function: ussd.tests.util.display_name # module util does not exists
+
+get_weight:
+  type: function_screen
+  next_screen: get_age
+  session_key: func_response
+  function: display_name # module not provided
+
+# Does not have all the fields required for a function screen
+get_age:
+  type: function_screen
+
+
+display_name:
+  type: quit_screen
+  text: "Your name is {{func_response.name}} and phone number is {{func_response.phone_number}}"
