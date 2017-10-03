@@ -78,6 +78,4 @@ class FunctionScreen(UssdHandlerAbstract):
             self.screen_content['session_key']
         ] = getattr(module, function_name)(self.ussd_request)
 
-        return self.ussd_request.forward(
-            self.screen_content['next_screen']
-        )
+        return self.route_options()

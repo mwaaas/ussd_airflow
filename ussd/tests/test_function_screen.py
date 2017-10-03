@@ -20,18 +20,28 @@ class TestFunctionScreen(UssdTestCase.BaseUssdTestCase):
     )
 
     def test(self):
-        phone_number = '0711111111'
-        expected_text = "Your name is mwas " \
-                        "and phone number is {0}"
-        self.assertEqual(expected_text.format(phone_number),
-                         self.ussd_client(
-                             phone_number=phone_number).send('')
-                         )
+        client = self.ussd_client(phone_number='200')
+        client.send('')  # dial in
+        client.send('10')  # enter 10
+        resp = client.send('1')
 
-        # test with a different number
-        phone_number = '072222222'
+        expected_text = "The results was an {0} number " \
+                        "which is {1}"
+
         self.assertEqual(
-            expected_text.format(phone_number),
-            self.ussd_client(
-                phone_number=phone_number).send('')
+            expected_text.format('odd', 11),
+            resp
+        )
+
+        client = self.ussd_client(phone_number='200')
+        client.send('')  # dial in
+        client.send('10')  # enter 10
+        resp = client.send('2')
+
+        expected_text = "The results was an {0} number " \
+                        "which is {1}"
+
+        self.assertEqual(
+            expected_text.format('even', 12),
+            resp
         )

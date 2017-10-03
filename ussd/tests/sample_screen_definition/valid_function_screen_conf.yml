@@ -1,12 +1,30 @@
-initial_screen: get_name
+initial_screen: enter_fisrt_number
 
-get_name:
+enter_fisrt_number:
+  type: input_screen
+  input_identifier: first_number
+  next_screen: enter_second_number
+  text: Enter your first number
+
+enter_second_number:
+  type: input_screen
+  input_identifier: second_number
+  next_screen: sum_numbers
+  text: Enter your second number
+
+sum_numbers:
   type: function_screen
-  next_screen: display_name
-  session_key: func_response
-  function: ussd.tests.utils.display_name
+  default_next_screen: display_odd_number
+  function: ussd.tests.utils.sum_numbers
+  session_key: sum_results
+  next_screen:
+    - condition: sum_results|int % 2 == 0
+      next_screen: display_even_number
 
-
-display_name:
+display_odd_number:
   type: quit_screen
-  text: "Your name is {{func_response.name}} and phone number is {{func_response.phone_number}}"
+  text: "The results was an odd number which is {{sum_results}}"
+
+display_even_number:
+  type: quit_screen
+  text: "The results was an even number which is {{sum_results}}"
