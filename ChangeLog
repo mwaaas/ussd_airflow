@@ -1,6 +1,12 @@
 Ussd Airflow Changelog
 ======================
 
+Version 0.0.5
+-----------------
+bug-fx
+    - Fixing a bug in function screen in
+    using multiple next screens
+
 Version 0.0.4.9
 -----------------
 Feature
