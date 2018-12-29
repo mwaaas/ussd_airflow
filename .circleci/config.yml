@@ -13,7 +13,9 @@ jobs:
 
       - run:
           name: start the containers
-          command: docker-compose up -d
+          command: |
+            docker-compose up -d
+            sleep 10
 
       - run:
           name: Running tests
