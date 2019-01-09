@@ -27,6 +27,9 @@ import requests
 import inspect
 from ussd.tasks import report_session
 from ussd import utilities
+from .graph import Graph, Link, Vertex, convert_graph_to_mermaid_text
+from collections import namedtuple
+import typing
 
 _registered_ussd_handlers = {}
 _registered_filters = {}
@@ -316,10 +319,12 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
 
     def __init__(self, ussd_request: UssdRequest,
                  handler: str, screen_content: dict,
-                 initial_screen: dict, logger=None):
+                 initial_screen: dict, logger=None,
+                 raw_text=False):
         self.ussd_request = ussd_request
         self.handler = handler
         self.screen_content = screen_content
+        self.raw_text = raw_text
 
         self.SINGLE_VAR = re.compile(r"^%s\s*(\w*)\s*%s$" % (
             '{{', '}}'))
@@ -455,7 +460,8 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
                    else self.ussd_request.default_language
             text_context = text_context[language]
 
-
+        if self.raw_text:
+            return text_context
         return self.render_text(
             self.ussd_request.session,
             text_context
@@ -616,6 +622,37 @@ class UssdHandlerAbstract(object, metaclass=UssdHandlerMetaClass):
             **keyword_args
         )
 
+    @staticmethod
+    def get_handler(screen_type):
+        return _registered_ussd_handlers[screen_type]
+
+    def get_next_screens(self) -> typing.List[Link]:
+        raise NotImplementedError
+
+    def render_graph(self, ussd_journey: dict, graph: Graph):
+        # adding the screen as vertex
+        graph.add_vertex(Vertex(self.handler, self.show_ussd_content()))
+
+        # get next screens
+        next_screens = self.get_next_screens()
+
+        # add links
+        [graph.add_link(i) for i in next_screens]
+
+        for i in next_screens:
+
+            # check if node has been created
+            if not (graph.get_vertex(i.end) and graph.get_vertex(i.end)['text'] != ""):
+                graph.add_vertex(i.end)
+                if ussd_journey.get(i.end.name):
+                    next_screen_content = ussd_journey[i.end.name]
+                    handler = self.get_handler(next_screen_content['type'])
+                    handler(self.ussd_request, i.end.name, next_screen_content,
+                            self.initial_screen, raw_text=self.raw_text). \
+                    render_graph(ussd_journey, graph)
+
+
+NextScreens = namedtuple("NextScreens", "next_screens links")
 
 class UssdView(APIView, metaclass=UssdViewMetaClass):
     """
@@ -922,3 +959,62 @@ class UssdView(APIView, metaclass=UssdViewMetaClass):
                 is_valid = screen_validation
 
         return is_valid, errors
+
+    @staticmethod
+    def get_initial_screen(ussd_content: dict):
+        initial_screen = ussd_content['initial_screen']
+        return initial_screen if isinstance(initial_screen, dict) \
+            else {"initial_screen": initial_screen}
+
+
+def convert_error_response_to_mermaid_error(error_response: dict, errors=None, paths=None) -> list:
+    errors = [] if errors is None else errors
+    paths = [] if paths is None else paths
+
+    for key, value in error_response.items():
+        if isinstance(value, list):
+            if len(value) == 1 and value[0] == "This field is required.":
+                errors.append(
+                    dict(path=paths, message=value[0].replace('This field', key))
+                )
+            else:
+                errors.append(
+                    dict(path=paths + [key], message='\n'.join(value))
+                )
+        else:
+            convert_error_response_to_mermaid_error(value, errors, paths=paths + [key])
+    return errors
+
+
+def _convert_obj_to_mermaid_error_obj(key, value, errors: list):
+    if isinstance(value, list):
+        return dict(path=[key], message='\n'.join(value))
+
+    for k, v in value.items():
+        error_obj = {}
+        j = _convert_obj_to_mermaid_error_obj(k, v)
+        error_obj['path'] = [key] + j['path']
+        error_obj['message'] = j['message']
+        errors.append(error_obj)
+
+    return error_obj
+
+
+def render_journey_as_graph(ussd_screen: dict) -> Graph:
+    graph = Graph()
+
+    initial_screen = ussd_screen['initial_screen']
+    _registered_ussd_handlers['initial_screen'](
+        UssdRequest("dummy", "dummy", "", "en"),
+        "initial_screen",
+        initial_screen,
+        initial_screen,
+        raw_text=True
+    ).render_graph(ussd_screen, graph)
+    return graph
+
+
+def render_journey_as_mermaid_text(ussd_screen: dict) -> str:
+    return convert_graph_to_mermaid_text(
+        render_journey_as_graph(ussd_screen)
+    )

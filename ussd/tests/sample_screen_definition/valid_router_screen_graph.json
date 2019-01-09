@@ -1,0 +1,123 @@
+{
+  "vertices": {
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "router_exa_1": {
+      "id": "router_exa_1",
+      "text": "Routing screen: router_exa_1"
+    },
+    "200_phone_number": {
+      "id": "200_phone_number",
+      "text": "This number is 200"
+    },
+    "202_phone_number": {
+      "id": "202_phone_number",
+      "text": "This number is 202"
+    },
+    "default_screen": {
+      "id": "default_screen",
+      "text": "This is the default screen"
+    },
+    "sample_router_screen_with_loop": {
+      "id": "sample_router_screen_with_loop",
+      "text": "Routing screen: sample_router_screen_with_loop"
+    },
+    "registred_screen": {
+      "id": "registred_screen",
+      "text": "You are registered user"
+    },
+    "not_registered": {
+      "id": "not_registered",
+      "text": "You are not registered user"
+    },
+    "sample_router_screen_with_dict_loop": {
+      "id": "sample_router_screen_with_dict_loop",
+      "text": "Routing screen: sample_router_screen_with_dict_loop"
+    },
+    "207_screen": {
+      "id": "207_screen",
+      "text": "This screen has been routed here because the phone number is {{phone_number}}"
+    }
+  },
+  "edges": [
+    {
+      "start": "initial_screen",
+      "end": "router_exa_1",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "router_exa_1",
+      "end": "200_phone_number",
+      "text": "{{ phone_number == 200|string }}",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "router_exa_1",
+      "end": "202_phone_number",
+      "text": "{{ phone_number == 202| string }}",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "router_exa_1",
+      "end": "sample_router_screen_with_loop",
+      "text": "{{ phone_number in [203|string, 204|string, 205|string] }}",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "router_exa_1",
+      "end": "sample_router_screen_with_dict_loop",
+      "text": "{{ phone_number in [ 206|string, 207|string] }}",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "router_exa_1",
+      "end": "default_screen",
+      "text": "default",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "sample_router_screen_with_loop",
+      "end": "registred_screen",
+      "text": "{{ item == 'registered' }}",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "sample_router_screen_with_loop",
+      "end": "not_registered",
+      "text": "{{ item == 'not_registered'}}",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "sample_router_screen_with_loop",
+      "end": "default_screen",
+      "text": "default",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "sample_router_screen_with_dict_loop",
+      "end": "207_screen",
+      "text": "{{ key == 'phone_number' and value == phone_number}}",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "sample_router_screen_with_dict_loop",
+      "end": "default_screen",
+      "text": "default",
+      "type": "arrow",
+      "stroke": "thick"
+    }
+  ]
+}

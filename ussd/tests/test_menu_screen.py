@@ -57,7 +57,7 @@ class TestMenuHandler(UssdTestCase.BaseUssdTestCase):
         ),
         types_of_fruit=dict(
             options=dict(
-                next_screen={'next_screen': ["invalid_screen is missing in ussd journey"]}
+                next_screen=["invalid_screen is missing in ussd journey"]
             )
         ),
         types_of_drinks=dict(

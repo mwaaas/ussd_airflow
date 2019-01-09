@@ -7,6 +7,8 @@ from django.core.paginator import Paginator
 import textwrap
 from django.conf import settings
 from ussd import defaults
+from ussd.graph import Link, Vertex
+import typing
 
 
 class WithItemField(CharField):
@@ -91,11 +93,12 @@ class ListItem(object):
 
 class MenuOption(object):
     def __init__(self, text, next_screen, index_display=None,
-                 index_value=None):
+                 index_value=None, raw_text=''):
         self.text = text
         self.next_screen = next_screen
         self.index_display = index_display or index_value
         self.index_value = index_value or self.index_display
+        self.raw_text = raw_text
 
 
 class MenuScreen(UssdHandlerAbstract):
@@ -189,7 +192,8 @@ class MenuScreen(UssdHandlerAbstract):
         self.paginator = self.get_paginator()
 
     def show_ussd_content(self):
-        self.ussd_request.session['_ussd_state']['page'] = 1
+        if not self.raw_text:
+            self.ussd_request.session['_ussd_state']['page'] = 1
         return self._render_django_page(1)
 
     def _render_django_page(self, index):
@@ -335,7 +339,10 @@ class MenuScreen(UssdHandlerAbstract):
                                               session=self.ussd_request.session,
                                               default=[]
                                               )
-
+        if items is None and self.raw_text:
+            txt = loop_value or value
+            txt += '\n'
+            return [ListItem(txt, items_section['session_key'])]
         return getattr(self, loop_method)(
             text, value, items, start_index
         )
@@ -361,7 +368,8 @@ class MenuScreen(UssdHandlerAbstract):
                     text,
                     option['next_screen'],
                     input_display,
-                    input_value
+                    input_value,
+                    self.get_text(text_context=option['text'])
                 )
             )
         return menu_options
@@ -416,5 +424,30 @@ class MenuScreen(UssdHandlerAbstract):
 
     def _with_dict(self, text, value, items, start_index):
         return self._with_items(text, value, items, start_index)
+
+    def get_next_screens(self) -> typing.List[Link]:
+        links = []
+        screen_vertex = Vertex(self.handler)
+        if self.list_options:
+            item_section = self.screen_content['items']
+            links.append(
+                Link(screen_vertex, Vertex(item_section['next_screen']), item_section['session_key'])
+            )
+
+        for option in self.menu_options:
+            if isinstance(option.next_screen, list):
+                for i in option.next_screen:
+                    links.append(
+                        Link(screen_vertex, Vertex(i['next_screen']),
+                             "option: {option}\nrouting: {routing}\n".format(
+                                 option=option.raw_text, routing=i['condition']))
+                    )
+            else:
+                links.append(
+                    Link(screen_vertex, Vertex(option.next_screen), option.raw_text)
+                )
+
+        return links
+
 
 

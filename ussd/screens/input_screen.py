@@ -5,6 +5,8 @@ from django.utils.encoding import force_text
 import re
 from rest_framework import serializers
 from ussd.screens.menu_screen import MenuScreen
+from ussd.graph import Link, Vertex
+import typing
 
 
 class InputValidatorSerializer(UssdTextSerializer):
@@ -99,3 +101,60 @@ class InputScreen(MenuScreen):
         ] = self.ussd_request.input
 
         return self.route_options()
+
+    def get_next_screens(self) -> typing.List[Link]:
+        # generate validators links
+        links = []
+        screen_vertex = Vertex(self.handler)
+        for index, validation_screen in enumerate(self.screen_content.get("validators", [])):
+            validator_screen_name = self.handler + "_validator_" + str(index + 1)
+            validation_vertex = Vertex(validator_screen_name,
+                                       self.get_text(validation_screen['text']))
+            if 'regex' in validation_screen:
+                validation_command = 'regex: ' + validation_screen['regex']
+            else:
+                validation_command = 'expression: ' + validation_screen['expression']
+            links.append(
+                Link(screen_vertex,
+                     validation_vertex,
+                     "validation",
+                     "arrow",
+                     "dotted"
+                     )
+            )
+
+            links.append(
+                Link(
+                    validation_vertex,
+                    screen_vertex,
+                    validation_command,
+                    "arrow",
+                    "dotted"
+                )
+            )
+
+        if isinstance(self.screen_content.get("next_screen"), list):
+            for i in self.screen_content.get("next_screen", []):
+                links.append(
+                    Link(screen_vertex,
+                         Vertex(i['next_screen'], ""),
+                         i['condition'])
+            )
+        elif self.screen_content.get('next_screen'):
+            links.append(
+                Link(
+                    screen_vertex,
+                    Vertex(self.screen_content['next_screen']),
+                    self.screen_content['input_identifier']
+                )
+            )
+
+        if self.screen_content.get('default_next_screen'):
+            links.append(
+                Link(
+                    screen_vertex,
+                    Vertex(self.screen_content['default_next_screen'], ""),
+                    self.screen_content['input_identifier']
+                )
+            )
+        return links + super(InputScreen, self).get_next_screens()

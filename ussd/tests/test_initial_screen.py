@@ -7,7 +7,7 @@ from ussd.tests import UssdTestCase
 class TestInitialHandler(UssdTestCase.BaseUssdTestCase):
     validation_error_message = {
         'initial_screen': {
-            'next_screen': {"next_screen": ['invalid_screen is missing in ussd journey']},
+            'next_screen': ['invalid_screen is missing in ussd journey'],
             'variables': {'file': ['This field is required.'],
                           'namespace': ['This field is required.']},
             'ussd_report_session': {

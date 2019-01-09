@@ -1,0 +1,65 @@
+{
+  "vertices": {
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "enter_fisrt_number": {
+      "id": "enter_fisrt_number",
+      "text": "Enter your first number\n"
+    },
+    "enter_second_number": {
+      "id": "enter_second_number",
+      "text": "Enter your second number\n"
+    },
+    "sum_numbers": {
+      "id": "sum_numbers",
+      "text": "function_screen\nussd.tests.utils.sum_numbers"
+    },
+    "display_odd_number": {
+      "id": "display_odd_number",
+      "text": "The results was an odd number which is {{sum_results}}"
+    },
+    "display_even_number": {
+      "id": "display_even_number",
+      "text": "The results was an even number which is {{sum_results}}"
+    }
+  },
+  "edges": [
+    {
+      "start": "initial_screen",
+      "end": "enter_fisrt_number",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "enter_fisrt_number",
+      "end": "enter_second_number",
+      "text": "first_number",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "enter_second_number",
+      "end": "sum_numbers",
+      "text": "second_number",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "sum_numbers",
+      "end": "display_even_number",
+      "text": "sum_results|int % 2 == 0",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "sum_numbers",
+      "end": "display_odd_number",
+      "text": "sum_results",
+      "type": "arrow",
+      "stroke": "thick"
+    }
+  ]
+}

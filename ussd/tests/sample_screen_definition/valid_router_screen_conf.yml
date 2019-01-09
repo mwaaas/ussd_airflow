@@ -1,4 +1,6 @@
-initial_screen: router_exa_1
+initial_screen:
+  type: initial_screen
+  next_screen: router_exa_1
 
 router_exa_1:
   type: router_screen
@@ -50,7 +52,7 @@ sample_router_screen_with_dict_loop:
   with_items:
     phone_number: '207'
   router_options:
-    - expression: '{{ key == "phone_number" and value == phone_number}}'
+    - expression: "{{ key == 'phone_number' and value == phone_number}}"
       next_screen: 207_screen
 
 207_screen:

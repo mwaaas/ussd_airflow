@@ -3,8 +3,10 @@ import requests
 import staticconf
 from django.test import LiveServerTestCase, TestCase
 from django.urls import reverse
-from ussd.core import UssdView, load_yaml
+from ussd.core import UssdView, load_yaml, render_journey_as_graph, render_journey_as_mermaid_text
 from ussd.tests.sample_screen_definition import path
+import os
+import json
 
 
 class UssdTestCase(object):
@@ -16,14 +18,18 @@ class UssdTestCase(object):
         validate_ussd = True
 
         def setUp(self):
-            file_yml = self.__module__.split('.')[-1]. \
-                           replace('test_', '') + '_conf.yml'
+            file_prefix = self.__module__.split('.')[-1].replace('test_', '')
+            file_yml = file_prefix + '_conf.yml'
             self.valid_yml = 'valid_' + file_yml
             self.invalid_yml = 'invalid_' + file_yml
+            self.mermaid_file = path + '/' + 'valid_' + file_prefix + '_mermaid.txt'
+            self.graph_file = path + '/' + 'valid_' + file_prefix + '_graph.json'
             self.namespace = self.__module__.split('.')[-1]
             self.maxDiff = None
 
             super(UssdTestCase.BaseUssdTestCase, self).setUp()
+
+            #
 
         def _test_ussd_validation(self, yaml_to_validate, expected_validation,
                                   expected_errors):
@@ -53,6 +59,60 @@ class UssdTestCase(object):
                                        getattr(self,
                                                "validation_error_message",
                                                {}))
+
+        def test_rendering_graph_js(self):
+            if os.path.exists(self.graph_file):
+                namespace = self.namespace + 'mermaid_js'
+                file_path = path + '/' + self.valid_yml
+                load_yaml(file_path, namespace)
+                ussd_screens = staticconf.config.get_namespace(namespace). \
+                    get_config_values()
+
+                actual_graph_js = render_journey_as_graph(ussd_screens)
+
+                expected_graph_js = json.loads(self.read_file_content(self.graph_file))
+
+                for key, value in expected_graph_js["vertices"].items():
+                    if value.get('id') == 'test_explicit_dict_loop':
+                        for i in (
+                                "a for apple\n",
+                                "b for boy\n",
+                                "c for cat\n"
+                        ):
+                            self.assertRegex(value.get('text'), i)
+                    else:
+                        self.assertDictEqual(value, actual_graph_js.vertices[key])
+                # self.assertDictEqual(expected_graph_js["vertices"], actual_graph_js.vertices)
+
+                for index, value in enumerate(expected_graph_js['edges']):
+                    self.assertDictEqual(value, actual_graph_js.get_edges()[index])
+                self.assertEqual(expected_graph_js["edges"], actual_graph_js.get_edges())
+
+        def test_rendering_mermaid_js(self):
+            if os.path.exists(self.mermaid_file):
+                namespace = self.namespace + 'mermaid_js'
+                file_path = path + '/' + self.valid_yml
+                load_yaml(file_path, namespace)
+                ussd_screens = staticconf.config.get_namespace(namespace).\
+                    get_config_values()
+
+                mermaid_text_format = render_journey_as_mermaid_text(ussd_screens)
+
+                file_content = self.read_file_content(self.mermaid_file)
+
+                expected_text_lines = file_content.split('\n')
+                actual_text_lines = mermaid_text_format.split('\n')
+
+                for index, line in enumerate(expected_text_lines):
+                    self.assertEqual(line, actual_text_lines[index])
+
+                self.assertEqual(mermaid_text_format, file_content)
+
+        def read_file_content(self, file_path):
+            with open(file_path) as f:
+                mermaid_text = f.read()
+            return mermaid_text
+
 
         def ussd_client(self, generate_customer_journey=True, **kwargs):
             class UssdTestClient(object):

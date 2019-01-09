@@ -2,6 +2,8 @@ from ussd.core import UssdHandlerAbstract
 from ussd.screens.serializers import UssdBaseSerializer, \
     NextUssdScreenSerializer
 from rest_framework import serializers
+from ussd.graph import Link, Vertex
+import json
 
 
 class UpdateSessionExpressionSerializer(serializers.Serializer):
@@ -93,3 +95,17 @@ class UpdateSessionScreen(UssdHandlerAbstract):
                 self.ussd_request.session[key] = value
         return self.route_options()
 
+    def show_ussd_content(self, **kwargs):
+        results = json.dumps(self.screen_content, indent=2, sort_keys=True)
+        results = results.replace('"', "'")
+        return results
+
+    def get_next_screens(self):
+        return [
+            Link(
+                Vertex(self.handler),
+                Vertex(self.screen_content['next_screen'],
+                       ""
+                       )
+            )
+        ]

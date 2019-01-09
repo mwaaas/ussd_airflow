@@ -2,6 +2,8 @@ from ussd.core import UssdHandlerAbstract, load_yaml
 from rest_framework import serializers
 from ussd.screens.serializers import NextUssdScreenSerializer
 import staticconf
+from ussd.graph import Vertex, Link
+import typing
 
 
 class VariableDefinition(serializers.Serializer):
@@ -120,6 +122,13 @@ class InitialScreen(UssdHandlerAbstract):
     screen_type = "initial_screen"
 
     serializer = InitialScreenSerializer
+
+    def get_next_screens(self) -> typing.List[Link]:
+        next_screens = self.screen_content['next_screen']
+        return [Link(Vertex(self.handler), Vertex(next_screens, ''), "")]
+
+    def show_ussd_content(self):
+        return ""
 
     def handle(self):
 

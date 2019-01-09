@@ -2,6 +2,8 @@ from ussd.core import UssdHandlerAbstract, UssdHandlerMetaClass
 from ussd.screens.serializers import UssdBaseSerializer
 from rest_framework import serializers
 from ussd.utilities import str_to_class
+import typing
+from ussd.graph import Link, Vertex
 
 
 class CustomScreenSerializer(UssdBaseSerializer):
@@ -91,16 +93,33 @@ class CustomScreen(UssdHandlerAbstract):
     screen_type = "custom_screen"
     serializer = CustomScreenSerializer
 
-    def handle(self):
-        # Todo initiate the class in the core. to avoid double changing
-        # if the parameter changes.
-
-        # calling the custom screen handler method
-        return str_to_class(
+    def __init__(self, *args, **kwargs):
+        super(CustomScreen, self).__init__(*args, **kwargs)
+        self.custom_screen_instance = str_to_class(
             self.screen_content['screen_obj']
         )(
             self.ussd_request,
             self.handler,
             self.screen_content,
             initial_screen={},
-        ).handle()
+        )
+
+    def handle(self):
+        # Todo initiate the class in the core. to avoid double changing
+        # if the parameter changes.
+
+        # calling the custom screen handler method
+        return self.custom_screen_instance.handle()
+
+    def show_ussd_content(self, **kwargs):
+        if self.custom_screen_instance.__class__.__dict__.get('show_ussd_content'):
+            return self.custom_screen_instance.show_ussd_content()
+        return "custom_screen\n{}".format(self.screen_content['screen_obj'])
+
+    def get_next_screens(self) -> typing.List[Link]:
+        if self.custom_screen_instance.__class__.__dict__.get('get_next_screens'):
+            return self.custom_screen_instance.get_next_screens()
+        return [
+            Link(Vertex(self.handler),
+                 Vertex(self.screen_content['next_screen']),
+                 self.screen_content['input_identifier'])]

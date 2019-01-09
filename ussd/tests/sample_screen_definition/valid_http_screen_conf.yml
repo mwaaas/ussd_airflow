@@ -1,4 +1,6 @@
-initial_screen: http_get_example
+initial_screen:
+  type: initial_screen
+  next_screen: http_get_example
 
 http_get_example:
   type: http_screen

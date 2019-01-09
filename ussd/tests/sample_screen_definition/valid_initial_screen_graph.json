@@ -1,0 +1,21 @@
+{
+  "vertices":{
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "screen_one":{
+      "id": "screen_one",
+      "text": "Just testing"
+    }
+  },
+  "edges":[
+    {
+      "start": "initial_screen",
+      "end": "screen_one",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+  }
+  ]
+}

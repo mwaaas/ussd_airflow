@@ -1,6 +1,9 @@
 from ussd.core import UssdHandlerAbstract, UssdResponse
 from ussd.screens.serializers import UssdContentBaseSerializer
 from ussd import defaults as ussd_airflow_variables
+from ussd.graph import Link
+import typing
+
 
 class QuitScreen(UssdHandlerAbstract):
     """
@@ -26,3 +29,9 @@ class QuitScreen(UssdHandlerAbstract):
                                                support_countdown=False)
 
         return UssdResponse(self.get_text(), status=False)
+
+    def show_ussd_content(self):
+        return self.get_text()
+
+    def get_next_screens(self) -> typing.List[Link]:
+        return []

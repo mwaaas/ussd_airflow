@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import url, include
 from django.contrib import admin
 from ussd.views import AfricasTalkingUssdGateway
 
@@ -21,5 +21,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^africastalking_gateway',
         AfricasTalkingUssdGateway.as_view(),
-        name='africastalking_url')
+        name='africastalking_url'),
+    url(r'^ussd_airflow/', include('ussd.urls'))
 ]

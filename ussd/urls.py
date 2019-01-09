@@ -1,7 +1,7 @@
 from django.conf.urls import url
-from ussd.views import journey_visual,journey_visual_data
+from ussd.views import MermaidText, ValidateJourney
 
 urlpatterns = [
-    url(r'ussd-airflow/journey_visual$',journey_visual,name="journey_visual"),
-    url(r'ussd-airflow/journey_visual_data$',journey_visual_data,name='journey_visual_data')
+    url(r'mermaid_text$', MermaidText.as_view(), name="mermaid_text"),
+    url(r'validate_journey$', ValidateJourney.as_view())
 ]

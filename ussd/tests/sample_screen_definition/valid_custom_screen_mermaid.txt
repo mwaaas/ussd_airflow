@@ -1,0 +1,4 @@
+graph TD
+initial_screen ==> custom_screen_1["This is a custom Handler1"]
+custom_screen_1 ==> custom_screen_2["Enter a digit and it will be doubled on your behalf"]
+custom_screen_2 =="var1"==> quit["Your custom screen has modified your input to {{var1}}"]

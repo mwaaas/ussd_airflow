@@ -2,7 +2,8 @@ from ussd.core import UssdHandlerAbstract
 from ussd.screens.serializers import NextUssdScreenSerializer
 from rest_framework import serializers
 from ussd.tasks import http_task
-
+import json
+from ussd.graph import Link, Vertex
 
 class HttpScreenConfSerializer(serializers.Serializer):
     method = serializers.ChoiceField(
@@ -75,3 +76,15 @@ class HttpScreen(UssdHandlerAbstract):
                 logger=self.logger
             )
         return self.route_options()
+
+    def show_ussd_content(self, **kwargs):
+        results = "http_screen\n{}".format(json.dumps(self.screen_content['http_request'],
+                                                   indent=2, sort_keys=True))
+        results = results.replace('"', "'")
+        return results
+
+    def get_next_screens(self):
+        return [
+            Link(Vertex(self.handler), Vertex(self.screen_content['next_screen']),
+                 self.screen_content['session_key'])
+        ]

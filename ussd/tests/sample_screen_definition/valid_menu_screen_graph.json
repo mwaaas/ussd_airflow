@@ -1,0 +1,273 @@
+{
+  "vertices":{
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "choose_meal": {
+      "id": "choose_meal",
+      "text": "Choose your favourite meal\n1. food\n2. fruits\n3. drinks\n4. vegetables\n5. test pagination\n"
+    },
+    "types_of_food": {
+      "id": "types_of_food",
+      "text": "Choose your favourite food\n1. rice\n2. back\n3. test next screen routing\n"
+    },
+    "types_of_fruit": {
+      "id": "types_of_fruit",
+      "text": "No fruits available choose * to go back\n*. back\n"
+    },
+    "types_of_drinks": {
+      "id": "types_of_drinks",
+      "text": "No drinks available choose 0 to go back\n0 back\n"
+    },
+    "types_of_vegetables": {
+      "id": "types_of_vegetables",
+      "text": "Choose one of the following vegetables\n{{vegetables_list}}\n"
+    },
+    "choose_quantity": {
+      "id": "choose_quantity",
+      "text": "Choose vegetable size\n{{ vegetable_quantity }}\n2. back\n"
+    },
+    "last_screen": {
+      "id": "last_screen",
+      "text": "end of session {{testing}}"
+    },
+    "rice_chosen": {
+      "id": "rice_chosen",
+      "text": "Your rice will be delivered shortly. Choose 1 to go back\n1. back\n"
+    },
+    "selected_vegetable": {
+      "id": "selected_vegetable",
+      "text": "You have selected this {{selected_vegetable}} and this quantity\n98. More\n"
+    },
+    "test_explicit_dict_loop": {
+      "id": "test_explicit_dict_loop",
+      "text": "1. a for apple\n2. b for boy\n3. c for cat\n"
+    },
+    "test_invalid_jija_variable": {
+      "id": "test_invalid_jija_variable",
+      "text": "Choose one of the following vegetables\n"
+    },
+    "test_list_with_native_loop": {
+      "id": "test_list_with_native_loop",
+      "text": "1. a\n2. b\n3. c\n4. d\n"
+    },
+    "test_next_screen_routing_one": {
+      "id": "test_next_screen_routing_one",
+      "text": "screen_one"
+    },
+    "test_next_screen_routing_two": {
+      "id": "test_next_screen_routing_two",
+      "text": "screen_two"
+    },
+    "test_pagination_in_both_text_and_options": {
+      "id": "test_pagination_in_both_text_and_options",
+      "text": "This screen has both large text and options that exceed the limit required so\n98. More\n"
+    },
+    "test_pagination_in_both_text_options_items": {
+      "id": "test_pagination_in_both_text_options_items",
+      "text": "This screen has both large text, options, items that exceed ussd text limit part\n98. More\n"
+    },
+    "test_pagination_in_menu_options": {
+      "id": "test_pagination_in_menu_options",
+      "text": "An example of screen with multiple options that need to be paginated\n98. More\n"
+    },
+    "test_text_prompt_pagination": {
+      "id": "test_text_prompt_pagination",
+      "text": "Ussd airflow should be able to wrap anytext that is larger than the one\n98. More\n"
+    }
+  },
+  "edges":[
+    {
+      "start": "initial_screen",
+      "end": "choose_meal",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "choose_meal",
+      "end": "types_of_food",
+      "text": "food",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "choose_meal",
+      "end": "types_of_fruit",
+      "text": "fruits",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "choose_meal",
+      "end": "types_of_drinks",
+      "text": "drinks",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "choose_meal",
+      "end": "types_of_vegetables",
+      "text": "vegetables",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "choose_meal",
+      "end": "test_text_prompt_pagination",
+      "text": "test pagination",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "types_of_food",
+      "end": "rice_chosen",
+      "text": "rice",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "types_of_food",
+      "end": "choose_meal",
+      "text": "back",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "types_of_food",
+      "end": "test_next_screen_routing_one",
+      "text": "option: test next screen routing\nrouting: phone_number == '200'\n",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "types_of_food",
+      "end": "test_next_screen_routing_two",
+      "text": "option: test next screen routing\nrouting: phone_number == '201'\n",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "rice_chosen",
+      "end": "choose_meal",
+      "text": "back",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+
+    {
+      "start": "types_of_fruit",
+      "end": "choose_meal",
+      "text": "back",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "types_of_drinks",
+      "end": "choose_meal",
+      "text": "back",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "types_of_vegetables",
+      "end": "choose_quantity",
+      "text": "selected_vegetable",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "choose_quantity",
+      "end": "selected_vegetable",
+      "text": "selected_quantity",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "choose_quantity",
+      "end": "choose_meal",
+      "text": "back",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "selected_vegetable",
+      "end": "test_list_with_native_loop",
+      "text": "test_list",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "test_list_with_native_loop",
+      "end": "test_explicit_dict_loop",
+      "text": "alphabet",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "test_explicit_dict_loop",
+      "end": "test_invalid_jija_variable",
+      "text": "testing",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "test_text_prompt_pagination",
+      "end": "test_pagination_in_menu_options",
+      "text": "next",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "test_pagination_in_menu_options",
+      "end": "test_pagination_in_both_text_and_options",
+      "text": "screen_with_both_text_and_menu_options_pagination",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "test_pagination_in_menu_options",
+      "end": "test_pagination_in_both_text_options_items",
+      "text": "screen_with_both_text_item_options_pagination",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+
+    {
+      "start": "test_pagination_in_both_text_and_options",
+      "end": "test_pagination_in_menu_options",
+      "text": "go back to the previous screen",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+     "start": "test_pagination_in_both_text_and_options",
+      "end": "last_screen",
+      "text": "quit this session",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+     "start": "test_pagination_in_both_text_and_options",
+      "end": "test_pagination_in_both_text_options_items",
+      "text": "this options will be showed in the next_screen",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "test_pagination_in_both_text_options_items",
+      "end": "last_screen",
+      "text": "testing",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "test_pagination_in_both_text_options_items",
+      "end": "last_screen",
+      "text": "quit_session",
+      "type": "arrow",
+      "stroke": "thick"
+    }
+  ]
+}

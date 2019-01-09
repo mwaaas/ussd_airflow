@@ -1,4 +1,6 @@
-initial_screen: custom_screen_1
+initial_screen:
+  type: initial_screen
+  next_screen: custom_screen_1
 
 custom_screen_1:
   type: custom_screen

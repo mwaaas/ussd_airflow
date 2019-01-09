@@ -1,4 +1,6 @@
-initial_screen: enter_fisrt_number
+initial_screen:
+  type: initial_screen
+  next_screen: enter_fisrt_number
 
 enter_fisrt_number:
   type: input_screen

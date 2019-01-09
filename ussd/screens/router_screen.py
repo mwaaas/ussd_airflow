@@ -2,6 +2,7 @@ from ussd.core import UssdHandlerAbstract
 from ussd.screens.serializers import UssdBaseSerializer, \
     NextUssdScreenSerializer
 from rest_framework import serializers
+from ussd.graph import Link, Vertex
 
 
 class RouterOptionSerializer(NextUssdScreenSerializer):
@@ -58,3 +59,29 @@ class RouterScreen(UssdHandlerAbstract):
         return self.route_options(
             self.screen_content.get("router_options")
         )
+
+    def show_ussd_content(self, **kwargs):
+        return "Routing screen: {}".format(self.handler)
+
+    def get_next_screens(self):
+        links = []
+
+        for obj in self.screen_content['router_options']:
+            links.append(
+                Link(
+                    Vertex(self.handler),
+                    Vertex(obj['next_screen']),
+                    obj['expression']
+                )
+            )
+
+        if self.screen_content.get('default_next_screen'):
+            links.append(
+                Link(
+                    Vertex(self.handler),
+                    Vertex(self.screen_content['default_next_screen']),
+                    'default'
+                )
+            )
+
+        return links

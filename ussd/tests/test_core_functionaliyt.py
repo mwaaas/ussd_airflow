@@ -1,7 +1,8 @@
 from django.test import TestCase
 from ussd.core import _registered_ussd_handlers, \
     UssdHandlerAbstract, MissingAttribute, \
-    InvalidAttribute, UssdRequest, ussd_session
+    InvalidAttribute, UssdRequest, ussd_session, UssdView, \
+    convert_error_response_to_mermaid_error
 from rest_framework import serializers
 from ussd.tests import UssdTestCase
 from freezegun import freeze_time
@@ -9,6 +10,7 @@ from datetime import datetime
 import time
 from ussd import defaults as ussd_airflow_variables
 from ussd.utilities import datetime_to_string, string_to_datetime
+from collections import OrderedDict
 
 
 class SampleSerializer(serializers.Serializer):
@@ -384,10 +386,72 @@ class TestSessionManagement(UssdTestCase.BaseUssdTestCase):
         )
 
 
-class TestDatetimeConversion(TestCase):
+class TestCommonFunctionality(TestCase):
 
-    def test(self):
+    def test_date_time_conversion(self):
         now = datetime.now()
         now_str = datetime_to_string(now)
 
         self.assertEqual(now, string_to_datetime(now_str))
+
+    def test_converting_error_response_to_mermaid_error(self):
+
+        d = OrderedDict()
+        d['e'] = ["e is required", "e is invalid"]
+
+        b = OrderedDict()
+        b['c'] = ['c is invalid']
+        b['d'] = d
+
+        error_response_sample = OrderedDict()
+        error_response_sample['a'] = ["a is invalid"]
+        error_response_sample['b'] = b
+        error_response_sample['f'] = ['f is invalid']
+
+        h = OrderedDict()
+        h['h'] = ["This field is required."]
+        error_response_sample['g'] = h
+
+
+        unordered_dict = dict(
+            a=["a is invalid"],
+            b=dict(
+                c=["c is invalid"],
+                d=dict(
+                    e=["e is required", "e is invalid"]
+                )
+            ),
+            f=["f is invalid"],
+            g=dict(h=["This field is required."])
+        )
+
+        self.assertEqual(error_response_sample, unordered_dict)
+
+        mermaid_error_response = [
+            {
+                "path": ["a"],
+                "message": "a is invalid",
+            },
+            {
+                "path": ["b", "c"],
+                "message": "c is invalid"
+            },
+            {
+                "path": ["b", "d", "e"],
+                "message": "e is required\ne is invalid"
+            },
+            {
+                "path": ["f"],
+                "message": "f is invalid"
+            },
+            {
+                "path": ["g"],
+                "message": "h is required."
+            }
+        ]
+
+        actual_error = convert_error_response_to_mermaid_error(error_response_sample)
+
+        for index, v in enumerate(mermaid_error_response):
+            self.assertDictEqual(v, actual_error[index])
+        self.assertListEqual(mermaid_error_response, actual_error)

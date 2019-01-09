@@ -1,0 +1,43 @@
+{
+  "vertices": {
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "screen_one": {
+      "id": "screen_one",
+      "text": "{\n  'next_screen': 'screen_two',\n  'type': 'update_session_screen',\n  'values_to_update': [\n    {\n      'expression': '{{phone_number == 200|string}}',\n      'key': 'customer_status',\n      'value': 'registered'\n    },\n    {\n      'expression': '{{phone_number == 404|string}}',\n      'key': 'customer_status',\n      'value': 'not_registered'\n    },\n    {\n      'key': 'aged_24',\n      'value': '{{[]}}'\n    },\n    {\n      'key': 'height_54',\n      'value': '{{[]}}'\n    }\n  ]\n}"
+    },
+    "screen_two": {
+      "id": "screen_two",
+      "text": "{\n  'next_screen': 'show_saved_status',\n  'type': 'update_session_screen',\n  'values_to_update': [\n    {\n      'expression': '{{item.age == 24}}',\n      'key': 'aged_24',\n      'value': '{{aged_24|append(item)}}'\n    },\n    {\n      'expression': '{{item.height == 5.4}}',\n      'key': 'height_54',\n      'value': '{{height_54|append(item)}}'\n    }\n  ],\n  'with_items': [\n    {\n      'age': 24,\n      'height': 5.4,\n      'name': 'Francis Mwangi'\n    },\n    {\n      'age': 22,\n      'height': 5.4,\n      'name': 'Isaac Karanja'\n    },\n    {\n      'age': 20,\n      'height': 5.5,\n      'name': 'Stephen Gitigi'\n    },\n    {\n      'age': 24,\n      'height': 5.4,\n      'name': 'Wambui'\n    }\n  ]\n}"
+    },
+    "show_saved_status": {
+      "id": "show_saved_status",
+      "text": "The customer status is {{customer_status}}.\nPeople aged 24 {{aged_24}}\nPeople with height 5.4 {{height_54}}"
+    }
+  },
+  "edges": [
+    {
+      "start": "initial_screen",
+      "end": "screen_one",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "screen_one",
+      "end": "screen_two",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "screen_two",
+      "end": "show_saved_status",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "vertices": {
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "http_get_example": {
+      "id": "http_get_example",
+      "text": "http_screen\n{\n  'headers': {\n    'content-type': 'application/json',\n    'user-agent': 'my-app/0.0.1'\n  },\n  'method': 'get',\n  'params': {\n    'phone_number': '{{ phone_number }}',\n    'session_id': '{{ session_id }}'\n  },\n  'url': 'http://localhost:8000/mock/balance',\n  'verify': false\n}"
+    },
+    "http_get_url_query": {
+      "id": "http_get_url_query",
+      "text": "http_screen\n{\n  'method': 'get',\n  'url': 'http://localhost:8000/mock/balance/{{phone_number}}/'\n}"
+    },
+    "http_post_example": {
+      "id": "http_post_example",
+      "text": "http_screen\n{\n  'headers': {\n    'content-type': 'application/json'\n  },\n  'method': 'post',\n  'params': {\n    'phone_numbers': [\n      200,\n      201,\n      202\n    ],\n    'session_id': '{{ session_id }}'\n  },\n  'timeout': 30,\n  'url': 'http://localhost:8000/mock/balance',\n  'verify': true\n}"
+    },
+    "http_async_example": {
+      "id": "http_async_example",
+      "text": "http_screen\n{\n  'method': 'get',\n  'params': {\n    'phone_number': '{{ phone_number }}',\n    'session_id': '{{ session_id }}'\n  },\n  'url': 'https://localhost:8000/mock/submission'\n}"
+    },
+    "end_of_http_example": {
+      "id": "end_of_http_example",
+      "text": "Testing response is being saved in session status code is {{http_post_response.status_code}} and balance is {{http_post_response.balance}} and full content {{http_post_response.content}}.\n"
+    }
+  },
+  "edges": [
+    {
+      "start": "initial_screen",
+      "end": "http_get_example",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "http_get_example",
+      "end": "http_get_url_query",
+      "text": "get_response",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "http_get_url_query",
+      "end": "http_post_example",
+      "text": "get_url_query",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "http_post_example",
+      "end": "http_async_example",
+      "text": "http_post_response",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "http_async_example",
+      "end": "end_of_http_example",
+      "text": "http_async_response",
+      "type": "arrow",
+      "stroke": "thick"
+    }
+  ]
+}

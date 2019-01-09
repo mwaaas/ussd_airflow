@@ -9,3 +9,4 @@ codacy-coverage==1.2.18
 dj-database-url==0.4.1
 freezegun
 setuptools>=27
+django-cors-headers==2.4.0

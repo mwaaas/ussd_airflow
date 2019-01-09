@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 
 class UssdBaseSerializer(serializers.Serializer):
@@ -68,11 +69,13 @@ class UssdNextScreenField(serializers.ListField):
               screen: screen_two
     """
     def to_internal_value(self, data):
+        self.original_data = data
         if not isinstance(data, list):
             data = [
                 {"condition": 'true', "next_screen": data}
             ]
         return super(UssdNextScreenField, self).to_internal_value(data)
+
 
 
 class NextUssdScreenChildSerializer(serializers.Serializer):
@@ -89,6 +92,15 @@ class NextUssdScreenChildSerializer(serializers.Serializer):
 
 class NextUssdScreenSerializer(serializers.Serializer):
     next_screen = UssdNextScreenField(child=NextUssdScreenChildSerializer())
+
+    def to_internal_value(self, data):
+        try:
+            return super(NextUssdScreenSerializer, self).to_internal_value(data)
+        except ValidationError as err:
+            if isinstance(data.get('next_screen'), str):
+                if err.detail.get('next_screen'):
+                    err.detail['next_screen'] = err.detail['next_screen']['next_screen']
+            raise err
 
 
 class MenuOptionSerializer(UssdTextSerializer, NextUssdScreenSerializer):

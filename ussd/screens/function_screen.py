@@ -2,6 +2,7 @@ from ussd.core import UssdHandlerAbstract
 from ussd.screens.serializers import NextUssdScreenSerializer
 from rest_framework import serializers
 import importlib
+from ussd.graph import Link, Vertex
 
 
 class FunctionScreenSerializer(NextUssdScreenSerializer):
@@ -79,3 +80,35 @@ class FunctionScreen(UssdHandlerAbstract):
         ] = getattr(module, function_name)(self.ussd_request)
 
         return self.route_options()
+
+    def show_ussd_content(self, **kwargs):
+        return "function_screen\n{}".format(self.screen_content['function'])
+
+    def get_next_screens(self):
+        links = []
+        screen_vertex = Vertex(self.handler)
+        if isinstance(self.screen_content.get("next_screen"), list):
+            for i in self.screen_content.get("next_screen", []):
+                links.append(
+                    Link(screen_vertex,
+                         Vertex(i['next_screen'], ""),
+                         i['condition'])
+            )
+        elif self.screen_content.get('next_screen'):
+            links.append(
+                Link(
+                    screen_vertex,
+                    Vertex(self.screen_content['next_screen']),
+                    self.screen_content['session_key']
+                )
+            )
+
+        if self.screen_content.get('default_next_screen'):
+            links.append(
+                Link(
+                    screen_vertex,
+                    Vertex(self.screen_content['default_next_screen'], ""),
+                    self.screen_content['session_key']
+                )
+            )
+        return links

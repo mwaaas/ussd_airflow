@@ -1,0 +1,135 @@
+{
+  "vertices": {
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "enter_height": {
+      "id": "enter_height",
+      "text": "Enter your height\n"
+    },
+    "enter_age": {
+      "id": "enter_age",
+      "text": "Enter your age\n1. back\n"
+    },
+    "height_above_60": {
+      "id": "height_above_60",
+      "text": "We are not interested with height above 60"
+    },
+    "height_below_30": {
+      "id": "height_below_30",
+      "text": "We are not interested with height below 30"
+    },
+    "enter_height_validator_1": {
+      "id": "enter_height_validator_1",
+      "text": "Enter number between 1 and 7\n"
+    },
+    "show_information": {
+      "id": "show_information",
+      "text": "Your age is {{ age }} and your height is {{ height }}.\nEnter anything to go back to the first screen\n"
+    },
+    "enter_age_validator_1": {
+      "id": "enter_age_validator_1",
+      "text": "Only nubers are allowed\n"
+    },
+    "enter_age_validator_2": {
+      "id": "enter_age_validator_2",
+      "text": "Number over 100 is not allowed\n"
+    }
+  },
+  "edges": [
+    {
+      "start": "initial_screen",
+      "end": "enter_height",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "enter_height",
+      "end": "enter_height_validator_1",
+      "text": "validation",
+      "type": "arrow",
+      "stroke": "dotted"
+    },
+    {
+      "start": "enter_height_validator_1",
+      "end": "enter_height",
+      "text": "regex: ^[0-9]{1,7}$",
+      "type": "arrow",
+      "stroke": "dotted"
+    },
+    {
+      "start": "enter_height",
+      "end": "height_above_60",
+      "text": "input|int == 60",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "enter_height",
+      "end": "height_below_30",
+      "text": "input|int == 30",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "enter_height",
+      "end": "enter_age",
+      "text": "height",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "enter_age",
+      "end": "enter_age_validator_1",
+      "text": "validation",
+      "type": "arrow",
+      "stroke": "dotted"
+    },
+    {
+     "start":  "enter_age_validator_1",
+      "end": "enter_age",
+      "text": "regex: ^[0-9]{1,7}$",
+      "type": "arrow",
+      "stroke": "dotted"
+    },
+    {
+     "start": "enter_age",
+      "end": "enter_age_validator_2",
+      "text": "validation",
+      "type": "arrow",
+      "stroke": "dotted"
+    },
+    {
+      "start": "enter_age_validator_2",
+      "end": "enter_age",
+      "text": "expression: ussd_request.input|int < 100",
+      "type": "arrow",
+      "stroke": "dotted"
+    },
+    {
+      "start": "enter_age",
+      "end": "show_information",
+      "text": "age",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "enter_age",
+      "end": "enter_height",
+      "text": "back",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "show_information",
+      "end": "enter_height",
+      "text": "foo",
+      "type": "arrow",
+      "stroke": "thick"
+    }
+
+  ]
+}
+

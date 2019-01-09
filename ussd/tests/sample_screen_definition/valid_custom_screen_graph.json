@@ -1,0 +1,43 @@
+{
+  "vertices": {
+    "initial_screen": {
+      "id": "initial_screen",
+      "text": ""
+    },
+    "custom_screen_1": {
+      "id": "custom_screen_1",
+      "text": "This is a custom Handler1"
+    },
+    "custom_screen_2": {
+      "id": "custom_screen_2",
+      "text": "Enter a digit and it will be doubled on your behalf"
+    },
+    "quit": {
+      "id": "quit",
+      "text": "Your custom screen has modified your input to {{var1}}"
+    }
+  },
+  "edges": [
+    {
+      "start": "initial_screen",
+      "end": "custom_screen_1",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "custom_screen_1",
+      "end": "custom_screen_2",
+      "text": "",
+      "type": "arrow",
+      "stroke": "thick"
+    },
+    {
+      "start": "custom_screen_2",
+      "end": "quit",
+      "text": "var1",
+      "type": "arrow",
+      "stroke": "thick"
+    }
+  ]
+}

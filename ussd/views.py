@@ -1,11 +1,13 @@
-from ussd.core import UssdView, UssdRequest,_customer_journey_files
+from ussd.core import UssdView, UssdRequest,_customer_journey_files, \
+    render_journey_as_mermaid_text, convert_error_response_to_mermaid_error
 from ussd.tests.sample_screen_definition import path
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.conf import settings
 
 from django.shortcuts import render
 import json
 from ussd.utilities import YamlToGo
+from rest_framework.views import APIView
 
 
 class AfricasTalkingUssdGateway(UssdView):
@@ -55,8 +57,41 @@ class AfricasTalkingUssdGateway(UssdView):
             response = HttpResponse(res)
         return response
 
+class MermaidText(APIView):
+
+    def post(self, req):
+        ussd_journey = req.data['journey']
+        if isinstance(ussd_journey, str):
+            ussd_journey = json.loads(ussd_journey)
+
+        mermaid_options = req.data.get('mermaidOptions', {})
+
+        mermaid_text = render_journey_as_mermaid_text(ussd_journey)
+
+        return JsonResponse({'mermaidText': mermaid_text,
+                             'mermaidOptions': mermaid_options})
+
+class ValidateJourney(APIView):
+
+    def post(self, req):
+        journey = req.data['journey']
+
+        if isinstance(journey, str):
+            journey = json.loads(journey)
+
+        error_type = req.data.get('error_type', 'default')
+
+        is_valid, errors = UssdView.validate_ussd_journey(journey)
+
+
+        if error_type == 'mermaid_txt':
+            errors = convert_error_response_to_mermaid_error(errors)
+        return JsonResponse(errors, safe=False)
+
+
 def journey_visual(request):
     return render(request,'journey_visual.html',{'yaml_files':_customer_journey_files})
+
 
 
 def journey_visual_data(request):

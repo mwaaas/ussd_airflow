@@ -4,6 +4,7 @@ from ussd.screens.serializers import UssdBaseSerializer, \
 from rest_framework import serializers
 from ussd.tests import UssdTestCase
 from ussd.core import UssdResponse
+from ussd.graph import Link, Vertex
 
 
 class InvalidCustomHandler(object):
@@ -15,12 +16,17 @@ class SampleCustomHandler1(UssdHandlerAbstract):
     @staticmethod
     def show_ussd_content():  # This method doesn't have to be static
         # Do anything custom here.
-        return UssdResponse("This is a custom Handler1")
+        return "This is a custom Handler1"
 
     def handle_ussd_input(self, ussd_input):
         # Do anything custom here
         print(ussd_input)  # pep 8 for the sake of using it.
         return self.ussd_request.forward('custom_screen_2')
+
+    def get_next_screens(self):
+        return [
+            Link(Vertex(self.handler), Vertex('custom_screen_2'), "")
+        ]
 
 
 class SampleSerializer(UssdBaseSerializer, NextUssdScreenSerializer):

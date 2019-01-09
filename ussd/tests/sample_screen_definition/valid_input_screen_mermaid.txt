@@ -1,0 +1,14 @@
+graph TD
+initial_screen ==> enter_height["Enter your height<br>"]
+enter_height -."validation".-> enter_height_validator_1["Enter number between 1 and 7<br>"]
+enter_height_validator_1 -."regex: ^[0-9]{1,7}$".-> enter_height
+enter_height =="input|int == 60"==> height_above_60["We are not interested with height above 60"]
+enter_height =="input|int == 30"==> height_below_30["We are not interested with height below 30"]
+enter_height =="height"==> enter_age["Enter your age<br>1. back<br>"]
+enter_age -."validation".-> enter_age_validator_1["Only nubers are allowed<br>"]
+enter_age_validator_1 -."regex: ^[0-9]{1,7}$".-> enter_age
+enter_age -."validation".-> enter_age_validator_2["Number over 100 is not allowed<br>"]
+enter_age_validator_2 -."expression: ussd_request.input|int < 100".-> enter_age
+enter_age =="age"==> show_information["Your age is {{ age }} and your height is {{ height }}.<br>Enter anything to go back to the first screen<br>"]
+enter_age =="back"==> enter_height
+show_information =="foo"==> enter_height
