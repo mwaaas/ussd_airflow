@@ -62,6 +62,11 @@ services:
     ports:
       - 8007:80
 
+  editor:
+    image: mwaaas/ussd_airflow_editor
+    ports:
+      - 8009:80
+
   worker:
     build: .
     depends_on:
