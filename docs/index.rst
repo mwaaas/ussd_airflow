@@ -25,5 +25,7 @@ Internal Architecture
 ---------------------
     .. automodule:: ussd.core
 
-
+Configuring Ussd Store
+----------------------
+    .. automodule:: ussd.store
 
