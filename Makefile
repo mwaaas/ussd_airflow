@@ -7,3 +7,6 @@ base_image:
 
 compile_documentation:
 	docker-compose run app make -C /usr/src/app/docs html
+
+create_dynamodb_table:
+	docker-compose run ansible ./create_dynamodb.sh

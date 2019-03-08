@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: DyanamoDb instance for journey storage
+Parameters:
+  DyanamoTableName:
+    Type: String
+    Description: DynamoDB table name
+  WriteCapacityUnits:
+    Type: String
+    Description: Write capacity units for the dynamo db instance
+  ReadCapacityUnits:
+    Type: String
+    Description: Read capacity for the dynamo database instance
+Resources:
+  # Create DynamoDB
+  DyanamoDb:
+    Type: "AWS::DynamoDB::Table"
+    Properties:
+      TableName:
+        Ref: DyanamoTableName
+      AttributeDefinitions:
+        -
+          AttributeName: "journeyName"
+          AttributeType: "S"
+        -
+          AttributeName: "version"
+          AttributeType: "S"
+      KeySchema:
+        -
+          AttributeName: "journeyName"
+          KeyType: "HASH"
+        -
+          AttributeName: "version"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+          ReadCapacityUnits:
+            Ref: ReadCapacityUnits
+          WriteCapacityUnits:
+            Ref: WriteCapacityUnits
+
+      TimeToLiveSpecification:
+        AttributeName: "ttl"
+        Enabled: Yes
+
+  # Create DynamoDB Policy
+  Policy:
+    Type: "AWS::IAM::Policy"
+    DependsOn: DyanamoDb
+    Properties:
+      PolicyName:
+        Fn::Sub: "${DyanamoTableName}-policy-name"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          -
+            Effect: "Allow"
+            Action:
+              - "dynamodb:DescribeTable"
+              - "dynamodb:Query"
+              - "dynamodb:Scan"
+              - "dynamodb:BatchGetItem"
+              - "dynamodb:BatchWriteItem"
+              - "dynamodb:GetItem"
+              - "dynamodb:PutItem"
+              - "dynamodb:DeleteItem"
+              - "dynamodb:UpdateItem"
+            Resource:
+              Fn::Sub: "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DyanamoTableName}"
+      Roles:
+        - your_role

@@ -3,6 +3,9 @@ from django.core.exceptions import ValidationError
 from copy import deepcopy
 from ussd.core import UssdView
 from ..DummyStore import DummyStore
+from ..DynamoDb import DynamoDb
+from django.core import management
+from django.conf import settings
 
 
 class TestDriverStore:
@@ -74,7 +77,9 @@ class TestDriverStore:
             self.driver.save(name="journey_b", journey=sample_journey_b_three, version="0.0.3")
 
             # test getting the journey a
-            self.assertEqual(sample_journey_two, self.driver.get('journey_a', '0.0.2'))
+            a = sample_journey_two
+            b = self.driver.get('journey_a', '0.0.2')
+            self.assertDictEqual(sample_journey_two, self.driver.get('journey_a', '0.0.2'))
             self.assertEqual(sample_journey_three, self.driver.get('journey_a', '0.0.3'))
             self.assertEqual(sample_journey_one, self.driver.get('journey_a', '0.0.1'))
 
@@ -162,5 +167,13 @@ class TestDriverStore:
 
 class TestDummyStore(TestDriverStore.BaseDriverStoreTestCase):
 
-    def setup_driver(self) -> DummyStore:
+    @staticmethod
+    def setup_driver() -> DummyStore:
         return DummyStore()
+
+
+class TestDynamodb(TestDriverStore.BaseDriverStoreTestCase):
+
+    @staticmethod
+    def setup_driver() -> DynamoDb:
+        return DynamoDb(settings.DYNAMODB_TABLE, "http://dynamodb:8000")

@@ -137,3 +137,5 @@ CORS_ORIGIN_ALLOW_ALL = True
 #Todo investigate why this variable is not working when using
 # override_settings
 CELERY_ALWAYS_EAGER = True
+
+DYNAMODB_TABLE = os.environ["DYNAMODB_TABLE"]
