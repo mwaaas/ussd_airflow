@@ -121,4 +121,3 @@ services:
     volumes:
       - $HOME/.aws:/root/.aws
       - ./:/usr/src/app
-    
