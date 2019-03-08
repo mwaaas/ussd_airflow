@@ -5,11 +5,19 @@ defaults: &defaults
 
   working_directory: ~/ussd_airflow
 
+aws_setup: &aws_setup
+    run:
+        name: configure aws
+        command: |
+          sudo AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY ./devops/scripts/ecr_credentials.sh
+
 jobs:
   test:
     <<: *defaults
     steps:
       - checkout
+
+      - *aws_setup
 
       - run:
           name: start the containers

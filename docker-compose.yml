@@ -44,7 +44,7 @@ services:
       - rabbitmq
     volumes:
       - ./:/usr/src/app
-      - $HOME/.aws:/root/.aws
+#      - $HOME/.aws:/root/.aws
     command: bash -c "./wait-for-it.sh -t 300 db:5432 && ./run.sh"
     links:
       - db
