@@ -10,3 +10,8 @@ dj-database-url==0.4.1
 freezegun
 setuptools>=27
 django-cors-headers==2.4.0
+boto3==1.9.87
+awscli==1.16.15
+# using mwaaas branch here as we wait for this pull request to be merged
+# https://github.com/steven-bruce-au/dynamodb-local-cloud-formation/pull/4
+git+https://github.com/mwaaas/dynamodb-local-cloud-formation.git@4bc92a0430ec319dc3ce33e9fffadd6ba1c861a8

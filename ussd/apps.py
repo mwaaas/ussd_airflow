@@ -1,7 +1,6 @@
 from django.apps import AppConfig
 import pkgutil
-
-
+from ussd.patch import *
 
 def get_all_screens_module(path_name, package_name, package_list=None):
     package_list = [] if package_list is None else package_list
